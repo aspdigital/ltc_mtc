@@ -162,9 +162,10 @@ package body ltc_mtc_pkg is
         variable seg : std_logic_vector(6 downto 0);
     begin  -- function segment_driver
         DigitEncoder : case DIGIT is
+            --                GFEDCBA 
             when 0 => seg := "1000000";
             when 1 => seg := "1111001";
-            when 2 => seg := "0101100";
+            when 2 => seg := "0100100";
             when 3 => seg := "0110000";
             when 4 => seg := "0011001";
             when 5 => seg := "0010010";
