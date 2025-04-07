@@ -189,7 +189,7 @@ begin  -- architecture toplevel
                             isSecRollover: if frame_time.ft_sec.msd = 5 then
                                 frame_time.ft_sec.msd <= 0;
 
-                                isLastMin : if frame_time.ft_min.lsd = 0 then
+                                isLastMin : if frame_time.ft_min.lsd = 9 then
                                     frame_time.ft_min.lsd <= 0;
 
                                     isMinRollover: if frame_time.ft_min.msd = 5 then
