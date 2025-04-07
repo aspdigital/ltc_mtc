@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="ltc_mtc_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="ltc_mtc_pkg" />
+            <top_module name="ltc_mtc_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="1,599.001000001 ms"></ZoomEndTime>
+      <Cursor1Time time="265.804893023 ms"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="276"></NameColumnWidth>
+      <ValueColumnWidth column_width="116"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="22" />
+   <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
+      <obj_property name="ElementShortName">CLK100MHZ</obj_property>
+      <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CPU_RESETN" type="logic">
+      <obj_property name="ElementShortName">CPU_RESETN</obj_property>
+      <obj_property name="ObjectShortName">CPU_RESETN</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/rst_l" type="logic">
+      <obj_property name="ElementShortName">rst_l</obj_property>
+      <obj_property name="ObjectShortName">rst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/SW" type="array">
+      <obj_property name="ElementShortName">SW[1:0]</obj_property>
+      <obj_property name="ObjectShortName">SW[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frsw" type="array">
+      <obj_property name="ElementShortName">frsw[1:0]</obj_property>
+      <obj_property name="ObjectShortName">frsw[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CA" type="logic">
+      <obj_property name="ElementShortName">CA</obj_property>
+      <obj_property name="ObjectShortName">CA</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CB" type="logic">
+      <obj_property name="ElementShortName">CB</obj_property>
+      <obj_property name="ObjectShortName">CB</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CC" type="logic">
+      <obj_property name="ElementShortName">CC</obj_property>
+      <obj_property name="ObjectShortName">CC</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CD" type="logic">
+      <obj_property name="ElementShortName">CD</obj_property>
+      <obj_property name="ObjectShortName">CD</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CE" type="logic">
+      <obj_property name="ElementShortName">CE</obj_property>
+      <obj_property name="ObjectShortName">CE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CF" type="logic">
+      <obj_property name="ElementShortName">CF</obj_property>
+      <obj_property name="ObjectShortName">CF</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CG" type="logic">
+      <obj_property name="ElementShortName">CG</obj_property>
+      <obj_property name="ObjectShortName">CG</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DP" type="logic">
+      <obj_property name="ElementShortName">DP</obj_property>
+      <obj_property name="ObjectShortName">DP</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/AN" type="array">
+      <obj_property name="ElementShortName">AN[7:0]</obj_property>
+      <obj_property name="ObjectShortName">AN[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/CLKPER" type="other">
+      <obj_property name="ElementShortName">CLKPER</obj_property>
+      <obj_property name="ObjectShortName">CLKPER</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/refresh_timer" type="other">
+      <obj_property name="ElementShortName">refresh_timer</obj_property>
+      <obj_property name="ObjectShortName">refresh_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/refresh_tick" type="logic">
+      <obj_property name="ElementShortName">refresh_tick</obj_property>
+      <obj_property name="ObjectShortName">refresh_tick</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_tick" type="logic">
+      <obj_property name="ElementShortName">frame_tick</obj_property>
+      <obj_property name="ObjectShortName">frame_tick</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time" type="array">
+      <obj_property name="ElementShortName">frame_time</obj_property>
+      <obj_property name="ObjectShortName">frame_time</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time.frame_cnt" type="array">
+         <obj_property name="ElementShortName">.frame_cnt</obj_property>
+         <obj_property name="ObjectShortName">.frame_cnt</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time.ft_sec" type="array">
+         <obj_property name="ElementShortName">.ft_sec</obj_property>
+         <obj_property name="ObjectShortName">.ft_sec</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time.ft_min" type="array">
+         <obj_property name="ElementShortName">.ft_min</obj_property>
+         <obj_property name="ObjectShortName">.ft_min</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time.ft_hr" type="array">
+         <obj_property name="ElementShortName">.ft_hr</obj_property>
+         <obj_property name="ObjectShortName">.ft_hr</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/DUT/frame_time.frame_rate" type="other">
+         <obj_property name="ElementShortName">.frame_rate</obj_property>
+         <obj_property name="ObjectShortName">.frame_rate</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_rate" type="other">
+      <obj_property name="ElementShortName">frame_rate</obj_property>
+      <obj_property name="ObjectShortName">frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_tick" type="logic">
+      <obj_property name="ElementShortName">frame_tick</obj_property>
+      <obj_property name="ObjectShortName">frame_tick</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_tickcnt" type="other">
+      <obj_property name="ElementShortName">frame_tickcnt</obj_property>
+      <obj_property name="ObjectShortName">frame_tickcnt</obj_property>
+   </wvobject>
+</wave_config>
