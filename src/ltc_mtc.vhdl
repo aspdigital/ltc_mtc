@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-06
+-- Last update: 2025-04-07
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -78,14 +78,22 @@ end entity ltc_mtc;
 
 architecture toplevel of ltc_mtc is
 
-    -- reset synched to our clock.
-    signal rst_l : std_logic;
+    -- system clock.
+    signal clkmain : std_logic;
+    signal rstmain_l : std_logic;
+
+    -- clock for timers.
+    signal clktimer : std_logic;
+    signal rsttimer_l : std_logic;
 
     -- synchronized switches, which set frame rate.
     signal frsw : std_logic_vector(1 downto 0);
 
     -- tick every frame time.
     signal frame_tick : std_logic;
+    -- and in the main domain.
+    signal frame_tick_s : std_logic;
+    signal frame_tick_d : std_logic;
 
     -- keep track of the frame time and frame rate.
     signal frame_time : frame_time_t;
@@ -106,13 +114,17 @@ architecture toplevel of ltc_mtc is
 begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
-    -- Reset synchronizer.
+    -- Clocking.
     ---------------------------------------------------------------------------------------------------------
-    reset_syncer : entity work.reset_sync
+    clks_rst_1: entity work.clks_rst
         port map (
-            clk    => CLK100MHZ,
-            arst_l => CPU_RESETN,
-            srst_l => rst_l);
+            clkref     => CLK100MHZ,
+            arst_l     => CPU_RESETN,
+            frame_rate => frame_time.frame_rate,
+            clktimer   => clktimer,
+            rsttimer_l => rsttimer_l,
+            clkmain    => clkmain,
+            rstmain_l  => rstmain_l);
 
     ---------------------------------------------------------------------------------------------------------
     -- Frame rate is set by the state of switches 0 and 1.
@@ -120,16 +132,16 @@ begin  -- architecture toplevel
     SwitchSync : for thissw in frsw'range generate
         frsw_cdc_sync : entity work.cdc_sync
             port map (
-                clk   => CLK100MHZ,
-                rst_l => rst_l,
+                clk   => clkmain,
+                rst_l => rstmain_l,
                 d     => SW(thissw),
                 q     => frsw(thissw));
     end generate SwitchSync;
 
-    GetFrameRate : process (CLK100MHZ) is
+    GetFrameRate : process (clkmain) is
     begin  -- process GetFrameRate
-        if rising_edge(CLK100MHZ) then
-            if rst_l = '0' then
+        if rising_edge(clkmain) then
+            if rstmain_l = '0' then
                 frame_time.frame_rate <= FR_30;
                 frame_time.frame_cnt.lsd_rollover <= 9;
             else
@@ -155,18 +167,18 @@ begin  -- architecture toplevel
         generic map (
             CLKPER => CLKPER)
         port map (
-            clk        => CLK100MHZ,
-            rst_l      => rst_l,
+            clk        => clktimer,
+            rst_l      => rsttimer_l,
             frame_rate => frame_time.frame_rate,
             frame_tick => frame_tick);
     
     ---------------------------------------------------------------------------------------------------------
     -- Time code counter.
     ---------------------------------------------------------------------------------------------------------
-    TimeCodeGenerator : process (CLK100MHZ) is
+    TimeCodeGenerator : process (clktimer) is
     begin  -- process TimeCodeGenerator
-        if rising_edge(CLK100MHZ) then
-            if rst_l = '0' then
+        if rising_edge(clktimer) then
+            if rsttimer_l = '0' then
                 frame_time.frame_cnt.lsd  <= 0;
                 frame_time.frame_cnt.msd  <= 0;
                 frame_time.ft_sec.lsd <= 0;
@@ -246,17 +258,30 @@ begin  -- architecture toplevel
     end process TimeCodeGenerator;
 
     ---------------------------------------------------------------------------------------------------------
+    -- Get frame tick on the faster system clock.
+    ---------------------------------------------------------------------------------------------------------
+    tick_sync : entity work.cdc_sync
+        port map (
+            clk   => clkmain,
+            rst_l => rstmain_l,
+            d     => frame_tick,
+            q     => frame_tick_s);
+    
+    ---------------------------------------------------------------------------------------------------------
     -- Update digits to display on the timer tick.
     -- The display always shows the "previous" frame time, although that probably doesn't matter at 100 MHz.
     ---------------------------------------------------------------------------------------------------------
-    UpdateDigits: process (CLK100MHZ) is
+    UpdateDigits: process (clkmain) is
     begin  -- process UpdateDigits
-        if rising_edge(CLK100MHZ) then
-            if rst_l = '0' then
+        if rising_edge(clkmain) then
+            if rstmain_l = '0' then
+                frame_tick_d <= '0';
                 -- ensure all segments are off
                 all_digits <= (others => (others => '1'));
             else
-                UodateSegments: if frame_tick then
+                frame_tick_d <= frame_tick_s;
+                
+                UodateSegments: if frame_tick_s and not frame_tick_d then
                     all_digits(DIGIT_FRAME_LSD) <= segment_driver(frame_time.frame_cnt.lsd, DECPT_OFF);
                     all_digits(DIGIT_FRAME_MSD) <= segment_driver(frame_time.frame_cnt.msd, DECPT_OFF);
                     all_digits(DIGIT_SEC_LSD) <= segment_driver(frame_time.ft_sec.lsd, DECPT_ON);
@@ -274,10 +299,10 @@ begin  -- architecture toplevel
     -- We multiplex the cathodes and enable the outputs with the anode.
     -- This is where we set the update rate and drive the anodes and the cathodes.
     ---------------------------------------------------------------------------------------------------------
-    RefreshDisplay: process (CLK100MHz) is
+    RefreshDisplay: process (clkmain) is
     begin  -- process RefreshDisplay
-        if rising_edge(CLK100MHz) then 
-            if rst_l = '0' then
+        if rising_edge(clkmain) then 
+            if rstmain_l = '0' then
                 refresh_timer <= 0;
                 refresh_tick <= '0';
                 this_anode <= 0;

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-06
+-- Last update: 2025-04-07
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,20 +39,15 @@ end entity frame_timer;
 
 architecture timer of frame_timer is
 
-    -- Frame rate timer. The number of ticks in a frame is a maximum with the longest frame time (lowest
-    -- frame rate).
-    constant FRAMES_PER_SECOND_MIN : natural := 24;  -- minimum frame rate we support
-    -- get frame time.
-    constant FRAME_TIME_24         : time    := 1 SEC / FRAMES_PER_SECOND_MIN;
-    -- get the number of ticks in the longst frame time.
-    constant TICKS_PER_FRAME_24    : natural := integer(FRAME_TIME_24 / CLKPER);
-    -- support other frame rates.
-    constant FRAME_TIME_25         : time    := 1 SEC / 25;
-    constant FRAME_TIME_30         : time    := 1 SEC / 30;
-    constant TICKS_PER_FRAME_25    : natural := integer(FRAME_TIME_25 / CLKPER) -  1;
-    constant TICKS_PER_FRAME_30    : natural := integer(FRAME_TIME_30 / CLKPER) -  1;
+    -- these are magic numbers, based on timer clock frequencies.
+    -- for 24 fps the timer clock is 37.5 MHz.
+    constant TICKS_PER_FRAME_24 : natural := 1562500;
+    -- for 25 fps the timer clock is 50 MHz.
+    constant TICKS_PER_FRAME_25 : natural := 2000000;
+    -- for 30 fps the timer clock is 33 MHz.
+    constant TICKS_PER_FRAME_30 : natural := 1100000;
 
-    subtype frame_tickcnt_t is natural range 0 to TICKS_PER_FRAME_24 - 1;
+    subtype frame_tickcnt_t is natural range 0 to TICKS_PER_FRAME_25 - 1;
     signal frame_tickcnt : frame_tickcnt_t;
 
 begin  -- architecture timer

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-06
+-- Last update: 2025-04-07
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -71,7 +71,18 @@ begin  -- architecture testbench
 
     -- clock generation
     CLK100MHZ <= not CLK100MHZ after 10 ns;
-    CPU_RESETN <= '1' after 666 ns;   
+    CPU_RESETN <= '1' after 666 ns;
+
+    -- change clock frequency.
+    ChangeClockFreq: process is
+    begin  -- process ChangeClockFreq
+        SW <= "00";
+        wait for 500 US;
+        SW <= "01";
+        wait for 500 US;
+        SW <= "10";
+        wait for 500 US;
+    end process ChangeClockFreq;
 
 end architecture testbench;
 
