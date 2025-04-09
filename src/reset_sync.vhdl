@@ -6,11 +6,11 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-06
+-- Last update: 2025-04-08
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
--- Description: 
+-- Description: Create a reset whose release is synchronized with the clock.
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025 ASP Digital
 -------------------------------------------------------------------------------

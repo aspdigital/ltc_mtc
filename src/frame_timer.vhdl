@@ -6,11 +6,20 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-07
+-- Last update: 2025-04-08
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
--- Description: 
+-- Description: Generate a strobe at the selected frame rate.
+-- This is essentially a counter that runs continuously and rolls over at the frame rate.
+-- 
+-- NB we use magic numbers for the dividers as we "know" the frequency of the clock used to generate the
+-- given frame rate. The clock coming in here will always be at the "correct" frequency as it is selected by
+-- the frame rate decider logic.
+--
+-- TODO: pass in the frequencies/periods of the clocks for each frame rate and use them instead of the magic
+-- numbers.
+--
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025 ASP Digital
 -------------------------------------------------------------------------------
@@ -25,10 +34,6 @@ library work;
 use work.ltc_mtc_pkg.all;
 
 entity frame_timer is
-
-    generic (
-        CLKPER : time);                 -- logic clock period
-
     port (
         clk        : in  std_logic;     -- our logic clock
         rst_l      : in  std_logic;     -- reset in that domain

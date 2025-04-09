@@ -30,7 +30,13 @@
 -- seconds range from 0 to 59
 -- minutes range from 0 to 59
 -- hours range from 0 to 23
-
+--
+-------------------------------------------------------------------------------------------------------------
+-- To ensure timing accuracy, the frame rate selection also chooses the frequency of the logic clock used to
+-- drive the dividers that generate the time code and the display.
+-------------------------------------------------------------------------------------------------------------
+-- Note that top-level signal names match the schematic.
+-------------------------------------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -78,35 +84,60 @@ end entity ltc_mtc;
 
 architecture toplevel of ltc_mtc is
 
-    -- system clock.
+    ---------------------------------------------------------------------------------------------------------
+    -- Clocking and resets.
+    ---------------------------------------------------------------------------------------------------------
+    -- system clock, and a reset in its domain.
+    -- This clock handles input synchronization, display refresh timing and the timer frequency selection.
+    -- Basically the input clock is buffered in clks_rst and driven right back out to here.
     signal clkmain : std_logic;
     signal rstmain_l : std_logic;
 
-    -- clock for timers.
+    -- clock for the time code generation and display. This clock runs at one of three frequencies, depending
+    -- on the selected frame rate. The frequencies are integer multiples of the frame rate so we maintain
+    -- accuracy.
     signal clktimer : std_logic;
     signal rsttimer_l : std_logic;
 
-    -- synchronized switches, which set frame rate.
+    ---------------------------------------------------------------------------------------------------------
+    -- Switches.
+    ---------------------------------------------------------------------------------------------------------
+    -- We use two of the 16 switches to select the frame rate. The state of the switches is synchronized to
+    -- the main clock, and this codes the frame rate and chooses which timer frequency drives the time code
+    -- generator. 
     signal frsw : std_logic_vector(1 downto 0);
 
-    -- tick every frame time.
+    ---------------------------------------------------------------------------------------------------------
+    -- Timing.
+    ---------------------------------------------------------------------------------------------------------
+    -- The timer clock, frequency as selected by the frame rate switches above, is divided down to generate a
+    -- strobe tick at the start of every frame time. This strobe will be at 24, 25 or 30 frames per second.
     signal frame_tick : std_logic;
-    -- and in the main domain.
+    -- Synchronzize the frame tick in the main domain, and delay it for edge detect.
+    -- On the edge of this tick, the frame time counters are copied to the display digits.
     signal frame_tick_s : std_logic;
     signal frame_tick_d : std_logic;
 
-    -- keep track of the frame time and frame rate.
+    -- Here is where we keep track of the frame time. The frame rate is part of this record.
     signal frame_time : frame_time_t;
-    -- and in the fast system clock domain.
+    -- Synchronize it to the fast main clock domain for display.
     signal frame_time_s : frame_time_t;
-    
-    -- capture digit segments. Each digit includes the decimal point.
+
+    ---------------------------------------------------------------------------------------------------------
+    -- Display.
+    ---------------------------------------------------------------------------------------------------------
+    -- On every frame tick, capture digit segments. Each digit includes the decimal point.
+    -- These are the cathodes of the digit display LEDs.
     signal all_digits : digit_array_t;
 
-    -- anode enable.
+    -- Index into the LED anodes. Cathodes are common to all digits, and enabling the anode lights that
+    -- digit.
     signal this_anode : natural range 0 to NUM_DIGITS - 1;
 
-    -- refresh timer. The period is for one digit. Refreshing the display takes eight times that one digit.
+    -- Display refresh timer. The period is for one digit. Refreshing the display takes eight times that one
+    -- digit. On each refresh tick, we turn on one anode so that its digit can update.
+    -- The refresh period of 1 ms per digit, or 8 ms for all digits, was determined by inspection. There is
+    -- no visible flicker in the display.
     constant REFRESH_PERIOD : time := 1 MS;
     constant TICKS_PER_REFRESH : natural := integer(REFRESH_PERIOD / CLKPER);
     subtype refresh_timer_t is natural range 0 to TICKS_PER_REFRESH - 1;
@@ -117,8 +148,11 @@ begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
     -- Clocking.
+    -- Take in the 100 MHz board oscillator and based on the selected frame rate, output a timer frequency
+    -- that is an integer when divided to that frame rate. The frequencies chosen are allowed by the MMCM, so
+    -- they're not entirely random.
     ---------------------------------------------------------------------------------------------------------
-    clks_rst_1: entity work.clks_rst
+    clks_rst_inst: entity work.clks_rst
         port map (
             clkref     => CLK100MHZ,
             arst_l     => CPU_RESETN,
@@ -130,6 +164,8 @@ begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
     -- Frame rate is set by the state of switches 0 and 1.
+    -- Synchronize the two rate select switches to the main clock, and then encode that select into the frame
+    -- rate type. Store the encoded frame rate in the timer record.
     ---------------------------------------------------------------------------------------------------------
     frsw_cdc_sync : entity work.cdc_sync
         generic map (
@@ -166,10 +202,9 @@ begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
     -- Frame tick counter.
+    -- Generate a strobe once per frame, at the rate of 24, 25 or 30 fps, depending on the chosen rate.
     ---------------------------------------------------------------------------------------------------------
-    frame_timer_1: entity work.frame_timer(timer)
-        generic map (
-            CLKPER => CLKPER)
+    frame_timer_tick: entity work.frame_timer(timer)
         port map (
             clk        => clktimer,
             rst_l      => rsttimer_l,
@@ -178,6 +213,12 @@ begin  -- architecture toplevel
     
     ---------------------------------------------------------------------------------------------------------
     -- Time code counter.
+    -- On every frame tick, increment the frame counter LSD.
+    -- When frame counter LSD rolls over, increment the frame counter MSD.
+    -- When frame counter MSD rolls over, increment the seconds counter LSD.
+    -- And so forth.
+    --
+    -- Frame counter rollover is a bit of a special case because it will roll over after 23, 24 or 29 counts.
     ---------------------------------------------------------------------------------------------------------
     TimeCodeGenerator : process (clktimer) is
     begin  -- process TimeCodeGenerator
@@ -262,6 +303,8 @@ begin  -- architecture toplevel
     end process TimeCodeGenerator;
 
     ---------------------------------------------------------------------------------------------------------
+    -- DISPLAY THE FRAME TIME.
+    --
     -- Get frame tick on the faster system clock.
     ---------------------------------------------------------------------------------------------------------
     tick_sync : entity work.cdc_sync
@@ -306,12 +349,12 @@ begin  -- architecture toplevel
                 UodateSegments: if frame_tick_s and not frame_tick_d then
                     all_digits(DIGIT_FRAME_LSD) <= segment_driver(frame_time_s.frame_cnt.lsd, DECPT_OFF);
                     all_digits(DIGIT_FRAME_MSD) <= segment_driver(frame_time_s.frame_cnt.msd, DECPT_OFF);
-                    all_digits(DIGIT_SEC_LSD) <= segment_driver(frame_time_s.ft_sec.lsd, DECPT_ON);
-                    all_digits(DIGIT_SEC_MSD) <= segment_driver(frame_time_s.ft_sec.msd, DECPT_OFF);
-                    all_digits(DIGIT_MIN_LSD) <= segment_driver(frame_time_s.ft_min.lsd, DECPT_ON);
-                    all_digits(DIGIT_MIN_MSD) <= segment_driver(frame_time_s.ft_min.msd, DECPT_OFF);
-                    all_digits(DIGIT_HR_LSD) <= segment_driver(frame_time_s.ft_hr.lsd, DECPT_ON);
-                    all_digits(DIGIT_HR_MSD) <= segment_driver(frame_time_s.ft_hr.msd, DECPT_OFF);
+                    all_digits(DIGIT_SEC_LSD)   <= segment_driver(frame_time_s.ft_sec.lsd, DECPT_ON);
+                    all_digits(DIGIT_SEC_MSD)   <= segment_driver(frame_time_s.ft_sec.msd, DECPT_OFF);
+                    all_digits(DIGIT_MIN_LSD)   <= segment_driver(frame_time_s.ft_min.lsd, DECPT_ON);
+                    all_digits(DIGIT_MIN_MSD)   <= segment_driver(frame_time_s.ft_min.msd, DECPT_OFF);
+                    all_digits(DIGIT_HR_LSD)    <= segment_driver(frame_time_s.ft_hr.lsd, DECPT_ON);
+                    all_digits(DIGIT_HR_MSD)    <= segment_driver(frame_time_s.ft_hr.msd, DECPT_OFF);
                 end if UodateSegments;
             end if;
         end if;
@@ -320,42 +363,52 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     -- We multiplex the cathodes and enable the outputs with the anode.
     -- This is where we set the update rate and drive the anodes and the cathodes.
+    --
+    -- The refresh timer indicates when the next digit should be selected and illuminated.
+    -- The timer rollover is pipelined, that is, we set the tick strobe when the count is 1 so it is true on
+    -- count equals zero. Then that single bit is an enable for the output updates.
+    -- Note the this_anode is updated with timer = 1, so on refresh tick the new anode is updated
+    -- simultaneously with the cathodes for that digit.
     ---------------------------------------------------------------------------------------------------------
     RefreshDisplay: process (clkmain) is
     begin  -- process RefreshDisplay
         if rising_edge(clkmain) then 
             if rstmain_l = '0' then
                 refresh_timer <= 0;
-                refresh_tick <= '0';
-                this_anode <= 0;
-                AN <= (0 => '0', others => '1');
+                refresh_tick  <= '0';
+                this_anode    <= 0;
+                AN            <= (0 => '0', others => '1');
             else
 
+                -- the refresh timer just runs continously.
                 TheRefreshTimer: if refresh_timer = refresh_timer_t'low then
                     refresh_timer <= refresh_timer_t'high;
                 else
                     refresh_timer <= refresh_timer - 1;
                 end if TheRefreshTimer;
 
+                -- When the timer rolls over, assert our tick and also update the current anode which is also
+                -- the current digit to display.
                 RolloverTick: if refresh_timer = 1 then
                     refresh_tick <= '1';
-                    this_anode <= (this_anode + 1) mod NUM_DIGITS;
+                    this_anode   <= (this_anode + 1) mod NUM_DIGITS;
                 else
                     refresh_tick <= '0';
                 end if RolloverTick;
 
-                -- drive segments and anode.
+                -- drive segments and anode. Note that we first clear all anodes, and then only enable the
+                -- anode that is currently selected.
                 UpdateDisplay: if refresh_tick then
                     AN <= (others => '1');
                     AN(this_anode) <= '0';
-                    CA <= all_digits(this_anode)(0);
-                    CB <= all_digits(this_anode)(1);
-                    CC <= all_digits(this_anode)(2);
-                    CD <= all_digits(this_anode)(3);
-                    CE <= all_digits(this_anode)(4);
-                    CF <= all_digits(this_anode)(5);
-                    CG <= all_digits(this_anode)(6);
-                    DP <= all_digits(this_anode)(7);
+                    CA <= all_digits(this_anode)(CA_IDX);
+                    CB <= all_digits(this_anode)(CB_IDX);
+                    CC <= all_digits(this_anode)(CC_IDX);
+                    CD <= all_digits(this_anode)(CD_IDX);
+                    CE <= all_digits(this_anode)(CE_IDX);
+                    CF <= all_digits(this_anode)(CF_IDX);
+                    CG <= all_digits(this_anode)(CG_IDX);
+                    DP <= all_digits(this_anode)(DP_IDX);
                 end if UpdateDisplay;
                 
             end if;
