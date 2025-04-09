@@ -1,0 +1,9 @@
+xpm_cdc.sv,systemverilog,xpm,../../../../../../../../Xilinx/Vivado/2024.2/data/ip/xpm/xpm_cdc/hdl/xpm_cdc.sv,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+xpm_VCOMP.vhd,vhdl,xpm,../../../../../../../../Xilinx/Vivado/2024.2/data/ip/xpm/xpm_VCOMP.vhd,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+cdc_sync.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/src/cdc_sync.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+ltc_mtc_pkg.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/src/ltc_mtc_pkg.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+frame_timer.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/src/frame_timer.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+reset_sync.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/src/reset_sync.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+ltc_mtc.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/src/ltc_mtc.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+ltc_mtc_tb.vhdl,vhdl 2008,xil_defaultlib,../../../../../../Documents/GitHub/ltc_mtc/tb/ltc_mtc_tb.vhdl,incdir="../../../ltc_mtc.gen/sources_1/ip/clkgen"
+glbl.v,Verilog,xil_defaultlib,glbl.v

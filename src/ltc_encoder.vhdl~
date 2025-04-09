@@ -1,0 +1,27 @@
+-------------------------------------------------------------------------------
+-- Title      : Serialize and transmit a provided timecode
+-- Project    : 
+-------------------------------------------------------------------------------
+-- File       : ltc_encoder.vhdl
+-- Author     : Andy Peters  <devel@latke.net>
+-- Company    : ASP Digital
+-- Created    : 2025-04-07
+-- Last update: 2025-04-07
+-- Platform   : 
+-- Standard   : VHDL'08, Math Packages
+-------------------------------------------------------------------------------
+-- Description: 
+-------------------------------------------------------------------------------
+-- Copyright (c) 2025 ASP Digital
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author  Description
+-- 2025-04-07  -        andy	Created
+-------------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+
+
+
+
+

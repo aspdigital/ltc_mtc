@@ -1,0 +1,13 @@
+vhdl xpm  \
+"C:/Xilinx/Vivado/2024.2/data/ip/xpm/xpm_VCOMP.vhd" \
+
+vhdl2008 xil_defaultlib  \
+"../../../../src/cdc_sync.vhdl" \
+"../../../../src/ltc_mtc_pkg.vhdl" \
+"../../../../src/frame_timer.vhdl" \
+"../../../../src/reset_sync.vhdl" \
+"../../../../src/ltc_mtc.vhdl" \
+"../../../../tb/ltc_mtc_tb.vhdl" \
+
+# Do not sort compile order
+nosort

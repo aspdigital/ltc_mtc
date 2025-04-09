@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-07
+-- Last update: 2025-04-08
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -52,9 +52,9 @@ architecture clkgen of clks_rst is
     signal clkfb_out : std_logic;       -- feedback out, to BUFG
 
     -- MMCM output clocks.
-    signal clk_out1 : std_logic;
-    signal clk_out2 : std_logic;
-    signal clk_out3 : std_logic;
+    signal clk_out_50   : std_logic;    -- for 25 fps
+    signal clk_out_37p5 : std_logic;    -- for 24 fps
+    signal clk_out_33   : std_logic;    -- for 30 fps
 
     -- locked status,
     signal locked : std_logic;
@@ -62,11 +62,19 @@ architecture clkgen of clks_rst is
     -- for the reset in the timer clock domain.
     signal timer_reset : std_logic;
 
-    -- one-hot clock selects decoded from frame_rate input
-    signal clk_sel : std_logic_vector(3 downto 0);
+    -- one-hot clock selects decoded from frame_rate input.
+    -- bit 0 selects between 50 MHz (0) and 37.5 MHz (1).
+    -- bit 1 selects between the above (0) or 33 MHz (1)
+    constant CLK_SEL_37_NOT_50 : natural := 0;
+    constant CLK_SEL_33_NOT_OTHERS : natural := 1;
+    subtype clk_sel_t is std_logic_vector(CLK_SEL_33_NOT_OTHERS downto CLK_SEL_37_NOT_50);
+    signal clk_sel        : clk_sel_t;
+    constant CLK_SEL_FR24 : clk_sel_t := "01";  -- 37.5 MHz
+    constant CLK_SEL_FR25 : clk_sel_t := "00";  -- 50 MHz
+    constant CLK_SEL_FR30 : clk_sel_t := "10";  -- 33 MHz
 
     -- output of selected clock 1 or 2:
-    signal clk_sel_1_or_2 : std_logic;
+    signal clk_mux_37_or_50 : std_logic;
 
     -- delay frame rate for edge detect, used to assert the final output clock.
     signal frame_rate_d : frame_rate_t;
@@ -88,55 +96,55 @@ begin  -- architecture clkgen
 
     mmcm_adv_inst : MMCME2_BASE
         generic map(
-            BANDWIDTH            => "OPTIMIZED",
-            CLKFBOUT_MULT_F      => 8.250000,
-            CLKFBOUT_PHASE       => 0.000000,
-            CLKIN1_PERIOD        => 10.000000,
-            CLKOUT0_DIVIDE_F     => 16.500000,
-            CLKOUT0_DUTY_CYCLE   => 0.500000,
-            CLKOUT0_PHASE        => 0.000000,
-            CLKOUT1_DIVIDE       => 22,
-            CLKOUT1_DUTY_CYCLE   => 0.500000,
-            CLKOUT1_PHASE        => 0.000000,
-            CLKOUT2_DIVIDE       => 25,
-            CLKOUT2_DUTY_CYCLE   => 0.500000,
-            CLKOUT2_PHASE        => 0.000000,
-            CLKOUT3_DIVIDE       => 1,
-            CLKOUT3_DUTY_CYCLE   => 0.500000,
-            CLKOUT3_PHASE        => 0.000000,
-            CLKOUT4_CASCADE      => FALSE,
-            CLKOUT4_DIVIDE       => 1,
-            CLKOUT4_DUTY_CYCLE   => 0.500000,
-            CLKOUT4_PHASE        => 0.000000,
-            CLKOUT5_DIVIDE       => 1,
-            CLKOUT5_DUTY_CYCLE   => 0.500000,
-            CLKOUT5_PHASE        => 0.000000,
-            CLKOUT6_DIVIDE       => 1,
-            CLKOUT6_DUTY_CYCLE   => 0.500000,
-            CLKOUT6_PHASE        => 0.000000,
-            DIVCLK_DIVIDE        => 1,
-            REF_JITTER1          => 0.010000,
-            STARTUP_WAIT         => FALSE
+            BANDWIDTH          => "OPTIMIZED",
+            CLKFBOUT_MULT_F    => 8.250000,
+            CLKFBOUT_PHASE     => 0.000000,
+            CLKIN1_PERIOD      => 10.000000,
+            CLKOUT0_DIVIDE_F   => 16.500000,
+            CLKOUT0_DUTY_CYCLE => 0.500000,
+            CLKOUT0_PHASE      => 0.000000,
+            CLKOUT1_DIVIDE     => 22,
+            CLKOUT1_DUTY_CYCLE => 0.500000,
+            CLKOUT1_PHASE      => 0.000000,
+            CLKOUT2_DIVIDE     => 25,
+            CLKOUT2_DUTY_CYCLE => 0.500000,
+            CLKOUT2_PHASE      => 0.000000,
+            CLKOUT3_DIVIDE     => 1,
+            CLKOUT3_DUTY_CYCLE => 0.500000,
+            CLKOUT3_PHASE      => 0.000000,
+            CLKOUT4_CASCADE    => FALSE,
+            CLKOUT4_DIVIDE     => 1,
+            CLKOUT4_DUTY_CYCLE => 0.500000,
+            CLKOUT4_PHASE      => 0.000000,
+            CLKOUT5_DIVIDE     => 1,
+            CLKOUT5_DUTY_CYCLE => 0.500000,
+            CLKOUT5_PHASE      => 0.000000,
+            CLKOUT6_DIVIDE     => 1,
+            CLKOUT6_DUTY_CYCLE => 0.500000,
+            CLKOUT6_PHASE      => 0.000000,
+            DIVCLK_DIVIDE      => 1,
+            REF_JITTER1        => 0.010000,
+            STARTUP_WAIT       => FALSE
             )
         port map (
-            CLKFBIN           => clkfb_in,
-            CLKFBOUT          => clkfb_out,
-            CLKFBOUTB         => open,
-            CLKIN1            => clkmain,
-            CLKOUT0           => clk_out1,  -- 50 MHz for 25 fps
-            CLKOUT0B          => open,
-            CLKOUT1           => clk_out2,  -- 37.5 MHz for 24 fps
-            CLKOUT1B          => open,
-            CLKOUT2           => clk_out3,  -- 33 MHz for 30 fps
-            CLKOUT2B          => open,
-            CLKOUT3           => open,
-            CLKOUT3B          => open,
-            CLKOUT4           => open,
-            CLKOUT5           => open,
-            CLKOUT6           => open,
-            LOCKED            => locked,
-            PWRDWN            => '0',
-            RST               => '0');
+            CLKFBIN   => clkfb_in,
+            CLKFBOUT  => clkfb_out,
+            CLKFBOUTB => open,
+            CLKIN1    => clkmain,
+            CLKOUT0   => clk_out_50,    -- 50 MHz for 25 fps
+            CLKOUT0B  => open,
+            CLKOUT1   => clk_out_37p5,  -- 37.5 MHz for 24 fps
+            CLKOUT1B  => open,
+            CLKOUT2   => clk_out_33,    -- 33 MHz for 30 fps
+            CLKOUT2B  => open,
+            CLKOUT3   => open,
+            CLKOUT3B  => open,
+            CLKOUT4   => open,
+            CLKOUT5   => open,
+            CLKOUT6   => open,
+            LOCKED    => locked,
+            PWRDWN    => '0',
+            RST       => '0');
 
     -- reset in the "main" clock domain.
     main_reset_sync : entity work.reset_sync
@@ -151,12 +159,12 @@ begin  -- architecture clkgen
         if rising_edge(clkmain) then
             if rstmain_l = '0' then
                 frame_rate_d <= FR_30;
-                clk_sel      <= "1001";
+                clk_sel      <= CLK_SEL_FR30;
             else
                 FrameRateDecoder : case frame_rate is
-                    when FR_30 => clk_sel <= "1001";
-                    when FR_25 => clk_sel <= "1010";
-                    when FR_24 => clk_sel <= "0100";
+                    when FR_30 => clk_sel <= CLK_SEL_FR30;  -- need 33 MHz clock
+                    when FR_25 => clk_sel <= CLK_SEL_FR25;  -- need 50 MHz clock
+                    when FR_24 => clk_sel <= CLK_SEL_FR24;  -- need 37.5 MHz clock
                 end case FrameRateDecoder;
 
                 frame_rate_d <= frame_rate;
@@ -165,38 +173,29 @@ begin  -- architecture clkgen
         end if;
     end process get_clock_selects;
 
-    -- select clocks 1 or 2
-    clksel_1_2_bufgctrl : BUFGCTRL
+    -- select clocks 50 MHz or 37.5 MHz
+    clksel_1_2_bufgmux : BUFGMUX
         port map (
-            O       => clk_sel_1_or_2,
-            CE0     => '1',
-            CE1     => '1',
-            I0      => clk_out1,
-            I1      => clk_out2,
-            IGNORE0 => '0',
-            IGNORE1 => '0',
-            S0      => clk_sel(0),
-            S1      => clk_sel(1));
+            O  => clk_mux_37_or_50,
+            I0 => clk_out_50,
+            I1 => clk_out_37p5,
+            S  => clk_sel(CLK_SEL_37_NOT_50));
 
-    -- select clocks 1/2 or 3
-    clksel_12_3_bufgctrl : BUFGCTRL
+    -- select above or 33 MHz
+    clksel_12_3_bufgctrl : BUFGMUX
         port map (
-            O       => clktimer,
-            CE0     => '1',
-            CE1     => '1',
-            I0      => clk_sel_1_or_2,
-            I1      => clk_out3,
-            IGNORE0 => '0',
-            IGNORE1 => '0',
-            S0      => clk_sel(3),
-            S1      => clk_sel(2));
+            O  => clktimer,
+            I0 => clk_mux_37_or_50,
+            I1 => clk_out_33,
+            S  => clk_sel(CLK_SEL_33_NOT_OTHERS));
 
     -- generate a reset in the clktimer domain.
-    timer_reset <= '0' when (arst_l = '0' or frame_rate_e = '1' or locked = '0') else '1';
-    
+    timer_reset <= '0' when (rstmain_l = '0' or frame_rate_e = '1' or locked = '0') else '1';
+
     timer_reset_sync : entity work.reset_sync
         port map (
             clk    => clktimer,
             arst_l => timer_reset,
             srst_l => rsttimer_l);
+    
 end architecture clkgen;

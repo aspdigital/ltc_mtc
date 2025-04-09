@@ -1,0 +1,35 @@
+Vivado Simulator v2024.2.0
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+Running: C:/Xilinx/Vivado/2024.2/bin/unwrapped/win64.o/xelab.exe --incr --debug typical --relax --mt 2 -L xil_defaultlib -L secureip --snapshot ltc_mtc_tb_behav xil_defaultlib.ltc_mtc_tb -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling package std.standard
+Compiling package std.textio
+Compiling package ieee.std_logic_1164
+Compiling package xil_defaultlib.ltc_mtc_pkg
+Compiling package ieee.numeric_std
+Compiling package unisim.vcomponents
+Compiling package ieee.std_logic_arith
+Compiling package ieee.std_logic_signed
+Compiling package ieee.vital_timing
+Compiling package ieee.vital_primitives
+Compiling package unisim.vpkg
+Compiling architecture bufg_v of entity unisim.BUFG [bufg_default]
+Compiling architecture mmcme2_adv_v of entity unisim.MMCME2_ADV [\MMCME2_ADV(clkfbout_mult_f=8.25...]
+Compiling architecture mmcme2_base_v of entity unisim.MMCME2_BASE [\MMCME2_BASE(clkfbout_mult_f=8.2...]
+Compiling architecture synchronizer of entity xil_defaultlib.reset_sync [reset_sync_default]
+Compiling architecture bufgctrl_v of entity unisim.BUFGCTRL [\BUFGCTRL(preselect_i0=true)(1,4...]
+Compiling architecture inv_v of entity unisim.INV [inv_default]
+Compiling architecture bufgmux_v of entity unisim.BUFGMUX [\BUFGMUX(1,4)\]
+Compiling architecture clkgen of entity xil_defaultlib.clks_rst [clks_rst_default]
+Compiling architecture synchronizer of entity xil_defaultlib.cdc_sync [\cdc_sync(std_logic_vector,reset...]
+Compiling architecture timer of entity xil_defaultlib.frame_timer [\frame_timer(clkper=10000)\]
+Compiling architecture synchronizer of entity xil_defaultlib.cdc_sync [\cdc_sync(std_logic,reset_state=...]
+Compiling architecture toplevel of entity xil_defaultlib.ltc_mtc [ltc_mtc_default]
+Compiling architecture testbench of entity xil_defaultlib.ltc_mtc_tb
+Built simulation snapshot ltc_mtc_tb_behav

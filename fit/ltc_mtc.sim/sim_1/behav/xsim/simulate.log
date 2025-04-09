@@ -1,0 +1,4 @@
+Time resolution is 1 ps
+Warning: Warning : [Unisim MMCME2_ADV-162] input CLKIN1 period and attribute CLKIN1_PERIOD are not same.
+Time: 1900 ns  Iteration: 4  Process: /ltc_mtc_tb/DUT/clks_rst_1/mmcm_adv_inst/MMCME2_ADV_inst/pchk_p  File: C:/Xilinx/Vivado/2024.2/data/vhdl/src/unisims/primitive/MMCME2_ADV.vhd
+INFO: xsimkernel Simulation Memory Usage: 35468 KB (Peak: 35468 KB), Simulation CPU Usage: 42312 ms

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-07
+-- Last update: 2025-04-08
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -97,7 +97,9 @@ architecture toplevel of ltc_mtc is
 
     -- keep track of the frame time and frame rate.
     signal frame_time : frame_time_t;
-
+    -- and in the fast system clock domain.
+    signal frame_time_s : frame_time_t;
+    
     -- capture digit segments. Each digit includes the decimal point.
     signal all_digits : digit_array_t;
 
@@ -129,14 +131,16 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     -- Frame rate is set by the state of switches 0 and 1.
     ---------------------------------------------------------------------------------------------------------
-    SwitchSync : for thissw in frsw'range generate
-        frsw_cdc_sync : entity work.cdc_sync
-            port map (
-                clk   => clkmain,
-                rst_l => rstmain_l,
-                d     => SW(thissw),
-                q     => frsw(thissw));
-    end generate SwitchSync;
+    frsw_cdc_sync : entity work.cdc_sync
+        generic map (
+            t           => std_logic_vector(frsw'range),
+            RESET_STATE => (frsw'range => '0'),
+            SYNC_FLOPS  => 3)
+        port map (
+            clk   => clkmain,
+            rst_l => rstmain_l,
+            d     => SW,
+            q     => frsw);
 
     GetFrameRate : process (clkmain) is
     begin  -- process GetFrameRate
@@ -261,11 +265,29 @@ begin  -- architecture toplevel
     -- Get frame tick on the faster system clock.
     ---------------------------------------------------------------------------------------------------------
     tick_sync : entity work.cdc_sync
+        generic map (
+            t           => std_logic,
+            RESET_STATE => '0',
+            SYNC_FLOPS  => 3)
         port map (
             clk   => clkmain,
             rst_l => rstmain_l,
             d     => frame_tick,
             q     => frame_tick_s);
+
+    ---------------------------------------------------------------------------------------------------------
+    -- Get the frame time record on the faster system clock.
+    ---------------------------------------------------------------------------------------------------------
+    frame_time_sync : entity work.cdc_sync
+        generic map (
+            t           => frame_time_t,
+            RESET_STATE => FRAME_TIME_RESET,
+            SYNC_FLOPS  => 3)
+        port map (
+            clk   => clkmain,
+            rst_l => rstmain_l,
+            d     => frame_time,
+            q     => frame_time_s);
     
     ---------------------------------------------------------------------------------------------------------
     -- Update digits to display on the timer tick.
@@ -282,14 +304,14 @@ begin  -- architecture toplevel
                 frame_tick_d <= frame_tick_s;
                 
                 UodateSegments: if frame_tick_s and not frame_tick_d then
-                    all_digits(DIGIT_FRAME_LSD) <= segment_driver(frame_time.frame_cnt.lsd, DECPT_OFF);
-                    all_digits(DIGIT_FRAME_MSD) <= segment_driver(frame_time.frame_cnt.msd, DECPT_OFF);
-                    all_digits(DIGIT_SEC_LSD) <= segment_driver(frame_time.ft_sec.lsd, DECPT_ON);
-                    all_digits(DIGIT_SEC_MSD) <= segment_driver(frame_time.ft_sec.msd, DECPT_OFF);
-                    all_digits(DIGIT_MIN_LSD) <= segment_driver(frame_time.ft_min.lsd, DECPT_ON);
-                    all_digits(DIGIT_MIN_MSD) <= segment_driver(frame_time.ft_min.msd, DECPT_OFF);
-                    all_digits(DIGIT_HR_LSD) <= segment_driver(frame_time.ft_hr.lsd, DECPT_ON);
-                    all_digits(DIGIT_HR_MSD) <= segment_driver(frame_time.ft_hr.msd, DECPT_OFF);
+                    all_digits(DIGIT_FRAME_LSD) <= segment_driver(frame_time_s.frame_cnt.lsd, DECPT_OFF);
+                    all_digits(DIGIT_FRAME_MSD) <= segment_driver(frame_time_s.frame_cnt.msd, DECPT_OFF);
+                    all_digits(DIGIT_SEC_LSD) <= segment_driver(frame_time_s.ft_sec.lsd, DECPT_ON);
+                    all_digits(DIGIT_SEC_MSD) <= segment_driver(frame_time_s.ft_sec.msd, DECPT_OFF);
+                    all_digits(DIGIT_MIN_LSD) <= segment_driver(frame_time_s.ft_min.lsd, DECPT_ON);
+                    all_digits(DIGIT_MIN_MSD) <= segment_driver(frame_time_s.ft_min.msd, DECPT_OFF);
+                    all_digits(DIGIT_HR_LSD) <= segment_driver(frame_time_s.ft_hr.lsd, DECPT_ON);
+                    all_digits(DIGIT_HR_MSD) <= segment_driver(frame_time_s.ft_hr.msd, DECPT_OFF);
                 end if UodateSegments;
             end if;
         end if;
