@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-08
+-- Last update: 2025-04-09
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -100,6 +100,14 @@ architecture toplevel of ltc_mtc is
     signal rsttimer_l : std_logic;
 
     ---------------------------------------------------------------------------------------------------------
+    -- The periods of the three clocks that divide nicely into the three frame rates.
+    -- These are used to ensure that the display update rate is consistent.
+    ---------------------------------------------------------------------------------------------------------
+    constant CLKPER_30FPS : time := 30.3030 ns;  -- 33 MHz
+    constant CLKPER_25FPS : time := 20 ns;  -- 50 MHz
+    constant CLKPER_24FPS : time := 26.6667 ns;  -- 37.5 MHz
+
+    ---------------------------------------------------------------------------------------------------------
     -- Switches.
     ---------------------------------------------------------------------------------------------------------
     -- We use two of the 16 switches to select the frame rate. The state of the switches is synchronized to
@@ -110,40 +118,25 @@ architecture toplevel of ltc_mtc is
     ---------------------------------------------------------------------------------------------------------
     -- Timing.
     ---------------------------------------------------------------------------------------------------------
+    -- The frame rate, as determined by the switches. This drives the tick counter and selects which clock
+    -- drives the timers that are divided down to get the current coded time.
+    
+    signal frame_rate : frame_rate_t;
+    -- needed on timer clock too
+    signal frame_rate_s : frame_rate_t;
+    
     -- The timer clock, frequency as selected by the frame rate switches above, is divided down to generate a
     -- strobe tick at the start of every frame time. This strobe will be at 24, 25 or 30 frames per second.
     signal frame_tick : std_logic;
-    -- Synchronzize the frame tick in the main domain, and delay it for edge detect.
-    -- On the edge of this tick, the frame time counters are copied to the display digits.
-    signal frame_tick_s : std_logic;
-    signal frame_tick_d : std_logic;
 
-    -- Here is where we keep track of the frame time. The frame rate is part of this record.
+    -- This is the time code from the generator.
     signal frame_time : frame_time_t;
-    -- Synchronize it to the fast main clock domain for display.
-    signal frame_time_s : frame_time_t;
 
     ---------------------------------------------------------------------------------------------------------
-    -- Display.
+    -- Display the timecode.
     ---------------------------------------------------------------------------------------------------------
-    -- On every frame tick, capture digit segments. Each digit includes the decimal point.
-    -- These are the cathodes of the digit display LEDs.
-    signal all_digits : digit_array_t;
+    signal display : display_t;         -- record with all LED segments.
 
-    -- Index into the LED anodes. Cathodes are common to all digits, and enabling the anode lights that
-    -- digit.
-    signal this_anode : natural range 0 to NUM_DIGITS - 1;
-
-    -- Display refresh timer. The period is for one digit. Refreshing the display takes eight times that one
-    -- digit. On each refresh tick, we turn on one anode so that its digit can update.
-    -- The refresh period of 1 ms per digit, or 8 ms for all digits, was determined by inspection. There is
-    -- no visible flicker in the display.
-    constant REFRESH_PERIOD : time := 1 MS;
-    constant TICKS_PER_REFRESH : natural := integer(REFRESH_PERIOD / CLKPER);
-    subtype refresh_timer_t is natural range 0 to TICKS_PER_REFRESH - 1;
-    signal refresh_timer : refresh_timer_t;
-    signal refresh_tick : std_logic;    -- tick true on timer rollover.
-    
 begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
@@ -152,11 +145,11 @@ begin  -- architecture toplevel
     -- that is an integer when divided to that frame rate. The frequencies chosen are allowed by the MMCM, so
     -- they're not entirely random.
     ---------------------------------------------------------------------------------------------------------
-    clks_rst_inst: entity work.clks_rst
+    clks_rst_inst: entity work.clks_rst(clkgen)
         port map (
             clkref     => CLK100MHZ,
             arst_l     => CPU_RESETN,
-            frame_rate => frame_time.frame_rate,
+            frame_rate => frame_rate,
             clktimer   => clktimer,
             rsttimer_l => rsttimer_l,
             clkmain    => clkmain,
@@ -165,9 +158,10 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     -- Frame rate is set by the state of switches 0 and 1.
     -- Synchronize the two rate select switches to the main clock, and then encode that select into the frame
-    -- rate type. Store the encoded frame rate in the timer record.
+    -- rate type. We do this on the main clock, and not the timer clock, because the frame rate here is used
+    -- (in clks_rst) to select the timer clock.
     ---------------------------------------------------------------------------------------------------------
-    frsw_cdc_sync : entity work.cdc_sync
+    frsw_cdc_sync : entity work.cdc_sync(synchronizer)
         generic map (
             t           => std_logic_vector(frsw'range),
             RESET_STATE => (frsw'range => '0'),
@@ -182,24 +176,35 @@ begin  -- architecture toplevel
     begin  -- process GetFrameRate
         if rising_edge(clkmain) then
             if rstmain_l = '0' then
-                frame_time.frame_rate <= FR_30;
-                frame_time.frame_cnt.lsd_rollover <= 9;
+                frame_rate <= FR_30;
             else
                 FrameRateDecoder : case frsw is
                     when "01"   =>
-                        frame_time.frame_cnt.lsd_rollover <= 4;
-                        frame_time.frame_rate <= FR_25;
+                        frame_rate <= FR_25;
                     when "10"   =>
-                        frame_time.frame_cnt.lsd_rollover <= 3;
-                        frame_time.frame_rate <= FR_24;
+                        frame_rate <= FR_24;
                     when others =>
-                        frame_time.frame_cnt.lsd_rollover <= 9;
-                        frame_time.frame_rate <= FR_30;
+                        frame_rate <= FR_30;
                 end case FrameRateDecoder;
             end if;
         end if;
     end process GetFrameRate;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- Sync frame rate to the timer clock, as it is needed in that domain.
+    -- NB that the timer clock will change if the frame rate changes.
+    ---------------------------------------------------------------------------------------------------------
+    frame_rate_cdc_sync : entity work.cdc_sync(synchronizer)
+        generic map (
+            t           => frame_rate_t,
+            RESET_STATE => FR_30,
+            SYNC_FLOPS  => 3)
+        port map (
+            clk   => clktimer,
+            rst_l => rsttimer_l,
+            d     => frame_rate,
+            q     => frame_rate_s);
+    
     ---------------------------------------------------------------------------------------------------------
     -- Frame tick counter.
     -- Generate a strobe once per frame, at the rate of 24, 25 or 30 fps, depending on the chosen rate.
@@ -208,211 +213,45 @@ begin  -- architecture toplevel
         port map (
             clk        => clktimer,
             rst_l      => rsttimer_l,
-            frame_rate => frame_time.frame_rate,
+            frame_rate => frame_rate_s,
             frame_tick => frame_tick);
+
+    ---------------------------------------------------------------------------------------------------------
+    -- This is where we generate the time code, given a frame rate. The code updates with every frame_tick.
+    -- The generator runs freely. It restarts only when the frame rate changes.
+    ---------------------------------------------------------------------------------------------------------
+    tcg : entity work.timecode_generator(timers)
+        port map (
+            clktimer   => clktimer,
+            rsttimer_l => rsttimer_l,
+            frame_rate => frame_rate_s,
+            frame_tick => frame_tick,
+            frame_time => frame_time);
     
-    ---------------------------------------------------------------------------------------------------------
-    -- Time code counter.
-    -- On every frame tick, increment the frame counter LSD.
-    -- When frame counter LSD rolls over, increment the frame counter MSD.
-    -- When frame counter MSD rolls over, increment the seconds counter LSD.
-    -- And so forth.
-    --
-    -- Frame counter rollover is a bit of a special case because it will roll over after 23, 24 or 29 counts.
-    ---------------------------------------------------------------------------------------------------------
-    TimeCodeGenerator : process (clktimer) is
-    begin  -- process TimeCodeGenerator
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
-                frame_time.frame_cnt.lsd  <= 0;
-                frame_time.frame_cnt.msd  <= 0;
-                frame_time.ft_sec.lsd <= 0;
-                frame_time.ft_sec.msd <= 0;
-                frame_time.ft_min.lsd <= 0;
-                frame_time.ft_min.msd <= 0;
-                frame_time.ft_hr.lsd  <= 0;
-                frame_time.ft_hr.msd  <= 0;
-            else
-                OnTheTick: if frame_tick then
-
-                    isLastFrameCnt : if ( (frame_time.frame_cnt.lsd = frame_time.frame_cnt.lsd_rollover) and
-                                           (frame_time.frame_cnt.msd = 2) ) then
-                        frame_time.frame_cnt.lsd <= 0;
-                        frame_time.frame_cnt.msd <= 0;
-
-                        isLastSec: if frame_time.ft_sec.lsd = 9 then
-                            frame_time.ft_sec.lsd <= 0;
-                            
-                            isSecRollover: if frame_time.ft_sec.msd = 5 then
-                                frame_time.ft_sec.msd <= 0;
-
-                                isLastMin : if frame_time.ft_min.lsd = 9 then
-                                    frame_time.ft_min.lsd <= 0;
-
-                                    isMinRollover: if frame_time.ft_min.msd = 5 then
-                                        frame_time.ft_min.msd <= 0;
-
-                                        isLastHr: if frame_time.ft_hr.msd = 2 then
-                                            
-                                            isHrRollover: if frame_time.ft_hr.lsd = 3 then
-                                                -- this is the end when everything rolls over to 0
-                                                frame_time.ft_hr.msd <= 0;
-                                                frame_time.ft_hr.lsd <= 0;
-                                            elsif frame_time.ft_hr.lsd = 9 then
-                                                frame_time.ft_hr.lsd <= 0;
-                                                frame_time.ft_hr.msd <= frame_time.ft_hr.msd + 1;
-                                            end if isHrRollover;
-                                        else
-                                            isAlsoHrRollover: if frame_time.ft_hr.lsd = 9 then
-                                                frame_time.ft_hr.lsd <= 0;
-                                                frame_time.ft_hr.msd <= frame_time.ft_hr.msd + 1;
-                                            else
-                                                frame_time.ft_hr.lsd <= frame_time.ft_hr.lsd + 1;
-                                            end if isAlsoHrRollover;
-                                        end if isLastHr;
-                                    else
-                                        frame_time.ft_min.msd <= frame_time.ft_min.msd + 1;
-                                    end if isMinRollover;
-                                    
-                                else
-                                    frame_time.ft_min.lsd <= frame_time.ft_min.lsd + 1;
-                                end if isLastMin;
-
-                            else
-                                frame_time.ft_sec.msd <= frame_time.ft_sec.msd + 1;
-                            end if isSecRollover;
-                        else
-                            frame_time.ft_sec.lsd <= frame_time.ft_sec.lsd + 1;
-                        end if isLastSec;
-                        
-                    else
-
-                        UpdateFrameCnt: if frame_time.frame_cnt.lsd = 9 then
-                            frame_time.frame_cnt.lsd <= 0;
-                            frame_time.frame_cnt.msd <= frame_time.frame_cnt.msd + 1;
-                        else
-                            frame_time.frame_cnt.lsd <= frame_time.frame_cnt.lsd + 1;
-                        end if UpdateFrameCnt;
-                        
-                    end if isLastFrameCnt;
-
-                end if OnTheTick;
-
-            end if;
-        end if;
-    end process TimeCodeGenerator;
-
     ---------------------------------------------------------------------------------------------------------
     -- DISPLAY THE FRAME TIME.
-    --
-    -- Get frame tick on the faster system clock.
     ---------------------------------------------------------------------------------------------------------
-    tick_sync : entity work.cdc_sync
+    tcd : entity work.timecode_display(digit_driver)
         generic map (
-            t           => std_logic,
-            RESET_STATE => '0',
-            SYNC_FLOPS  => 3)
+            CLKPER_30FPS => CLKPER_30FPS,
+            CLKPER_25FPS => CLKPER_25FPS,
+            CLKPER_24FPS => CLKPER_24FPS)
         port map (
-            clk   => clkmain,
-            rst_l => rstmain_l,
-            d     => frame_tick,
-            q     => frame_tick_s);
+            clktimer   => clktimer,
+            rsttimer_l => rsttimer_l,
+            frame_time => frame_time,
+            frame_rate => frame_rate,
+            display    => display);
 
-    ---------------------------------------------------------------------------------------------------------
-    -- Get the frame time record on the faster system clock.
-    ---------------------------------------------------------------------------------------------------------
-    frame_time_sync : entity work.cdc_sync
-        generic map (
-            t           => frame_time_t,
-            RESET_STATE => FRAME_TIME_RESET,
-            SYNC_FLOPS  => 3)
-        port map (
-            clk   => clkmain,
-            rst_l => rstmain_l,
-            d     => frame_time,
-            q     => frame_time_s);
+    -- break out display type to pins.
+    CA <= display.CA;
+    CB <= display.CB;
+    CC <= display.CC;
+    CD <= display.CD;
+    CE <= display.CE;
+    CF <= display.CF;
+    CG <= display.CG;
+    DP <= display.DP;
+    AN <= display.AN;
     
-    ---------------------------------------------------------------------------------------------------------
-    -- Update digits to display on the timer tick.
-    -- The display always shows the "previous" frame time, although that probably doesn't matter at 100 MHz.
-    ---------------------------------------------------------------------------------------------------------
-    UpdateDigits: process (clkmain) is
-    begin  -- process UpdateDigits
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
-                frame_tick_d <= '0';
-                -- ensure all segments are off
-                all_digits <= (others => (others => '1'));
-            else
-                frame_tick_d <= frame_tick_s;
-                
-                UodateSegments: if frame_tick_s and not frame_tick_d then
-                    all_digits(DIGIT_FRAME_LSD) <= segment_driver(frame_time_s.frame_cnt.lsd, DECPT_OFF);
-                    all_digits(DIGIT_FRAME_MSD) <= segment_driver(frame_time_s.frame_cnt.msd, DECPT_OFF);
-                    all_digits(DIGIT_SEC_LSD)   <= segment_driver(frame_time_s.ft_sec.lsd, DECPT_ON);
-                    all_digits(DIGIT_SEC_MSD)   <= segment_driver(frame_time_s.ft_sec.msd, DECPT_OFF);
-                    all_digits(DIGIT_MIN_LSD)   <= segment_driver(frame_time_s.ft_min.lsd, DECPT_ON);
-                    all_digits(DIGIT_MIN_MSD)   <= segment_driver(frame_time_s.ft_min.msd, DECPT_OFF);
-                    all_digits(DIGIT_HR_LSD)    <= segment_driver(frame_time_s.ft_hr.lsd, DECPT_ON);
-                    all_digits(DIGIT_HR_MSD)    <= segment_driver(frame_time_s.ft_hr.msd, DECPT_OFF);
-                end if UodateSegments;
-            end if;
-        end if;
-    end process UpdateDigits;
-
-    ---------------------------------------------------------------------------------------------------------
-    -- We multiplex the cathodes and enable the outputs with the anode.
-    -- This is where we set the update rate and drive the anodes and the cathodes.
-    --
-    -- The refresh timer indicates when the next digit should be selected and illuminated.
-    -- The timer rollover is pipelined, that is, we set the tick strobe when the count is 1 so it is true on
-    -- count equals zero. Then that single bit is an enable for the output updates.
-    -- Note the this_anode is updated with timer = 1, so on refresh tick the new anode is updated
-    -- simultaneously with the cathodes for that digit.
-    ---------------------------------------------------------------------------------------------------------
-    RefreshDisplay: process (clkmain) is
-    begin  -- process RefreshDisplay
-        if rising_edge(clkmain) then 
-            if rstmain_l = '0' then
-                refresh_timer <= 0;
-                refresh_tick  <= '0';
-                this_anode    <= 0;
-                AN            <= (0 => '0', others => '1');
-            else
-
-                -- the refresh timer just runs continously.
-                TheRefreshTimer: if refresh_timer = refresh_timer_t'low then
-                    refresh_timer <= refresh_timer_t'high;
-                else
-                    refresh_timer <= refresh_timer - 1;
-                end if TheRefreshTimer;
-
-                -- When the timer rolls over, assert our tick and also update the current anode which is also
-                -- the current digit to display.
-                RolloverTick: if refresh_timer = 1 then
-                    refresh_tick <= '1';
-                    this_anode   <= (this_anode + 1) mod NUM_DIGITS;
-                else
-                    refresh_tick <= '0';
-                end if RolloverTick;
-
-                -- drive segments and anode. Note that we first clear all anodes, and then only enable the
-                -- anode that is currently selected.
-                UpdateDisplay: if refresh_tick then
-                    AN <= (others => '1');
-                    AN(this_anode) <= '0';
-                    CA <= all_digits(this_anode)(CA_IDX);
-                    CB <= all_digits(this_anode)(CB_IDX);
-                    CC <= all_digits(this_anode)(CC_IDX);
-                    CD <= all_digits(this_anode)(CD_IDX);
-                    CE <= all_digits(this_anode)(CE_IDX);
-                    CF <= all_digits(this_anode)(CF_IDX);
-                    CG <= all_digits(this_anode)(CG_IDX);
-                    DP <= all_digits(this_anode)(DP_IDX);
-                end if UpdateDisplay;
-                
-            end if;
-        end if;
-    end process RefreshDisplay;
-
 end architecture toplevel;

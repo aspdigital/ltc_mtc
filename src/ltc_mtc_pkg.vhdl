@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-08
--- Last update: 2025-04-08
+-- Last update: 2025-04-09
 -- Platform   : Xilinx Artix 7
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -33,6 +33,11 @@ package ltc_mtc_pkg is
         FR_30,                          -- 30 fps
         FR_25,                          -- 25 fps
         FR_24);                         -- 24 fps
+
+    -- frame count rollover LSD is set by the frame rate above.
+    constant FC_ROLLOVER_LSD_30 : natural := 9;  -- rolls over at 29 for 30 fps
+    constant FC_ROLLOVER_LSD_25 : natural := 4;  -- rolls over at 24 for 25 fps
+    constant FC_ROLLOVER_LSD_24 : natural := 3;  -- rolls over at 23 for 24 fps
 
     ---------------------------------------------------------------------------------------------------------
     -- These types manage the digits for time code display.
@@ -63,7 +68,6 @@ package ltc_mtc_pkg is
     ---------------------------------------------------------------------------------------------------------
     -- keep track of time with this record.
     -- we keep track of the individual digits, so we don't have to divide to work them out.
-    -- The selected frame rate just goes along for the ride here.
     ---------------------------------------------------------------------------------------------------------
     type frame_time_t is record
         -- frame range is max 29
@@ -74,8 +78,6 @@ package ltc_mtc_pkg is
         ft_min     : time_0_to_59_t;
         -- hours range from 0 to 23
         ft_hr      : time_0_to_23_t;
-        -- frame rate 
-        frame_rate : frame_rate_t;
     end record frame_time_t;
 
     -- provide a constant initializer/reset condition for the frame_time_t record, used mainly for CDC.
@@ -83,8 +85,7 @@ package ltc_mtc_pkg is
         frame_cnt  => (lsd => 0, msd => 0, lsd_rollover => 0),
         ft_sec     => (lsd => 0, msd => 0),
         ft_min     => (lsd => 0, msd => 0),
-        ft_hr      => (lsd => 0, msd => 0),
-        frame_rate => FR_30);
+        ft_hr      => (lsd => 0, msd => 0));
 
     ---------------------------------------------------------------------------------------------------------
     -- Support for the 7-segment display.
@@ -99,7 +100,7 @@ package ltc_mtc_pkg is
     constant CE_IDX : natural := 4;
     constant CF_IDX : natural := 5;
     constant CG_IDX : natural := 6;
-    constant DP_IDX : natural := 7;
+    constant DP_IDX : natural := 7;    
 
     -- all of the digits on the board.
     constant NUM_DIGITS : natural := 8;
@@ -142,6 +143,32 @@ package ltc_mtc_pkg is
         constant DIGIT : ones_digit_t;  -- digit to display
         constant DECPT : std_logic)     -- set to light up decimal
         return digit_t;
+
+    -- this record includes all anodes and the common cathodes for the display.
+    -- member names match schematic net names.
+    type display_t is record
+        AN : std_logic_vector(7 downto 0);  -- all anodes, driven one-hot
+        CA : std_logic;                 -- segment A cathode
+        CB : std_logic;                 -- segment B
+        CC : std_logic;                 -- segment C
+        CD : std_logic;                 -- segment D
+        CE : std_logic;                 -- segment E
+        CF : std_logic;                 -- segment F
+        CG : std_logic;                 -- segment G
+        DP : std_logic;                 -- segment DP
+    end record display_t;
+
+    constant DISPLAY_TYPE_RESET : display_t := (
+        AN => (0 => '0', others => '1'),
+        CA => '1', 
+        CB => '1', 
+        CC => '1', 
+        CD => '1', 
+        CE => '1', 
+        CF => '1', 
+        CG => '1', 
+        DP => '1'); 
+        
 
 end package ltc_mtc_pkg;
 

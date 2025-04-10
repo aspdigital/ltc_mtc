@@ -1,8 +1,0 @@
-INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/src/cdc_sync.vhdl" into library xil_defaultlib
-INFO: [VRFC 10-3107] analyzing entity 'cdc_sync'
-INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/src/clks_rst.vhdl" into library xil_defaultlib
-INFO: [VRFC 10-3107] analyzing entity 'clks_rst'
-INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/src/ltc_mtc.vhdl" into library xil_defaultlib
-INFO: [VRFC 10-3107] analyzing entity 'ltc_mtc'
-INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/tb/ltc_mtc_tb.vhdl" into library xil_defaultlib
-INFO: [VRFC 10-3107] analyzing entity 'ltc_mtc_tb'

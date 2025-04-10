@@ -1,0 +1,12 @@
++====================+===================+==================================+
+| Launch Setup Clock | Launch Hold Clock | Pin                              |
++====================+===================+==================================+
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[7]/D              |
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[12]/D             |
+| sys_clk_pin        | sys_clk_pin       | frame_rate_cdc_sync/d_s_reg[1]/D |
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[14]/D             |
+| sys_clk_pin        | sys_clk_pin       | frame_rate_cdc_sync/d_s_reg[0]/D |
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[3]/D              |
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[0]/D              |
+| sys_clk_pin        | sys_clk_pin       | tcd/reload_reg[5]/D              |
++--------------------+-------------------+----------------------------------+

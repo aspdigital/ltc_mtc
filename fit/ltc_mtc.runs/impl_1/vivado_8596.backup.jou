@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:35:27 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Wed Apr  9 23:45:46 2025
+# Process ID         : 8596
+# Current directory  : C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/fit/ltc_mtc.runs/impl_1
+# Command line       : vivado.exe -log ltc_mtc.vdi -applog -product Vivado -messageDb vivado.pb -mode batch -source ltc_mtc.tcl -notrace
+# Log file           : C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/fit/ltc_mtc.runs/impl_1/ltc_mtc.vdi
+# Journal file       : C:/Users/Andy Peters/Documents/GitHub/ltc_mtc/fit/ltc_mtc.runs/impl_1\vivado.jou
+# Running On         : mini-win
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 19045
+# Processor Detail   : Intel(R) Core(TM) i7-3720QM CPU @ 2.60GHz
+# CPU Frequency      : 2594 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 17081 MB
+# Swap memory        : 2550 MB
+# Total Virtual      : 19632 MB
+# Available Virtual  : 14388 MB
+#-----------------------------------------------------------
+source ltc_mtc.tcl -notrace
