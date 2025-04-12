@@ -1,3 +1,7 @@
+## Clock input.
+create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports CLK100MHZ]
+
+# False paths between the MMCM outputs and the input clock as well.
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT2]] -to [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT0]]
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT2]] -to [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT1]]
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT2]] -to [get_clocks sys_clk_pin]
@@ -8,10 +12,24 @@ set_false_path -from [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/
 set_false_path -from [get_clocks sys_clk_pin] -to [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT2]]
 set_false_path -from [get_clocks sys_clk_pin] -to [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT0]]
 set_false_path -from [get_clocks sys_clk_pin] -to [get_clocks -of_objects [get_pins clks_rst_1/mmcm_adv_inst/CLKOUT1]]
+
+# More clock groups and timing ignores, so Vivado doesn't complain about proper CDC.
+set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks {clk_out_37p5 clk_out_50}] -group [get_clocks -include_generated_clocks clk_out_33]
+set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks clk_out_50] -group [get_clocks -include_generated_clocks clk_out_37p5]
+
+set_false_path -from [get_pins {frame_rate_reg[*]/C}] -to [get_pins {frame_rate_cdc_sync/d_s_reg[*]/D}]
+set_false_path -from [get_pins {clks_rst_inst/clk_sel_reg[1]/C}] -to [get_pins clks_rst_inst/clksel_12_3_bufgctrl/CE1]
+set_false_path -from [get_pins clks_rst_inst/timer_reset_l_reg_inv/C] -to [get_pins clks_rst_inst/timer_reset_sync/srst_l_reg/CLR]
+set_false_path -from [get_pins clks_rst_inst/timer_reset_l_reg_inv/C] -to [get_pins {clks_rst_inst/timer_reset_sync/ResetSynchronizer.v_rsthold_reg[*]/PRE}]
+
+
+# Vivado demands input delay specs, even for the async buttons etc
 set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 2.100 [get_ports {SW[*]}]
 set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 8.100 [get_ports {SW[*]}]
 set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 2.100 [get_ports CPU_RESETN]
 set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 8.100 [get_ports CPU_RESETN]
+
+# vivado demands output delay specs for the LEDs.
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports {AN[*]}]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports {AN[*]}]
 set_false_path -to [get_ports {AN[*]}]
@@ -39,5 +57,4 @@ set_false_path -to [get_ports CG]
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports DP]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports DP]
 set_false_path -to [get_ports DP]
-set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks {clk_out_37p5 clk_out_50}] -group [get_clocks -include_generated_clocks clk_out_33]
-set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks clk_out_50] -group [get_clocks -include_generated_clocks clk_out_37p5]
+

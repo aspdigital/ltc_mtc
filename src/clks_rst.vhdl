@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-11
+-- Last update: 2025-04-12
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -53,11 +53,12 @@ architecture clkgen of clks_rst is
     signal clk_out_37p5 : std_logic;    -- for 24 fps
     signal clk_out_33   : std_logic;    -- for 30 fps
 
-    -- locked status,
+    -- MMCM locked status, which we sync to the main clock to create resets in the downstream domains.
     signal locked : std_logic;
+    signal locked_s : std_logic;
 
     -- for the reset in the timer clock domain.
-    signal timer_reset : std_logic;
+    signal timer_reset_l : std_logic;
 
     -- one-hot clock selects decoded from frame_rate input.
     -- bit 0 selects between 50 MHz (0) and 37.5 MHz (1).
@@ -170,6 +171,10 @@ begin  -- architecture clkgen
         end if;
     end process get_clock_selects;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- CLOCK MUXING, to select one of the three clocks on which the timecode generator runs, depending on the
+    -- selected frame rate.
+    ---------------------------------------------------------------------------------------------------------
     -- select clocks 50 MHz or 37.5 MHz
     clksel_1_2_bufgmux : BUFGMUX
         port map (
@@ -178,7 +183,7 @@ begin  -- architecture clkgen
             I1 => clk_out_37p5,
             S  => clk_sel(CLK_SEL_37_NOT_50));
 
-    -- select above or 33 MHz
+    -- select above or 33 MHz. This mux output is that downstream timer clock.
     clksel_12_3_bufgctrl : BUFGMUX
         port map (
             O  => clktimer,
@@ -187,12 +192,44 @@ begin  -- architecture clkgen
             S  => clk_sel(CLK_SEL_33_NOT_OTHERS));
 
     -- generate a reset in the clktimer domain.
-    timer_reset <= '0' when (rstmain_l = '0' or frame_rate_e = '1' or locked = '0') else '1';
+    
+    -- This includes changes in the frame rate because when that happens, the clock changes and we want to
+    -- ensure downstream logic resets.
+    --
+    -- better timing by synchronizing the MMCM locked status to the main clock before combining it with other
+    -- possible downstream clock reset sources.
+    mmcm_locked_cdcc : entity work.cdc_sync(synchronizer)
+        generic map (
+            t           => std_logic,
+            RESET_STATE => '0',
+            SYNC_FLOPS  => 3)
+        port map (
+            clk   => clkmain,
+            rst_l => rstmain_l,
+            d     => locked,
+            q     => locked_s);
 
-    timer_reset_sync : entity work.reset_sync
+    -- combine reset sources and register to the main clock before feeding it to the reset generator.
+    -- This ensures so we don't have a weird combinatorial path on the reset synchronizer's async reset input.
+    -- Those reset sources are:
+    -- 1. Main timer reset, asserted at the beginning of time,
+    -- 2. MMCM lock, which should assert soon after the beginning of time,
+    -- 3. Change in frame rate, which can happen at any time.
+    MakeTimerReset: process (clkmain) is
+    begin  -- process MakeTimerReset
+        if rising_edge(clkmain) then
+            if rstmain_l = '0' then
+                timer_reset_l <= '0';
+            else
+                timer_reset_l <= '0' when frame_rate_e or not locked_s else '1';
+            end if;
+        end if;
+    end process MakeTimerReset;
+
+    timer_reset_sync : entity work.reset_sync(synchronizer)
         port map (
             clk    => clktimer,
-            arst_l => timer_reset,
+            arst_l => timer_reset_l,
             srst_l => rsttimer_l);
     
 end architecture clkgen;
