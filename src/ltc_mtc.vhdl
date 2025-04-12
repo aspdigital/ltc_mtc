@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-09
+-- Last update: 2025-04-12
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ begin  -- architecture toplevel
             clktimer   => clktimer,
             rsttimer_l => rsttimer_l,
             frame_time => frame_time,
-            frame_rate => frame_rate,
+            frame_rate => frame_rate_s,
             display    => display);
 
     -- break out display type to pins.

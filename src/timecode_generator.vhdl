@@ -89,26 +89,23 @@ begin  -- architecture timers
                     ft_hr     => v_hr);
 
             else
-                -- determine the frame count rollover, based on the frame rate. It's either 23, 24 or 29.
-
-                
                 -- Update the counter every frame.
                 OnTheTick : if frame_tick then
 
                     -- start from frame to seconds to minutes to hours, incrementing and carrying as needed.
-                    v_fc := IncrementFrame(ARG => ft.frame_cnt, TC => fc_rollover);
+                    v_fc := IncrementDigits(ARG => ft.frame_cnt, TC => fc_rollover);
 
                     FrameCountRollover : if v_fc.carry then
                         -- frame count rolled over, increment seconds.
-                        v_sec := IncrementMinSec(ARG => ft.ft_sec);
+                        v_sec := IncrementDigits(ARG => ft.ft_sec);
 
                         SecondsRollover : if v_sec.carry then
                             -- seconds rolled over, increment minutes.
-                            v_min := IncrementMinSec(ARG => ft.ft_min);
+                            v_min := IncrementDigits(ARG => ft.ft_min);
 
                             MinutesRollover : if v_min.carry then
                                 -- minutes rolled over, increment hours.
-                                v_hr := IncrementHr(ARG => ft.ft_hr);
+                                v_hr := IncrementDigits(ARG => ft.ft_hr);
 
                             -- hours rolled over so now everything should be zero.
                             end if MinutesRollover;

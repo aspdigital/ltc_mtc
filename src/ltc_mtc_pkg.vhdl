@@ -75,18 +75,18 @@ package ltc_mtc_pkg is
     
     -- helper functions.
     -- increment the frame count, and indicate rollover with carry.
-    function IncrementFrame (
+    function IncrementDigits (
         constant ARG : frame_cnt_t;
         constant TC  : natural range 0 to 9)
         return frame_cnt_t;
 
     -- increment the second or minute count, and indicate rollover with carry.
-    function IncrementMinSec (
+    function IncrementDigits (
         constant ARG : time_0_to_59_t)
         return time_0_to_59_t;
 
     -- increment the hour  count, and indicate rollover with carry.
-    function IncrementHr (
+    function IncrementDigits (
         constant ARG : time_0_to_23_t)
         return time_0_to_23_t;
 
@@ -206,7 +206,7 @@ package body ltc_mtc_pkg is
     -- There's a complication with the MSD of the count, which can terminate at 3, 4 or 9 depending on the
     -- frame rate.
     -- Carry is asserted only on terminal count (frame count rolls over from 23 or 24 or 29 to 0).
-    function IncrementFrame (
+    function IncrementDigits (
         constant ARG : frame_cnt_t;
         constant TC  : natural range 0 to 9)
         return frame_cnt_t is
@@ -231,10 +231,10 @@ package body ltc_mtc_pkg is
 
         return rv;
 
-    end function IncrementFrame;
+    end function IncrementDigits;
 
     -- increment the second or minute count, and indicate rollover with carry.
-    function IncrementMinSec (
+    function IncrementDigits (
         constant ARG : time_0_to_59_t)
         return time_0_to_59_t is
         variable rv : time_0_to_59_t;
@@ -257,10 +257,10 @@ package body ltc_mtc_pkg is
 
         return rv;
         
-    end function IncrementMinSec;
+    end function IncrementDigits;
 
     -- increment the hour  count, and indicate rollover with carry.
-    function IncrementHr (
+    function IncrementDigits (
         constant ARG : time_0_to_23_t)
         return time_0_to_23_t is
         variable rv : time_0_to_23_t;
@@ -283,7 +283,7 @@ package body ltc_mtc_pkg is
 
         return rv;
         
-    end function IncrementHr;
+    end function IncrementDigits;
 
     ---------------------------------------------------------------------------------------------------------
     -- Encode a digit into a seven-segment display.
