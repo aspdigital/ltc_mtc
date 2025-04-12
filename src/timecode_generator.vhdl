@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-09
--- Last update: 2025-04-09
+-- Last update: 2025-04-11
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -18,7 +18,7 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2025-04-09  -        andy	Created
+-- 2025-04-09  -        andy    Created
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -26,12 +26,12 @@ use ieee.std_logic_1164.all;
 use work.ltc_mtc_pkg.all;
 
 entity timecode_generator is
-    
+
     port (
-        clktimer   : in std_logic;      -- clock at the proper timer rate for evenly-divisible timer tick
-        rsttimer_l : in std_logic;      -- reset in that domain
-        frame_rate : in frame_rate_t;   -- selected frame rate, should match clktimer frequency.
-        frame_tick : in std_logic;      -- strobe at the selected frame rate
+        clktimer   : in  std_logic;      -- clock at the proper timer rate for evenly-divisible timer tick
+        rsttimer_l : in  std_logic;      -- reset in that domain
+        frame_rate : in  frame_rate_t;   -- selected frame rate, should match clktimer frequency.
+        frame_tick : in  std_logic;      -- strobe at the selected frame rate
         frame_time : out frame_time_t);  -- the generated time code
 
 end entity timecode_generator;
@@ -41,22 +41,25 @@ architecture timers of timecode_generator is
     -- the counter.
     signal ft : frame_time_t;
 
+    -- frame count rollover is based on the frame rate.
+    signal fc_rollover : natural range 0 to 9;
+
 begin  -- architecture timers
 
     ---------------------------------------------------------------------------------------------------------
     -- Look up the frame count LSD for rollover.
     ---------------------------------------------------------------------------------------------------------
-    RolloverLookup: process (clktimer) is
+    RolloverLookup : process (clktimer) is
     begin  -- process RolloverLookup
         if rising_edge(clktimer) then
-            Selector: case frame_rate is
-                when FR_30 => ft.frame_cnt.lsd_rollover <= FC_ROLLOVER_LSD_30;
-                when FR_25 => ft.frame_cnt.lsd_rollover <= FC_ROLLOVER_LSD_25;
-                when FR_24 => ft.frame_cnt.lsd_rollover <= FC_ROLLOVER_LSD_24;
+            Selector : case frame_rate is
+                when FR_30 => fc_rollover <= FC_ROLLOVER_LSD_30;
+                when FR_25 => fc_rollover <= FC_ROLLOVER_LSD_25;
+                when FR_24 => fc_rollover <= FC_ROLLOVER_LSD_24;
             end case Selector;
         end if;
     end process RolloverLookup;
-    
+
     ---------------------------------------------------------------------------------------------------------
     -- Time code counter.
     -- On every frame tick, increment the frame counter LSD.
@@ -67,80 +70,58 @@ begin  -- architecture timers
     -- Frame counter rollover is a bit of a special case because it will roll over after 23, 24 or 29 counts.
     ---------------------------------------------------------------------------------------------------------
     TimeCodeGenerator : process (clktimer) is
+        variable v_fc  : frame_cnt_t;
+        variable v_sec : time_0_to_59_t;
+        variable v_min : time_0_to_59_t;
+        variable v_hr  : time_0_to_23_t;
     begin  -- process TimeCodeGenerator
         if rising_edge(clktimer) then
             if rsttimer_l = '0' then
-                ft.frame_cnt.lsd <= 0;
-                ft.frame_cnt.msd <= 0;
-                ft.ft_sec.lsd    <= 0;
-                ft.ft_sec.msd    <= 0;
-                ft.ft_min.lsd    <= 0;
-                ft.ft_min.msd    <= 0;
-                ft.ft_hr.lsd     <= 0;
-                ft.ft_hr.msd     <= 0;
+                v_fc  := FRAME_CNT_RESET;
+                v_sec := MINSEC_RESET;
+                v_min := MINSEC_RESET;
+                v_hr  := HR_RESET;
+
+                ft <= (
+                    frame_cnt => v_fc,
+                    ft_sec    => v_sec,
+                    ft_min    => v_min,
+                    ft_hr     => v_hr);
+
             else
-                OnTheTick: if frame_tick then
+                -- determine the frame count rollover, based on the frame rate. It's either 23, 24 or 29.
 
-                    isLastFrameCnt : if ( (ft.frame_cnt.lsd = ft.frame_cnt.lsd_rollover) and
-                                           (ft.frame_cnt.msd = 2) ) then
-                        ft.frame_cnt.lsd <= 0;
-                        ft.frame_cnt.msd <= 0;
+                
+                -- Update the counter every frame.
+                OnTheTick : if frame_tick then
 
-                        isLastSec: if ft.ft_sec.lsd = 9 then
-                            ft.ft_sec.lsd <= 0;
-                            
-                            isSecRollover: if ft.ft_sec.msd = 5 then
-                                ft.ft_sec.msd <= 0;
+                    -- start from frame to seconds to minutes to hours, incrementing and carrying as needed.
+                    v_fc := IncrementFrame(ARG => ft.frame_cnt, TC => fc_rollover);
 
-                                isLastMin : if ft.ft_min.lsd = 9 then
-                                    ft.ft_min.lsd <= 0;
+                    FrameCountRollover : if v_fc.carry then
+                        -- frame count rolled over, increment seconds.
+                        v_sec := IncrementMinSec(ARG => ft.ft_sec);
 
-                                    isMinRollover: if ft.ft_min.msd = 5 then
-                                        ft.ft_min.msd <= 0;
+                        SecondsRollover : if v_sec.carry then
+                            -- seconds rolled over, increment minutes.
+                            v_min := IncrementMinSec(ARG => ft.ft_min);
 
-                                        isLastHr: if ft.ft_hr.msd = 2 then
-                                            
-                                            isHrRollover: if ft.ft_hr.lsd = 3 then
-                                                -- this is the end when everything rolls over to 0
-                                                ft.ft_hr.msd <= 0;
-                                                ft.ft_hr.lsd <= 0;
-                                            elsif ft.ft_hr.lsd = 9 then
-                                                ft.ft_hr.lsd <= 0;
-                                                ft.ft_hr.msd <= ft.ft_hr.msd + 1;
-                                            end if isHrRollover;
-                                        else
-                                            isAlsoHrRollover: if ft.ft_hr.lsd = 9 then
-                                                ft.ft_hr.lsd <= 0;
-                                                ft.ft_hr.msd <= ft.ft_hr.msd + 1;
-                                            else
-                                                ft.ft_hr.lsd <= ft.ft_hr.lsd + 1;
-                                            end if isAlsoHrRollover;
-                                        end if isLastHr;
-                                    else
-                                        ft.ft_min.msd <= ft.ft_min.msd + 1;
-                                    end if isMinRollover;
-                                    
-                                else
-                                    ft.ft_min.lsd <= ft.ft_min.lsd + 1;
-                                end if isLastMin;
+                            MinutesRollover : if v_min.carry then
+                                -- minutes rolled over, increment hours.
+                                v_hr := IncrementHr(ARG => ft.ft_hr);
 
-                            else
-                                ft.ft_sec.msd <= ft.ft_sec.msd + 1;
-                            end if isSecRollover;
-                        else
-                            ft.ft_sec.lsd <= ft.ft_sec.lsd + 1;
-                        end if isLastSec;
-                        
-                    else
+                            -- hours rolled over so now everything should be zero.
+                            end if MinutesRollover;
 
-                        UpdateFrameCnt: if ft.frame_cnt.lsd = 9 then
-                            ft.frame_cnt.lsd <= 0;
-                            ft.frame_cnt.msd <= ft.frame_cnt.msd + 1;
-                        else
-                            ft.frame_cnt.lsd <= ft.frame_cnt.lsd + 1;
-                        end if UpdateFrameCnt;
-                        
-                    end if isLastFrameCnt;
+                        end if SecondsRollover;
+
+                    end if FrameCountRollover;
+
+                    ft <= (
+                        frame_cnt => v_fc,
+                        ft_sec    => v_sec,
+                        ft_min    => v_min,
+                        ft_hr     => v_hr);
 
                 end if OnTheTick;
 

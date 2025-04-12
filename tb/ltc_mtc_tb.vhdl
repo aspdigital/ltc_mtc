@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-07
+-- Last update: 2025-04-11
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -77,11 +77,11 @@ begin  -- architecture testbench
     ChangeClockFreq: process is
     begin  -- process ChangeClockFreq
         SW <= "00";
-        wait for 500 US;
+        wait for 500 ms;
         SW <= "01";
-        wait for 500 US;
+        wait for 500 ms;
         SW <= "10";
-        wait for 500 US;
+        wait for 500 ms;
     end process ChangeClockFreq;
 
 end architecture testbench;

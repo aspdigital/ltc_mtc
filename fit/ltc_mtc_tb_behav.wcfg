@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="499,896.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="501,640.001 ns"></ZoomEndTime>
-      <Cursor1Time time="500,960.000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="14.740212501 ms"></ZoomEndTime>
+      <Cursor1Time time="14.740212500 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="104"></ValueColumnWidth>
+      <ValueColumnWidth column_width="100"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="29" />
+   <WVObjectSize size="19" />
    <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
       <obj_property name="ElementShortName">CLK100MHZ</obj_property>
       <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
@@ -76,13 +76,17 @@
       <obj_property name="ElementShortName">CLKPER</obj_property>
       <obj_property name="ObjectShortName">CLKPER</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/refresh_timer" type="other">
-      <obj_property name="ElementShortName">refresh_timer</obj_property>
-      <obj_property name="ObjectShortName">refresh_timer</obj_property>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_tick/frame_rate" type="other">
+      <obj_property name="ElementShortName">frame_rate</obj_property>
+      <obj_property name="ObjectShortName">frame_rate</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/refresh_tick" type="logic">
-      <obj_property name="ElementShortName">refresh_tick</obj_property>
-      <obj_property name="ObjectShortName">refresh_tick</obj_property>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_tick/TICKS_PER_FRAME_24" type="other">
+      <obj_property name="ElementShortName">TICKS_PER_FRAME_24</obj_property>
+      <obj_property name="ObjectShortName">TICKS_PER_FRAME_24</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_tick/frame_tickcnt" type="other">
+      <obj_property name="ElementShortName">frame_tickcnt</obj_property>
+      <obj_property name="ObjectShortName">frame_tickcnt</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/frame_tick" type="logic">
       <obj_property name="ElementShortName">frame_tick</obj_property>
@@ -92,49 +96,5 @@
       <obj_property name="ElementShortName">frame_time</obj_property>
       <obj_property name="ObjectShortName">frame_time</obj_property>
       <obj_property name="isExpanded"></obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_rate" type="other">
-      <obj_property name="ElementShortName">frame_rate</obj_property>
-      <obj_property name="ObjectShortName">frame_rate</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_tick" type="logic">
-      <obj_property name="ElementShortName">frame_tick</obj_property>
-      <obj_property name="ObjectShortName">frame_tick</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/frame_tickcnt" type="other">
-      <obj_property name="ElementShortName">frame_tickcnt</obj_property>
-      <obj_property name="ObjectShortName">frame_tickcnt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_1/TICKS_PER_FRAME_30" type="other">
-      <obj_property name="ElementShortName">TICKS_PER_FRAME_30</obj_property>
-      <obj_property name="ObjectShortName">TICKS_PER_FRAME_30</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clk_out1" type="logic">
-      <obj_property name="ElementShortName">clk_out1</obj_property>
-      <obj_property name="ObjectShortName">clk_out1</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clk_out2" type="logic">
-      <obj_property name="ElementShortName">clk_out2</obj_property>
-      <obj_property name="ObjectShortName">clk_out2</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clk_out3" type="logic">
-      <obj_property name="ElementShortName">clk_out3</obj_property>
-      <obj_property name="ObjectShortName">clk_out3</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clk_sel" type="array">
-      <obj_property name="ElementShortName">clk_sel[3:0]</obj_property>
-      <obj_property name="ObjectShortName">clk_sel[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clk_sel_1_or_2" type="logic">
-      <obj_property name="ElementShortName">clk_sel_1_or_2</obj_property>
-      <obj_property name="ObjectShortName">clk_sel_1_or_2</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/clktimer" type="logic">
-      <obj_property name="ElementShortName">clktimer</obj_property>
-      <obj_property name="ObjectShortName">clktimer</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_1/rsttimer_l" type="logic">
-      <obj_property name="ElementShortName">rsttimer_l</obj_property>
-      <obj_property name="ObjectShortName">rsttimer_l</obj_property>
    </wvobject>
 </wave_config>

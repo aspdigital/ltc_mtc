@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-08
+-- Last update: 2025-04-11
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -43,9 +43,6 @@ entity clks_rst is
 end entity clks_rst;
 
 architecture clkgen of clks_rst is
-
-    -- reference clock after buffer.
-    signal clkref_buf : std_logic;
 
     -- feedback clock.
     signal clkfb_in  : std_logic;       -- output of BUFG on feedback net

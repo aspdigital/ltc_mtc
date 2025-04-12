@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-08
--- Last update: 2025-04-09
+-- Last update: 2025-04-11
 -- Platform   : Xilinx Artix 7
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -50,20 +50,45 @@ package ltc_mtc_pkg is
     type frame_cnt_t is record
         lsd          : natural range 0 to 9;
         msd          : natural range 0 to 2;
-        lsd_rollover : natural range 0 to 9;  -- set based on frame rate
+        carry        : std_logic;       -- true on rollover
     end record frame_cnt_t;
+
+    constant FRAME_CNT_RESET : frame_cnt_t := (lsd => 0, msd => 0, carry => '0');
 
     -- seconds and minutes range from 0 to 59.
     type time_0_to_59_t is record
         lsd : natural range 0 to 9;
         msd : natural range 0 to 5;
+        carry : std_logic;              -- true on rollover
     end record time_0_to_59_t;
+
+    constant MINSEC_RESET : time_0_to_59_t := (lsd => 0, msd => 0, carry => '0');
 
     -- hours range from 0 to 23.
     type time_0_to_23_t is record
         lsd : natural range 0 to 9;
         msd : natural range 0 to 2;
+        carry : std_logic;              -- true on rollover
     end record time_0_to_23_t;
+
+    constant HR_RESET : time_0_to_23_t := (lsd => 0, msd => 0, carry => '0');
+    
+    -- helper functions.
+    -- increment the frame count, and indicate rollover with carry.
+    function IncrementFrame (
+        constant ARG : frame_cnt_t;
+        constant TC  : natural range 0 to 9)
+        return frame_cnt_t;
+
+    -- increment the second or minute count, and indicate rollover with carry.
+    function IncrementMinSec (
+        constant ARG : time_0_to_59_t)
+        return time_0_to_59_t;
+
+    -- increment the hour  count, and indicate rollover with carry.
+    function IncrementHr (
+        constant ARG : time_0_to_23_t)
+        return time_0_to_23_t;
 
     ---------------------------------------------------------------------------------------------------------
     -- keep track of time with this record.
@@ -82,10 +107,10 @@ package ltc_mtc_pkg is
 
     -- provide a constant initializer/reset condition for the frame_time_t record, used mainly for CDC.
     constant FRAME_TIME_RESET : frame_time_t := (
-        frame_cnt  => (lsd => 0, msd => 0, lsd_rollover => 0),
-        ft_sec     => (lsd => 0, msd => 0),
-        ft_min     => (lsd => 0, msd => 0),
-        ft_hr      => (lsd => 0, msd => 0));
+        frame_cnt  => FRAME_CNT_RESET,
+        ft_sec     => MINSEC_RESET,
+        ft_min     => MINSEC_RESET,
+        ft_hr      => HR_RESET);
 
     ---------------------------------------------------------------------------------------------------------
     -- Support for the 7-segment display.
@@ -174,6 +199,93 @@ end package ltc_mtc_pkg;
 
 package body ltc_mtc_pkg is
 
+    ---------------------------------------------------------------------------------------------------------
+    -- helper functions.
+    ---------------------------------------------------------------------------------------------------------
+    -- increment the frame count, and indicate rollover with carry.
+    -- There's a complication with the MSD of the count, which can terminate at 3, 4 or 9 depending on the
+    -- frame rate.
+    -- Carry is asserted only on terminal count (frame count rolls over from 23 or 24 or 29 to 0).
+    function IncrementFrame (
+        constant ARG : frame_cnt_t;
+        constant TC  : natural range 0 to 9)
+        return frame_cnt_t is
+        variable rv : frame_cnt_t;
+    begin  -- function IncrementFrame
+        FrameCount : if ((ARG.msd = 2) and (ARG.lsd = TC)) then
+            -- last frame in this second.
+            rv.lsd   := 0;
+            rv.msd   := 0;
+            rv.carry := '1';
+        elsif ARG.lsd = 9 then
+            -- LSD of count is 9 or 19, simply roll over.
+            rv.lsd   := 0;
+            -- and increment MSD of count.
+            rv.msd   := ARG.msd + 1;
+            rv.carry := '0';
+        else
+            rv.lsd   := ARG.lsd + 1;
+            rv.msd   := ARG.msd;
+            rv.carry := '0';
+        end if FrameCount;
+
+        return rv;
+
+    end function IncrementFrame;
+
+    -- increment the second or minute count, and indicate rollover with carry.
+    function IncrementMinSec (
+        constant ARG : time_0_to_59_t)
+        return time_0_to_59_t is
+        variable rv : time_0_to_59_t;
+    begin
+        MinSecCount: if ((ARG.msd = 5) and (ARG.lsd = 9)) then
+            -- count rolls over from 59 to 0
+            rv.lsd   := 0;
+            rv.msd   := 0;
+            rv.carry := '1';
+        elsif ARG.lsd = 9 then
+            -- ones digit rolls over, so increment 10s.
+            rv.lsd := 0;
+            rv.msd := ARG.msd + 1;
+            rv.carry := '0';
+        else
+            rv.lsd   := ARG.lsd + 1;
+            rv.msd   := ARG.msd;
+            rv.carry := '0';
+        end if MinSecCount;
+
+        return rv;
+        
+    end function IncrementMinSec;
+
+    -- increment the hour  count, and indicate rollover with carry.
+    function IncrementHr (
+        constant ARG : time_0_to_23_t)
+        return time_0_to_23_t is
+        variable rv : time_0_to_23_t;
+    begin 
+        HrCount: if ((ARG.msd = 2) and (ARG.lsd = 3)) then
+            -- count rolls over from 23 to 0
+            rv.lsd   := 0;
+            rv.msd   := 0;
+            rv.carry := '1';
+        elsif ARG.lsd = 9 then
+            -- ones digit rolls over, so increment 10s.
+            rv.lsd := 0;
+            rv.msd := ARG.msd + 1;
+            rv.carry := '0';
+        else
+            rv.lsd   := ARG.lsd + 1;
+            rv.msd   := ARG.msd;
+            rv.carry := '0';
+        end if HrCount;
+
+        return rv;
+        
+    end function IncrementHr;
+
+    ---------------------------------------------------------------------------------------------------------
     -- Encode a digit into a seven-segment display.
     --        A
     --      -----
