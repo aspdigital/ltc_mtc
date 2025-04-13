@@ -42,6 +42,7 @@ use ieee.std_logic_1164.all;
 
 library work;
 use work.ltc_mtc_pkg.all;
+use work.mtc_pkg.all;
 
 entity ltc_mtc is
 
@@ -134,7 +135,10 @@ architecture toplevel of ltc_mtc is
     -- strobe tick at the start of every frame time. This strobe will be at 24, 25 or 30 frames per second.
     signal frame_tick : std_logic;
 
-    -- This is the time code from the generator.
+    -- quarter-frame timer, for MTC.
+    signal qframe_pkt : qframe_pkt_t;
+
+    -- This is the time code from the time code generator.
     signal frame_time : frame_time_t;
 
     ---------------------------------------------------------------------------------------------------------
@@ -224,7 +228,8 @@ begin  -- architecture toplevel
             clk        => clktimer,
             rst_l      => rsttimer_l,
             frame_rate => frame_rate_s,
-            frame_tick => frame_tick);
+            frame_tick => frame_tick,
+            qframe_pkt => qframe_pkt);
 
     ---------------------------------------------------------------------------------------------------------
     -- This is where we generate the time code, given a frame rate. The code updates with every frame_tick.
