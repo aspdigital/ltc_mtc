@@ -12,14 +12,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="14.740212501 ms"></ZoomEndTime>
-      <Cursor1Time time="14.740212500 ms"></Cursor1Time>
+      <ZoomEndTime time="6.486170082 ms"></ZoomEndTime>
+      <Cursor1Time time="1.000000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="100"></ValueColumnWidth>
+      <ValueColumnWidth column_width="96"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="19" />
+   <WVObjectSize size="23" />
    <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
       <obj_property name="ElementShortName">CLK100MHZ</obj_property>
       <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
@@ -96,5 +96,21 @@
       <obj_property name="ElementShortName">frame_time</obj_property>
       <obj_property name="ObjectShortName">frame_time</obj_property>
       <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/JA[1]" type="logic">
+      <obj_property name="ElementShortName">[1]</obj_property>
+      <obj_property name="ObjectShortName">[1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/ltc_enc/TICKS_PER_BIT_30FPS" type="other">
+      <obj_property name="ElementShortName">TICKS_PER_BIT_30FPS</obj_property>
+      <obj_property name="ObjectShortName">TICKS_PER_BIT_30FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/ltc_enc/TICKS_PER_BIT_25FPS" type="other">
+      <obj_property name="ElementShortName">TICKS_PER_BIT_25FPS</obj_property>
+      <obj_property name="ObjectShortName">TICKS_PER_BIT_25FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/ltc_enc/TICKS_PER_BIT_24FPS" type="other">
+      <obj_property name="ElementShortName">TICKS_PER_BIT_24FPS</obj_property>
+      <obj_property name="ObjectShortName">TICKS_PER_BIT_24FPS</obj_property>
    </wvobject>
 </wave_config>

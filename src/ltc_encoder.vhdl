@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-10
+-- Last update: 2025-04-12
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ architecture coder of ltc_encoder is
         v_frame_time := 1 SEC / FRAME_RATE;
         v_bit_time   := v_frame_time / BITS_IN_FRAME;
         v_clk_period := 1 SEC / CLK_FREQ;
-        v_rv         := v_bit_time / v_clk_period;
+        v_rv         := integer(v_bit_time / v_clk_period);
         return v_rv;
     end function CalcTicksPerBit;
 
@@ -99,7 +99,7 @@ architecture coder of ltc_encoder is
         FRAME_RATE => 24);
 
     -- size of the bit timer is set by the fastest clock frequency.
-    subtype bit_timer_t is natural range 0 to TICKS_PER_BIT_25 - 1;
+    subtype bit_timer_t is natural range 0 to TICKS_PER_BIT_25FPS - 1;
     signal bit_timer          : bit_timer_t;
     -- strobe true at the start of a bit time
     constant START_OF_BIT_CNT : bit_timer_t := 1;
@@ -153,24 +153,24 @@ begin  -- architecture coder
                 bit_timer         <= 0;
                 start_of_bit      <= '0';
                 middle_of_bit     <= '0';
-                middle_of_bit_cnt <= TICKS_PER_BIT_25 / 2;  -- don't init to zero, bad things happen
-                bit_timer_reload  <= TICKS_PER_BIT_25 - 1;
+                middle_of_bit_cnt <= TICKS_PER_BIT_25FPS / 2;  -- don't init to zero, bad things happen
+                bit_timer_reload  <= TICKS_PER_BIT_25FPS - 1;
             else
                 -- count for the middle of the bit and the reload depends on the frame rate.
                 WhatFrameRate : case frame_rate is
-                    when FR30 =>
-                        middle_of_bit_cnt <= TICKS_PER_BIT_30 / 2;
-                        bit_timer_reload  <= TICKS_PER_BIT_30 - 1;
-                    when FR25 =>
-                        middle_of_bit_cnt <= TICKS_PER_BIT_25 / 2;
-                        bit_timer_reload  <= TICKS_PER_BIT_25 - 1;
-                    when FR24 =>
-                        middle_of_bit_cnt <= TICKS_PER_BIT_24 / 2;
-                        bit_timer_reload  <= TICKS_PER_BIT_24 - 1;
+                    when FR_30 =>
+                        middle_of_bit_cnt <= TICKS_PER_BIT_30FPS / 2;
+                        bit_timer_reload  <= TICKS_PER_BIT_30FPS - 1;
+                    when FR_25 =>
+                        middle_of_bit_cnt <= TICKS_PER_BIT_25FPS / 2;
+                        bit_timer_reload  <= TICKS_PER_BIT_25FPS - 1;
+                    when FR_24 =>
+                        middle_of_bit_cnt <= TICKS_PER_BIT_24FPS / 2;
+                        bit_timer_reload  <= TICKS_PER_BIT_24FPS - 1;
                 end case WhatFrameRate;
 
                 -- synchronize with the frame tick and count
-                NewFrame : if frame_tick or (bit_timer = 0) then
+                NewFrame : if (frame_tick = '1') or (bit_timer = 0) then
                     bit_timer <= bit_timer_reload;
                 elsif bit_timer > 0 then
                     bit_timer <= bit_timer - 1;

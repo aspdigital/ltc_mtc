@@ -77,7 +77,12 @@ entity ltc_mtc is
         CF         : out std_logic;                    -- common "F" segment
         CG         : out std_logic;                    -- common "G" segment
         DP         : out std_logic;                    -- common decimal point
-        AN         : out std_logic_vector(7 downto 0)  -- anodes for each segment
+        AN         : out std_logic_vector(7 downto 0);  -- anodes for each segment
+        -- PMOD
+        JA         : out std_logic_vector(1 downto 1);  -- use as LTC output
+        -- Linear time code output on the audio PWM pin.
+        AUD_PWM    : out std_logic;     -- PWM signal path through to low-pass filter
+        AUD_SD     : out std_logic      -- active low shutdown, bring high to enable PWM
         );
 
 end entity ltc_mtc;
@@ -139,6 +144,11 @@ architecture toplevel of ltc_mtc is
 
 begin  -- architecture toplevel
 
+    ---------------------------------------------------------------------------------------------------------
+    -- For now, disble the PWM filters.
+    ---------------------------------------------------------------------------------------------------------
+    AUD_SD <= '0';
+    AUD_PWM <= '0';
     ---------------------------------------------------------------------------------------------------------
     -- Clocking.
     -- Take in the 100 MHz board oscillator and based on the selected frame rate, output a timer frequency
@@ -253,5 +263,17 @@ begin  -- architecture toplevel
     CG <= display.CG;
     DP <= display.DP;
     AN <= display.AN;
+
+    ---------------------------------------------------------------------------------------------------------
+    -- Encode the time code and drive it out.
+    ---------------------------------------------------------------------------------------------------------
+    ltc_enc : entity work.ltc_encoder(coder)
+        port map (
+            clktimer   => clktimer,
+            rsttimer_l => rsttimer_l,
+            frame_rate => frame_rate_s,
+            frame_tick => frame_tick,
+            frame_time => frame_time,
+            ltc        => JA(1));
     
 end architecture toplevel;

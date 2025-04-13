@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-11
+-- Last update: 2025-04-12
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description
--- 2025-04-06  -        andy	Created
+-- 2025-04-06  -        andy    Created
 -------------------------------------------------------------------------------
 
 library ieee;
@@ -36,8 +36,8 @@ architecture testbench of ltc_mtc_tb is
     constant CLKPER : time := 10 NS;
 
     -- component ports
-    signal CLK100MHZ  : std_logic := '1';
-    signal CPU_RESETN : std_logic := '0';
+    signal CLK100MHZ  : std_logic                    := '1';
+    signal CPU_RESETN : std_logic                    := '0';
     signal SW         : std_logic_vector(1 downto 0) := "00";
     signal CA         : std_logic;
     signal CB         : std_logic;
@@ -48,11 +48,14 @@ architecture testbench of ltc_mtc_tb is
     signal CG         : std_logic;
     signal DP         : std_logic;
     signal AN         : std_logic_vector(7 downto 0);
+    signal JA         : std_logic_vector(1 downto 1);
+    signal AUD_PWM    : std_logic;
+    signal AUD_SD     : std_logic;
 
 begin  -- architecture testbench
 
     -- component instantiation
-    DUT: entity work.ltc_mtc
+    DUT : entity work.ltc_mtc
         generic map (
             CLKPER => CLKPER)
         port map (
@@ -67,21 +70,24 @@ begin  -- architecture testbench
             CF         => CF,
             CG         => CG,
             DP         => DP,
-            AN         => AN);
+            AN         => AN,
+            JA         => JA,
+            AUD_PWM    => AUD_PWM,
+            AUD_SD     => AUD_SD);
 
     -- clock generation
-    CLK100MHZ <= not CLK100MHZ after 10 ns;
-    CPU_RESETN <= '1' after 666 ns;
+    CLK100MHZ  <= not CLK100MHZ after 10 NS;
+    CPU_RESETN <= '1'           after 666 NS;
 
     -- change clock frequency.
-    ChangeClockFreq: process is
+    ChangeClockFreq : process is
     begin  -- process ChangeClockFreq
         SW <= "00";
-        wait for 500 ms;
+        wait for 500 MS;
         SW <= "01";
-        wait for 500 ms;
+        wait for 500 MS;
         SW <= "10";
-        wait for 500 ms;
+        wait for 500 MS;
     end process ChangeClockFreq;
 
 end architecture testbench;

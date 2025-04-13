@@ -57,4 +57,7 @@ set_false_path -to [get_ports CG]
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports DP]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports DP]
 set_false_path -to [get_ports DP]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports {JA[*]}]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay  6.100 [get_ports {JA[*]}] 
+set_false_path -to [get_ports {JA[*]}]
 
