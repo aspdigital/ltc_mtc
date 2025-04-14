@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-09
--- Last update: 2025-04-09
+-- Last update: 2025-04-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -117,6 +117,7 @@ begin  -- architecture digit_driver
                     when FR_30 => reload <= TICKS_PER_REFRESH_30;
                     when FR_25 => reload <= TICKS_PER_REFRESH_25;
                     when FR_24 => reload <= TICKS_PER_REFRESH_24;
+                    when others => report "30 FPS drop frame not supported in timecode_display" severity ERROR;
                 end case Selector;
                 
                 -- the refresh timer just runs continously.

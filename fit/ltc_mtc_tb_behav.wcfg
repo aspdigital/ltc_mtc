@@ -5,6 +5,7 @@
    <db_ref_list>
       <db_ref path="ltc_mtc_tb_behav.wdb" id="1">
          <top_modules>
+            <top_module name="glbl" />
             <top_module name="ltc_mtc_pkg" />
             <top_module name="ltc_mtc_tb" />
             <top_module name="mtc_pkg" />
@@ -12,15 +13,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="582.265 ns"></ZoomStartTime>
-      <ZoomEndTime time="5,997.266 ns"></ZoomEndTime>
-      <Cursor1Time time="3,214.545 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="46.918921212 ms"></ZoomEndTime>
+      <Cursor1Time time="46.918921211 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="88"></ValueColumnWidth>
+      <ValueColumnWidth column_width="76"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="26" />
+   <WVObjectSize size="33" />
    <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
       <obj_property name="ElementShortName">CLK100MHZ</obj_property>
       <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
@@ -128,5 +129,33 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/frame_timer_tick/frame_rate" type="other">
       <obj_property name="ElementShortName">frame_rate</obj_property>
       <obj_property name="ObjectShortName">frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/BTND" type="logic">
+      <obj_property name="ElementShortName">BTND</obj_property>
+      <obj_property name="ObjectShortName">BTND</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/LED" type="array">
+      <obj_property name="ElementShortName">LED[15:0]</obj_property>
+      <obj_property name="ObjectShortName">LED[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/do_full_frame" type="logic">
+      <obj_property name="ElementShortName">do_full_frame</obj_property>
+      <obj_property name="ObjectShortName">do_full_frame</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/full_frame_latch" type="logic">
+      <obj_property name="ElementShortName">full_frame_latch</obj_property>
+      <obj_property name="ObjectShortName">full_frame_latch</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/ff_byte_cnt" type="other">
+      <obj_property name="ElementShortName">ff_byte_cnt</obj_property>
+      <obj_property name="ObjectShortName">ff_byte_cnt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/JA[2]" type="logic">
+      <obj_property name="ElementShortName">[2]</obj_property>
+      <obj_property name="ObjectShortName">[2]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/JA[1]" type="logic">
+      <obj_property name="ElementShortName">[1]</obj_property>
+      <obj_property name="ObjectShortName">[1]</obj_property>
    </wvobject>
 </wave_config>

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-12
+-- Last update: 2025-04-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -167,6 +167,9 @@ begin  -- architecture coder
                     when FR_24 =>
                         middle_of_bit_cnt <= TICKS_PER_BIT_24FPS / 2;
                         bit_timer_reload  <= TICKS_PER_BIT_24FPS - 1;
+                    when others =>
+                        -- because of non-support of drop frame
+                        report "Invalid Frame Rate in BitTimer!" severity ERROR;
                 end case WhatFrameRate;
 
                 -- synchronize with the frame tick and count

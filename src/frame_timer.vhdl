@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-12
+-- Last update: 2025-04-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ architecture timer of frame_timer is
     -- keep track of the quarter frames.
     signal qframe_id : qframe_id_t;
     -- counter for quarter frame timer.
-    subtype qframe_tickcnt_t is natural range 0 to QFRAME_25 / 4;
+    subtype qframe_tickcnt_t is natural range 0 to QFRAME_25 - 1;
     signal qframe_tickcnt : qframe_tickcnt_t;
     -- the tick asserted ever quarter frame.
     signal qframe_tick : std_logic;
@@ -105,6 +105,8 @@ begin  -- architecture timer
                             frame_tickcnt <= TICKS_PER_FRAME_25 - 1;
                         when FR_24 =>
                             frame_tickcnt <= TICKS_PER_FRAME_24 - 1;
+                        when others =>
+                            report "We don't support 30 FPS drop frame for FrameTimer" severity ERROR;
                     end case FrameTimeRollover;
 
                 else
@@ -148,11 +150,13 @@ begin  -- architecture timer
                 QframeTimerCount: if qframe_tick then
                     QframeReload: case frame_rate is
                         when FR_30 =>
-                            qframe_tickcnt <= QFRAME_30;
+                            qframe_tickcnt <= QFRAME_30 - 1;
                         when FR_25 =>
-                            qframe_tickcnt <= QFRAME_25;
+                            qframe_tickcnt <= QFRAME_25 - 1;
                         when FR_24 =>
-                            qframe_tickcnt <= QFRAME_24;
+                            qframe_tickcnt <= QFRAME_24 - 1;
+                        when others =>
+                            report "We don't support 30 FPS drop frame for QFrameTimer" severity ERROR;
                     end case QframeReload;
                 else
                     qframe_tickcnt <= qframe_tickcnt - 1;

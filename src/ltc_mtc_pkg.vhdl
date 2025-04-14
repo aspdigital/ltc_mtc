@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-08
--- Last update: 2025-04-12
+-- Last update: 2025-04-13
 -- Platform   : Xilinx Artix 7
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -23,16 +23,18 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 package ltc_mtc_pkg is
 
     ---------------------------------------------------------------------------------------------------------
-    -- We support three possible frame rates.
+    -- We support three possible frame rates. 30 drop frame is included but not supported.
     ---------------------------------------------------------------------------------------------------------
     type frame_rate_t is (
-        FR_30,                          -- 30 fps
-        FR_25,                          -- 25 fps
-        FR_24);                         -- 24 fps
+        FR_24,  
+        FR_25,  
+        FR_30DF,
+        FR_30);
 
     -- frame count rollover LSD is set by the frame rate above.
     constant FC_ROLLOVER_LSD_30 : natural := 9;  -- rolls over at 29 for 30 fps
@@ -40,7 +42,7 @@ package ltc_mtc_pkg is
     constant FC_ROLLOVER_LSD_24 : natural := 3;  -- rolls over at 23 for 24 fps
 
     ---------------------------------------------------------------------------------------------------------
-    -- These types manage the digits for time code display.
+    -- These types manage the binary-codedd digits for time code display.
     -- Tens and ones digits are managed separately so we don't have to do a divide.
     -- lsd: least significant digit
     -- msd: most significant digit.
@@ -89,6 +91,20 @@ package ltc_mtc_pkg is
     function IncrementDigits (
         constant ARG : time_0_to_23_t)
         return time_0_to_23_t;
+
+    -- convert two BCDs to a standard natural, in SLV notion.
+    -- there is a version of this for all three BCD types.
+    function BCDToSLV (
+        constant ARG : frame_cnt_t)
+        return std_logic_vector;
+    
+    function BCDToSLV (
+        constant ARG : time_0_to_23_t)
+        return std_logic_vector;
+    
+    function BCDToSLV (
+        constant ARG : time_0_to_59_t)
+        return std_logic_vector;
 
     ---------------------------------------------------------------------------------------------------------
     -- keep track of time with this record.
@@ -284,6 +300,40 @@ package body ltc_mtc_pkg is
         return rv;
         
     end function IncrementDigits;
+
+    -- convert two BCDs to a standard natural, in SLV notion.
+    -- there is a version of this for all BCD types.
+    -- note that hours returns only 6 bits because the message has the frame rate in the 2 MSbs.
+
+    -- for frame count
+    function BCDToSLV (
+        constant ARG : frame_cnt_t)
+        return std_logic_vector is
+        variable rv : std_logic_vector(7 downto 0);
+    begin
+        rv := std_logic_vector(to_unsigned(ARG.msd * 10 + ARG.lsd, rv'length));
+        return rv;
+    end function BCDToSLV;
+
+    -- for hours count.
+    function BCDToSLV (
+        constant ARG : time_0_to_23_t)
+        return std_logic_vector is
+        variable rv : std_logic_vector(5 downto 0);
+    begin
+        rv := std_logic_vector(to_unsigned(ARG.msd * 10 + ARG.lsd, rv'length));
+        return rv;
+    end function BCDToSLV;
+
+    -- for minutes and seconds count
+    function BCDToSLV (
+        constant ARG : time_0_to_59_t)
+        return std_logic_vector is
+        variable rv : std_logic_vector(7 downto 0);
+    begin
+        rv := std_logic_vector(to_unsigned(ARG.msd * 10 + ARG.lsd, rv'length));
+        return rv;
+    end function BCDToSLV;
 
     ---------------------------------------------------------------------------------------------------------
     -- Encode a digit into a seven-segment display.

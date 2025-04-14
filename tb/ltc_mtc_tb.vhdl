@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-12
+-- Last update: 2025-04-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,6 +39,8 @@ architecture testbench of ltc_mtc_tb is
     signal CLK100MHZ  : std_logic                    := '1';
     signal CPU_RESETN : std_logic                    := '0';
     signal SW         : std_logic_vector(1 downto 0) := "00";
+    signal BTND       : std_logic := '0';
+    signal LED : std_logic_vector(15 downto 0);
     signal CA         : std_logic;
     signal CB         : std_logic;
     signal CC         : std_logic;
@@ -48,7 +50,7 @@ architecture testbench of ltc_mtc_tb is
     signal CG         : std_logic;
     signal DP         : std_logic;
     signal AN         : std_logic_vector(7 downto 0);
-    signal JA         : std_logic_vector(1 downto 1);
+    signal JA         : std_logic_vector(2 downto 1);
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
@@ -61,6 +63,8 @@ begin  -- architecture testbench
         port map (
             CLK100MHZ  => CLK100MHZ,
             CPU_RESETN => CPU_RESETN,
+            BTND       => BTND,
+            LED        => LED,
             SW         => SW,
             CA         => CA,
             CB         => CB,
@@ -83,11 +87,11 @@ begin  -- architecture testbench
     ChangeClockFreq : process is
     begin  -- process ChangeClockFreq
         SW <= "00";
-        wait for 500 MS;
+        wait for 5000 MS;
         SW <= "01";
-        wait for 500 MS;
+        wait for 5000 MS;
         SW <= "10";
-        wait for 500 MS;
+        wait for 5000 MS;
     end process ChangeClockFreq;
 
 end architecture testbench;

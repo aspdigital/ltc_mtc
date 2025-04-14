@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="uatx_with_fifo_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="uatx_with_fifo_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="7,251.640000 us"></ZoomStartTime>
+      <ZoomEndTime time="9,246.640001 us"></ZoomEndTime>
+      <Cursor1Time time="8,696.640000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="258"></NameColumnWidth>
+      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="24" />
+   <wvobject fp_name="/uatx_with_fifo_tb/arst_l" type="logic">
+      <obj_property name="ElementShortName">arst_l</obj_property>
+      <obj_property name="ObjectShortName">arst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/clksrc" type="logic">
+      <obj_property name="ElementShortName">clksrc</obj_property>
+      <obj_property name="ObjectShortName">clksrc</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/rstsrc_l" type="logic">
+      <obj_property name="ElementShortName">rstsrc_l</obj_property>
+      <obj_property name="ObjectShortName">rstsrc_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/tx_data" type="array">
+      <obj_property name="ElementShortName">tx_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/tx_valid" type="logic">
+      <obj_property name="ElementShortName">tx_valid</obj_property>
+      <obj_property name="ObjectShortName">tx_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/full" type="logic">
+      <obj_property name="ElementShortName">full</obj_property>
+      <obj_property name="ObjectShortName">full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/almost_full" type="logic">
+      <obj_property name="ElementShortName">almost_full</obj_property>
+      <obj_property name="ObjectShortName">almost_full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/clkmain" type="logic">
+      <obj_property name="ElementShortName">clkmain</obj_property>
+      <obj_property name="ObjectShortName">clkmain</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/rstmain_l" type="logic">
+      <obj_property name="ElementShortName">rstmain_l</obj_property>
+      <obj_property name="ObjectShortName">rstmain_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/data_f_to_uatx" type="array">
+      <obj_property name="ElementShortName">data_f_to_uatx[7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_f_to_uatx[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/fifo_rddata_valid" type="logic">
+      <obj_property name="ElementShortName">fifo_rddata_valid</obj_property>
+      <obj_property name="ObjectShortName">fifo_rddata_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/tx_serializer/busy" type="logic">
+      <obj_property name="ElementShortName">busy</obj_property>
+      <obj_property name="ObjectShortName">busy</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/SYSCLKPER" type="other">
+      <obj_property name="ElementShortName">SYSCLKPER</obj_property>
+      <obj_property name="ObjectShortName">SYSCLKPER</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/BAUD_RATE" type="other">
+      <obj_property name="ElementShortName">BAUD_RATE</obj_property>
+      <obj_property name="ObjectShortName">BAUD_RATE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/SRCCLKPER" type="other">
+      <obj_property name="ElementShortName">SRCCLKPER</obj_property>
+      <obj_property name="ObjectShortName">SRCCLKPER</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/INTERVAL" type="other">
+      <obj_property name="ElementShortName">INTERVAL</obj_property>
+      <obj_property name="ObjectShortName">INTERVAL</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/pop_and_write" type="logic">
+      <obj_property name="ElementShortName">pop_and_write</obj_property>
+      <obj_property name="ObjectShortName">pop_and_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/ufifo/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/tx_serializer/rst_l" type="logic">
+      <obj_property name="ElementShortName">rst_l</obj_property>
+      <obj_property name="ObjectShortName">rst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/busy" type="logic">
+      <obj_property name="ElementShortName">busy</obj_property>
+      <obj_property name="ObjectShortName">busy</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/tx_serializer/br_timer" type="other">
+      <obj_property name="ElementShortName">br_timer</obj_property>
+      <obj_property name="ObjectShortName">br_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/tx_serializer/bc" type="other">
+      <obj_property name="ElementShortName">bc</obj_property>
+      <obj_property name="ObjectShortName">bc</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/DUT/tx_serializer/tx_state" type="other">
+      <obj_property name="ElementShortName">tx_state</obj_property>
+      <obj_property name="ObjectShortName">tx_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/uatx_with_fifo_tb/ser_tx" type="logic">
+      <obj_property name="ElementShortName">ser_tx</obj_property>
+      <obj_property name="ObjectShortName">ser_tx</obj_property>
+   </wvobject>
+</wave_config>

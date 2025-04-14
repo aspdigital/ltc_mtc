@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-12
+-- Last update: 2025-04-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ begin  -- architecture clkgen
             RST       => '0');
 
     -- reset in the "main" clock domain.
-    main_reset_sync : entity work.reset_sync
+    main_reset_sync : entity work.reset_sync(synchronizer)
         port map (
             clk    => clkmain,
             arst_l => arst_l,
@@ -163,6 +163,8 @@ begin  -- architecture clkgen
                     when FR_30 => clk_sel <= CLK_SEL_FR30;  -- need 33 MHz clock
                     when FR_25 => clk_sel <= CLK_SEL_FR25;  -- need 50 MHz clock
                     when FR_24 => clk_sel <= CLK_SEL_FR24;  -- need 37.5 MHz clock
+                    when others =>
+                        report "30 FPS drop not supported yet (clks_rst)" severity ERROR;
                 end case FrameRateDecoder;
 
                 frame_rate_d <= frame_rate;

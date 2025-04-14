@@ -4,8 +4,15 @@ vhdl xpm  \
 vhdl2008 xil_defaultlib  \
 "../../../../src/cdc_sync.vhdl" \
 "../../../../src/ltc_mtc_pkg.vhdl" \
-"../../../../src/frame_timer.vhdl" \
 "../../../../src/reset_sync.vhdl" \
+"../../../../src/clks_rst.vhdl" \
+"../../../../src/debounce.vhd" \
+"../../../../src/mtc_pkg.vhdl" \
+"../../../../src/frame_timer.vhdl" \
+"../../../../src/ltc_encoder.vhdl" \
+"../../../../src/timecode_generator.vhdl" \
+"../../../../src/timecode_display.vhdl" \
+"../../../../src/mtc_encoder.vhdl" \
 "../../../../src/ltc_mtc.vhdl" \
 "../../../../tb/ltc_mtc_tb.vhdl" \
 
