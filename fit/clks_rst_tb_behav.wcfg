@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="clks_rst_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="clk_mux_pkg" />
+            <top_module name="clks_rst_tb" />
+            <top_module name="glbl" />
+            <top_module name="ltc_mtc_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="975.417 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,542.918 ns"></ZoomEndTime>
+      <Cursor1Time time="1,070.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="254"></NameColumnWidth>
+      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="14" />
+   <wvobject fp_name="/clks_rst_tb/frame_rate" type="other">
+      <obj_property name="ElementShortName">frame_rate</obj_property>
+      <obj_property name="ObjectShortName">frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/arst_l" type="logic">
+      <obj_property name="ElementShortName">arst_l</obj_property>
+      <obj_property name="ObjectShortName">arst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/clkref" type="logic">
+      <obj_property name="ElementShortName">clkref</obj_property>
+      <obj_property name="ObjectShortName">clkref</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/clktimer" type="logic">
+      <obj_property name="ElementShortName">clktimer</obj_property>
+      <obj_property name="ObjectShortName">clktimer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/rsttimer_l" type="logic">
+      <obj_property name="ElementShortName">rsttimer_l</obj_property>
+      <obj_property name="ObjectShortName">rsttimer_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/clkmain" type="logic">
+      <obj_property name="ElementShortName">clkmain</obj_property>
+      <obj_property name="ObjectShortName">clkmain</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/rstmain_l" type="logic">
+      <obj_property name="ElementShortName">rstmain_l</obj_property>
+      <obj_property name="ObjectShortName">rstmain_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/timer_clk_mux/reset_sync/srst_l" type="logic">
+      <obj_property name="ElementShortName">srst_l</obj_property>
+      <obj_property name="ObjectShortName">srst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/locked" type="logic">
+      <obj_property name="ElementShortName">locked</obj_property>
+      <obj_property name="ObjectShortName">locked</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/locked_s" type="logic">
+      <obj_property name="ElementShortName">locked_s</obj_property>
+      <obj_property name="ObjectShortName">locked_s</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/frame_rate_e" type="logic">
+      <obj_property name="ElementShortName">frame_rate_e</obj_property>
+      <obj_property name="ObjectShortName">frame_rate_e</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/clk_sel" type="array">
+      <obj_property name="ElementShortName">clk_sel[1:0]</obj_property>
+      <obj_property name="ObjectShortName">clk_sel[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/timer_clk_mux/rst_int_l" type="logic">
+      <obj_property name="ElementShortName">rst_int_l</obj_property>
+      <obj_property name="ObjectShortName">rst_int_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/DUT/timer_clk_mux/clk_mux_37_or_50" type="logic">
+      <obj_property name="ElementShortName">clk_mux_37_or_50</obj_property>
+      <obj_property name="ObjectShortName">clk_mux_37_or_50</obj_property>
+   </wvobject>
+</wave_config>

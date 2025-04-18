@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-13
+-- Last update: 2025-04-16
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -195,7 +195,7 @@ begin  -- architecture coder
                             when 4      => msg_data_lsn <= BCDToSLV(frame_time.ft_min)(3 downto 0);
                             when 5      => msg_data_lsn <= "00" & BCDToSLV(frame_time.ft_min)(5 downto 4);
                             when 6      => msg_data_lsn <= BCDToSLV(frame_time.ft_hr)(3 downto 0);
-                            when 7      => msg_data_lsn <= "0" & EncodeFrameRate(frame_rate) & BCDToSLV(frame_time.ft_sec)(4 downto 4);
+                            when 7      => msg_data_lsn <= "0" & EncodeFrameRate(frame_rate) & BCDToSLV(frame_time.ft_hr)(4 downto 4);
                             when others => null;
                         end case QFrameSelect;
 

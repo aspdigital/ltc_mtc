@@ -1,6 +1,6 @@
 # ltc_mtc
 FPGA-based conversion between linear time code and MIDI time code.
-The current code is simply a linear time code generator.
+The current code generates linear time code and encodes it as both SMPTE 12 and MIDI Time Code.
 Other features will be added in future.
 
 ## Linear Time Code Generation Overview.
@@ -19,6 +19,51 @@ For 30 fps, the frame rate is 2400 bits per second, so the time per bit is $1 / 
 A simple counter is used to create the bit time. When the counter rolls over, the the output signal toggles. Half a bit time later there will be a second toggle if the bit is a '1'. 
 
 A frame rate timer asserts a strobe once every frame time. This timer is derived from a continuously-running higher-frequency FPGA clock. The timer reload value is set such that the timer rolls over at the desired frame rate.
+
+## The Time Code Timer
+Given a selected frame rate, the FPGA generates a timecode record. This is done in [timecode_generator.vhdl](https://github.com/aspdigital/ltc_mtc/blob/main/src/timecode_generator.vhdl). The current frame time is maintained in a signal `frame_time` of the following record type:
+
+```    
+    type frame_time_t is record
+        -- frame range is max 29
+        frame_cnt  : frame_cnt_t;
+        -- seconds range from 0 to 59
+        ft_sec     : time_0_to_59_t;
+        -- minutes range from 0 to 59
+        ft_min     : time_0_to_59_t;
+        -- hours range from 0 to 23
+        ft_hr      : time_0_to_23_t;
+    end record frame_time_t;
+```
+where the four members of the record are essentially pairs of Binary Coded Decimal digits. They are maintained as BCD to simplify both display on the 7-segment digits as well as when they are encoded into SMPTE LTC which wants BCD. Doing this means we don't have to do a divide-by-ten to convert from binary into decimal digits.
+
+The generator has a `frame_tick` signal as an input. This is at the frame rate. On each tick, the `frame_cnt` is incremented, and when it overflows (at 24, 25 or 30) the seconds increment, and so forth.
+
+The generated `frame_time` is presented to the MTC encoder, the LTC encoder and the display driver logic.
+
+## Linear Time Code Encoding
+The `frame_time` record and the `frame_tick` strobe are presented to the Linear Time Code encoder [ltc_encoder.vhdl](https://github.com/aspdigital/ltc_mtc/blob/main/src/ltc_encoder.vhdl). On `frame_tick` the `frame_time` is loaded into an 80-bit shift register, with the required flags and user fields interspersed. (Flags and user fields are cleared to '0' for now.) 
+
+Conveniently, the fields in the time code frame are BCD, so our frame time record maps directly to the initial contents of the shift register. 
+
+A `bit_timer` generates the time for each bit to go out and the shift register shifts when the timer expires. The LSb of the shift register  shifts into `prev_bit`. At the start of a bit time there is a transition on the encoded output signal as required by the biphase mark encoding. In the middle of the bit time, if the bit being encoded is a `'1'` there is a second transition on the encoded output signal.
+
+## MIDI Time Code Generation
+Details for MIDI Time Code can be found in the [official spec](https://midi.org/midi-time-code).
+
+The logic that generates the `frame_time` drives that signal to the [mtc_encoder.vhdl](https://github.com/aspdigital/ltc_mtc/blob/main/src/mtc_encoder.vhdl) along with the `frame_tick`. This indicates the start of a frame.
+
+MIDI Time Code is sent as a sequence of Quarter Frame messages. Quarter Frame messages are two-byte messages sent, as should be clear from the name, four times a frame. They are sent in this order: frame count LSN, frame count MSN, seconds LSN, seconds MSN, minutes LSN, minutes MSN, hours LSN, hours MSN and frame rate.
+
+There are eight messages in all, so to send the complete current time requires two frames. The receiver is responsible for keeping track. The spec itself notes that when the last Quarter Frame message is received so the time can be fully assembled, that information is actually two frames old. The receiver should keep an internal offset of +2 frames for its internal use and for display.
+
+The frame tick synchronizes the state machine that sends the messages. The clever thing is that the frame tick generator (in `frame_timer.vhd`) outputs a quarter-frame tick packet as well, and that packet includes the quarter-tick identifier which ranges from 0 to 7. The encoder simply uses that to know which Quarter Frame message to send.
+
+Note that unlike linear time code, MIDI time code uses straight binary coding for the time (frame, seconds, etc). This means that we must convert our linear time count from BCD to binary. This requires a multiply to convert the tens digit, but multipliers are cheap in Artix-7. The overloaded functions `BCDToSLV()` in `ltc_mtc_pkg.vhd` implement that conversion, and they return std_logic_vector for ease in creating the required message nybble.
+
+## Linear Time Code Decoding
+
+## MIDI Time Code Decoding
 
 ## Clocking
 
@@ -46,4 +91,4 @@ Constraints are important. We create one top-level clock constraint for our 100 
 
 and Vivado magically creates all of the downstream generated-clock constraints. That is, it knows how to timing the logic on the clock that comes out of the mux. We do have a bunch of false path constraints to sell Vivado not to try to time any interactions between any of these clocks.
 
-The MMCM and mux logic is described in https://github.com/aspdigital/ltc_mtc/blob/main/src/clks_rst.vhdl
+The MMCM and mux logic is described in [clks_rst.vhdl](https://github.com/aspdigital/ltc_mtc/blob/main/src/clks_rst.vhdl).

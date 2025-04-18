@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-13
+-- Last update: 2025-04-17
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -28,6 +28,8 @@ library unisim;
 use unisim.vcomponents.all;
 
 use work.ltc_mtc_pkg.all;
+
+use work.clk_mux_pkg.all;
 
 entity clks_rst is
 
@@ -60,23 +62,12 @@ architecture clkgen of clks_rst is
     -- for the reset in the timer clock domain.
     signal timer_reset_l : std_logic;
 
-    -- one-hot clock selects decoded from frame_rate input.
-    -- bit 0 selects between 50 MHz (0) and 37.5 MHz (1).
-    -- bit 1 selects between the above (0) or 33 MHz (1)
-    constant CLK_SEL_37_NOT_50 : natural := 0;
-    constant CLK_SEL_33_NOT_OTHERS : natural := 1;
-    subtype clk_sel_t is std_logic_vector(CLK_SEL_33_NOT_OTHERS downto CLK_SEL_37_NOT_50);
-    signal clk_sel        : clk_sel_t;
-    constant CLK_SEL_FR24 : clk_sel_t := "01";  -- 37.5 MHz
-    constant CLK_SEL_FR25 : clk_sel_t := "00";  -- 50 MHz
-    constant CLK_SEL_FR30 : clk_sel_t := "10";  -- 33 MHz
-
-    -- output of selected clock 1 or 2:
-    signal clk_mux_37_or_50 : std_logic;
-
     -- delay frame rate for edge detect, used to assert the final output clock.
     signal frame_rate_d : frame_rate_t;
     signal frame_rate_e : std_logic;    -- true on change of frame rate
+
+    -- mux select.
+    signal clk_sel : clk_sel_t;
 
 begin  -- architecture clkgen
 
@@ -174,26 +165,8 @@ begin  -- architecture clkgen
     end process get_clock_selects;
 
     ---------------------------------------------------------------------------------------------------------
-    -- CLOCK MUXING, to select one of the three clocks on which the timecode generator runs, depending on the
-    -- selected frame rate.
-    ---------------------------------------------------------------------------------------------------------
-    -- select clocks 50 MHz or 37.5 MHz
-    clksel_1_2_bufgmux : BUFGMUX
-        port map (
-            O  => clk_mux_37_or_50,
-            I0 => clk_out_50,
-            I1 => clk_out_37p5,
-            S  => clk_sel(CLK_SEL_37_NOT_50));
-
-    -- select above or 33 MHz. This mux output is that downstream timer clock.
-    clksel_12_3_bufgctrl : BUFGMUX
-        port map (
-            O  => clktimer,
-            I0 => clk_mux_37_or_50,
-            I1 => clk_out_33,
-            S  => clk_sel(CLK_SEL_33_NOT_OTHERS));
-
     -- generate a reset in the clktimer domain.
+    ---------------------------------------------------------------------------------------------------------
     
     -- This includes changes in the frame rate because when that happens, the clock changes and we want to
     -- ensure downstream logic resets.
@@ -211,27 +184,25 @@ begin  -- architecture clkgen
             d     => locked,
             q     => locked_s);
 
+    -- Select one of the three options as the timer clock, based on the switches.
+    -- Generate a reset synchronized to that clock.
     -- combine reset sources and register to the main clock before feeding it to the reset generator.
     -- This ensures so we don't have a weird combinatorial path on the reset synchronizer's async reset input.
     -- Those reset sources are:
     -- 1. Main timer reset, asserted at the beginning of time,
     -- 2. MMCM lock, which should assert soon after the beginning of time,
     -- 3. Change in frame rate, which can happen at any time.
-    MakeTimerReset: process (clkmain) is
-    begin  -- process MakeTimerReset
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
-                timer_reset_l <= '0';
-            else
-                timer_reset_l <= '0' when frame_rate_e or not locked_s else '1';
-            end if;
-        end if;
-    end process MakeTimerReset;
-
-    timer_reset_sync : entity work.reset_sync(synchronizer)
+    timer_clk_mux: entity work.clk_mux(mux)
         port map (
-            clk    => clktimer,
-            arst_l => timer_reset_l,
-            srst_l => rsttimer_l);
-    
+            clkmain      => clkmain,
+            rstmain_l    => rstmain_l,
+            mmcm_locked  => locked_s,
+            rate_changed => frame_rate_e,
+            clk_24fps    => clk_out_37p5,
+            clk_25fps    => clk_out_50,
+            clk_30fps    => clk_out_33,
+            clk_sel      => clk_sel,
+            clk_out      => clktimer,
+            rst_out_l    => rsttimer_l);
+        
 end architecture clkgen;
