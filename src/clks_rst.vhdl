@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-19
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -36,19 +36,19 @@ entity clks_rst is
 
     port (
         -- from the board.
-        clkref     : in  std_logic;     -- reference or board input clock
-        arst_l     : in  std_logic;     -- external asynchronous reset
+        clk_ref     : in  std_logic;     -- reference or board input clock
+        arst_l      : in  std_logic;     -- external asynchronous reset
         -- from something 
-        frame_rate : in  frame_rate_t;  -- desired frame rate, used as clock select
+        frame_rate  : in  frame_rate_t;  -- desired frame rate, used as clock select
         -- to other things that need to select a clock
-        clk_bundle : out clk_bundle_t;
+        clk_bundle  : out clk_bundle_t;
         mmcm_locked : out std_logic;
         -- use for LTC time code generator.
-        clktimer   : out std_logic;     -- selected timer clock
-        rsttimer_l : out std_logic;     -- reset in that domain
+        clk_timer   : out std_logic;     -- selected timer clock
+        rst_timer_l : out std_logic;     -- reset in that domain
         -- for non-timer logic that always runs.
-        clkmain    : out std_logic;     -- general use clock at reference frequency
-        rstmain_l  : out std_logic);    -- clock in that domain
+        clk_main    : out std_logic;     -- general use clock at reference frequency
+        rst_main_l  : out std_logic);    -- clock in that domain
 
 end entity clks_rst;
 
@@ -59,7 +59,7 @@ architecture clkgen of clks_rst is
     signal clkfb_out : std_logic;       -- feedback out, to BUFG
 
     -- MMCM locked status, which we sync to the main clock to create resets in the downstream domains.
-    signal locked : std_logic;
+    signal locked   : std_logic;
     signal locked_s : std_logic;
 
     -- for the reset in the timer clock domain.
@@ -77,8 +77,8 @@ begin  -- architecture clkgen
     -- input buffer
     refclk_bufg : BUFG
         port map (
-            O => clkmain,
-            I => clkref);
+            O => clk_main,
+            I => clk_ref);
 
     -- feedback buffer
     feedback_bufg : BUFG
@@ -122,12 +122,12 @@ begin  -- architecture clkgen
             CLKFBIN   => clkfb_in,
             CLKFBOUT  => clkfb_out,
             CLKFBOUTB => open,
-            CLKIN1    => clkmain,
-            CLKOUT0   => clk_bundle(CLK_25FPS), --clk_out_50,    -- 50 MHz for 25 fps
+            CLKIN1    => clk_main,
+            CLKOUT0   => clk_bundle(CLK_25FPS),  --clk_out_50,    -- 50 MHz for 25 fps
             CLKOUT0B  => open,
-            CLKOUT1   => clk_bundle(CLK_24FPS), -- clk_out_37p5,  -- 37.5 MHz for 24 fps
+            CLKOUT1   => clk_bundle(CLK_24FPS),  -- clk_out_37p5,  -- 37.5 MHz for 24 fps
             CLKOUT1B  => open,
-            CLKOUT2   => clk_bundle(CLK_30FPS),-- clk_out_33,    -- 33 MHz for 30 fps
+            CLKOUT2   => clk_bundle(CLK_30FPS),  -- clk_out_33,    -- 33 MHz for 30 fps
             CLKOUT2B  => open,
             CLKOUT3   => open,
             CLKOUT3B  => open,
@@ -141,14 +141,14 @@ begin  -- architecture clkgen
     -- reset in the "main" clock domain.
     main_reset_sync : entity work.reset_sync(synchronizer)
         port map (
-            clk    => clkmain,
+            clk    => clk_main,
             arst_l => arst_l,
-            srst_l => rstmain_l);
+            srst_l => rst_main_l);
 
     ---------------------------------------------------------------------------------------------------------
-    -- generate a reset in the clktimer domain.
+    -- generate a reset in the clk_timer domain.
     ---------------------------------------------------------------------------------------------------------
-    
+
     -- This includes changes in the frame rate because when that happens, the clock changes and we want to
     -- ensure downstream logic resets.
     --
@@ -160,8 +160,8 @@ begin  -- architecture clkgen
             RESET_STATE => '0',
             SYNC_FLOPS  => 3)
         port map (
-            clk   => clkmain,
-            rst_l => rstmain_l,
+            clk   => clk_main,
+            rst_l => rst_main_l,
             d     => locked,
             q     => locked_s);
 
@@ -176,15 +176,15 @@ begin  -- architecture clkgen
     -- 1. Main timer reset, asserted at the beginning of time,
     -- 2. MMCM lock, which should assert soon after the beginning of time,
     -- 3. Change in frame rate, which can happen at any time.
-    timer_clk_mux: entity work.clk_mux(mux)
+    timer_clk_mux : entity work.clk_mux(mux)
         port map (
-            clkmain      => clkmain,
-            rstmain_l    => rstmain_l,
-            mmcm_locked  => locked_s,
-            frame_rate   => frame_rate,
-            clk_bundle   => clk_bundle,
+            clk_main    => clk_main,
+            rst_main_l  => rst_main_l,
+            mmcm_locked => locked_s,
+            frame_rate  => frame_rate,
+            clk_bundle  => clk_bundle,
             --
-            clk_out      => clktimer,
-            rst_out_l    => rsttimer_l);
-        
+            clk_out     => clk_timer,
+            rst_out_l   => rst_timer_l);
+
 end architecture clkgen;

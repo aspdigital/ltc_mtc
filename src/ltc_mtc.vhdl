@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-19
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -30,7 +30,10 @@
 -- seconds range from 0 to 59
 -- minutes range from 0 to 59
 -- hours range from 0 to 23
---
+-------------------------------------------------------------------------------------------------------------
+-- Switches 1 and 0 combine to select the generated frame rate.
+-- Switch 2 selects the source of the time code display (internal or external).
+-- Switch 3 selects the external time code source (MTC or LTC)
 -------------------------------------------------------------------------------------------------------------
 -- To ensure timing accuracy, the frame rate selection also chooses the frequency of the logic clock used to
 -- drive the dividers that generate the time code and the display.
@@ -44,6 +47,8 @@ use ieee.numeric_std.all;
 library work;
 use work.ltc_mtc_pkg.all;
 use work.mtc_pkg.all;
+use work.seven_segment_display_pkg.all;
+use work.timecode_pkg.all;
 use work.clk_mux_pkg.all;
 
 entity ltc_mtc is
@@ -64,7 +69,7 @@ entity ltc_mtc is
         -- slide switches.
         SW         : in  std_logic_vector(1 downto 0);  -- 15 downto 0
         -- RGB LEDs. Controls are active low.
-        LED16_B    : out std_logic;                    -- blue
+        LED16_B    : out std_logic;                     -- blue
         -- LED16_G    : out std_logic;                    -- green
         -- LED16_R    : out std_logic;                    -- red
         -- LED17_B    : out std_logic;                    -- blue
@@ -99,14 +104,14 @@ architecture toplevel of ltc_mtc is
     -- system clock, and a reset in its domain.
     -- This clock handles input synchronization, display refresh timing and the timer frequency selection.
     -- Basically the input clock is buffered in clks_rst and driven right back out to here.
-    signal clkmain   : std_logic;
-    signal rstmain_l : std_logic;
+    signal clk_main   : std_logic;
+    signal rst_main_l : std_logic;
 
     -- clock for the time code generation and display. This clock runs at one of three frequencies, depending
     -- on the selected frame rate. The frequencies are integer multiples of the frame rate so we maintain
     -- accuracy.
-    signal clktimer   : std_logic;
-    signal rsttimer_l : std_logic;
+    signal clk_timer   : std_logic;
+    signal rst_timer_l : std_logic;
 
     -- bundle of the MMCM outputs.
     signal clk_bundle : clk_bundle_t;
@@ -185,19 +190,19 @@ begin  -- architecture toplevel
     clks_rst_inst : entity work.clks_rst(clkgen)
         port map (
             -- from theboard.
-            clkref     => CLK100MHZ,
-            arst_l     => CPU_RESETN,
+            clk_ref     => CLK100MHZ,
+            arst_l      => CPU_RESETN,
             -- switches determine frame timer rate.
-            frame_rate => frame_rate,
+            frame_rate  => frame_rate,
             -- to other things that need to select a clock.
-            clk_bundle => clk_bundle,
+            clk_bundle  => clk_bundle,
             mmcm_locked => mmcm_locked,
             -- to the LTC time code generator and frame rate generator.
-            clktimer   => clktimer,
-            rsttimer_l => rsttimer_l,
+            clk_timer   => clk_timer,
+            rst_timer_l => rst_timer_l,
             -- for non-frame-rate related logic, runs all the time.
-            clkmain    => clkmain,
-            rstmain_l  => rstmain_l);
+            clk_main    => clk_main,
+            rst_main_l  => rst_main_l);
 
     ---------------------------------------------------------------------------------------------------------
     -- Debounce the button we use to initiate a Full Frame time message over MIDI.
@@ -209,8 +214,8 @@ begin  -- architecture toplevel
             DEBOUNCE_WAIT => DEBOUNCE_WAIT,  -- when to sample after initial switch change
             ACTIVE_STATE  => '1')
         port map (
-            clk   => clktimer,               -- the logic clock to which the switch is synchronized
-            rst_l => rsttimer_l,             -- reset in that domain
+            clk   => clk_timer,              -- the logic clock to which the switch is synchronized
+            rst_l => rst_timer_l,            -- reset in that domain
             sw    => BTND,                   -- the switch input
             swdb  => do_full_frame);         -- debounced switch output
 
@@ -226,15 +231,15 @@ begin  -- architecture toplevel
             RESET_STATE => (frsw'range => '0'),
             SYNC_FLOPS  => 3)
         port map (
-            clk   => clkmain,
-            rst_l => rstmain_l,
+            clk   => clk_main,
+            rst_l => rst_main_l,
             d     => SW(1 downto 0),
             q     => frsw);
 
-    GetFrameRate : process (clkmain) is
+    GetFrameRate : process (clk_main) is
     begin  -- process GetFrameRate
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
+        if rising_edge(clk_main) then
+            if rst_main_l = '0' then
                 frame_rate <= FR_30;
             else
                 frame_rate <= frame_rate_t'val(to_integer(unsigned(frsw)));
@@ -252,8 +257,8 @@ begin  -- architecture toplevel
             RESET_STATE => FR_30,
             SYNC_FLOPS  => 3)
         port map (
-            clk   => clktimer,
-            rst_l => rsttimer_l,
+            clk   => clk_timer,
+            rst_l => rst_timer_l,
             d     => frame_rate,
             q     => frame_rate_s);
 
@@ -263,8 +268,8 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     frame_timer_tick : entity work.frame_timer(timer)
         port map (
-            clk        => clktimer,
-            rst_l      => rsttimer_l,
+            clk        => clk_timer,
+            rst_l      => rst_timer_l,
             frame_rate => frame_rate_s,
             frame_tick => frame_tick,
             qframe_pkt => qframe_pkt);
@@ -275,11 +280,11 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     tcg : entity work.timecode_generator(timers)
         port map (
-            clktimer   => clktimer,
-            rsttimer_l => rsttimer_l,
-            frame_rate => frame_rate_s,
-            frame_tick => frame_tick,
-            frame_time => frame_time);
+            clk_timer   => clk_timer,
+            rst_timer_l => rst_timer_l,
+            frame_rate  => frame_rate_s,
+            frame_tick  => frame_tick,
+            frame_time  => frame_time);
 
     ---------------------------------------------------------------------------------------------------------
     -- DISPLAY THE FRAME TIME.
@@ -290,11 +295,11 @@ begin  -- architecture toplevel
             CLKPER_25FPS => CLKPER_25FPS,
             CLKPER_24FPS => CLKPER_24FPS)
         port map (
-            clktimer   => clktimer,
-            rsttimer_l => rsttimer_l,
-            frame_time => frame_time,
-            frame_rate => frame_rate_s,
-            display    => display);
+            clk_timer   => clk_timer,
+            rst_timer_l => rst_timer_l,
+            frame_time  => frame_time,
+            frame_rate  => frame_rate_s,
+            display     => display);
 
     -- break out display type to pins.
     CA <= display.CA;
@@ -312,12 +317,12 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     ltc_enc : entity work.ltc_encoder(coder)
         port map (
-            clktimer   => clktimer,
-            rsttimer_l => rsttimer_l,
-            frame_rate => frame_rate_s,
-            frame_tick => frame_tick,
-            frame_time => frame_time,
-            ltc        => JA(1));       -- temporary test port.
+            clk_timer   => clk_timer,
+            rst_timer_l => rst_timer_l,
+            frame_rate  => frame_rate_s,
+            frame_tick  => frame_tick,
+            frame_time  => frame_time,
+            ltc         => JA(1));      -- temporary test port.
 
     ---------------------------------------------------------------------------------------------------------
     -- create MIDI time code packets and feed to serial transmitter.
@@ -327,8 +332,8 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     mtc_enc : entity work.mtc_encoder(coder)
         port map (
-            clktimer      => clktimer,
-            rsttimer_l    => rsttimer_l,
+            clk_timer     => clk_timer,
+            rst_timer_l   => rst_timer_l,
             frame_rate    => frame_rate,
             frame_tick    => frame_tick,
             frame_time    => frame_time,
@@ -345,23 +350,23 @@ begin  -- architecture toplevel
             SYSCLKPER => CLKPER,            -- system clock period, for UATX baud rate generator
             BAUD_RATE => MIDI_BAUD_RATE)    -- what it is
         port map (
-            clksrc      => clktimer,        -- clock for the FIFO input
-            rstsrc_l    => rsttimer_l,      -- reset in that domain
+            clk_src     => clk_timer,       -- clock for the FIFO input
+            rst_src_l   => rst_timer_l,     -- reset in that domain
             tx_data     => midi_msg_data,   -- data to send
             tx_valid    => midi_msg_valid,  -- write din to the FIFO
             full        => open,
             almost_full => open,
-            clkmain     => clkmain,         -- global clock which drives serializer
-            rstmain_l   => rstmain_l,       -- reset in that domain
+            clk_main    => clk_main,        -- global clock which drives serializer
+            rst_main_l  => rst_main_l,      -- reset in that domain
             ser_tx      => JA(2));          -- serial data transmit line
 
     -- until the MIDI serial interface is implemented, the MIDI message goes to the LEDs. Doubtful we will
     -- see them. LEDs are active high.
-    drive_leds : process (clktimer) is
+    drive_leds : process (clk_timer) is
         variable v_cntr : natural range 0 to 255;
     begin  -- process drive_leds
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
+        if rising_edge(clk_timer) then
+            if rst_timer_l = '0' then
                 LED <= (others => '0');
             else
                 -- lower 8 LEDs map to the message. Upper 8 LEDs count messages.
@@ -379,10 +384,11 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     decode_mtc : entity work.mtc_decoder(decoder)
         port map (
-            clkmain     => clkmain,
-            rstmain_l   => rstmain_l,
+            clk_main    => clk_main,
+            rst_main_l  => rst_main_l,
             frame_rate  => frame_rate,
             clk_bundle  => clk_bundle,
             mmcm_locked => mmcm_locked,
             led         => LED16_B);
+
 end architecture toplevel;

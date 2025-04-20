@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-13
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -47,16 +47,17 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.ltc_mtc_pkg.all;
+use work.timecode_pkg.all;
 
 entity ltc_encoder is
 
     port (
-        clktimer   : in  std_logic;     -- clock at the proper timer rate for evenly-divisible tick
-        rsttimer_l : in  std_logic;     -- reset in that domain
-        frame_rate : in  frame_rate_t;  -- frames per second, 24, 25 or 30
-        frame_tick : in  std_logic;     -- synchronizing strobe at the frame rate
-        frame_time : in  frame_time_t;  -- current frame time, valid on the tick
-        ltc        : out std_logic);    -- current time encoded in the serial time code
+        clk_timer   : in  std_logic;     -- clock at the proper timer rate for evenly-divisible tick
+        rst_timer_l : in  std_logic;     -- reset in that domain
+        frame_rate  : in  frame_rate_t;  -- frames per second, 24, 25 or 30
+        frame_tick  : in  std_logic;     -- synchronizing strobe at the frame rate
+        frame_time  : in  frame_time_t;  -- current frame time, valid on the tick
+        ltc         : out std_logic);    -- current time encoded in the serial time code
 
 end entity ltc_encoder;
 
@@ -146,10 +147,10 @@ begin  -- architecture coder
     -- Bit duration timer.
     -- Always count.
     -- Assert a strobe at the start of the bit and another at the middle of the bit.
-    BitTimer : process (clktimer) is
+    BitTimer : process (clk_timer) is
     begin  -- process BitTimer
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
+        if rising_edge(clk_timer) then
+            if rst_timer_l = '0' then
                 bit_timer         <= 0;
                 start_of_bit      <= '0';
                 middle_of_bit     <= '0';
@@ -189,10 +190,10 @@ begin  -- architecture coder
     end process BitTimer;
 
     -- Load and shift.
-    ShiftIt : process (clktimer) is
+    ShiftIt : process (clk_timer) is
     begin  -- process EncodeIt
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
+        if rising_edge(clk_timer) then
+            if rst_timer_l = '0' then
                 prev_msb <= '0';
                 sr       <= (others => '0');
             else
@@ -233,10 +234,10 @@ begin  -- architecture coder
 
     -- biphase mark encode.
     -- always toggle at the start of a bit time, and if the bit to send is a 1, toggle again in the middle.
-    EncodeIt : process (clktimer) is
+    EncodeIt : process (clk_timer) is
     begin  -- process EncodeIt
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
+        if rising_edge(clk_timer) then
+            if rst_timer_l = '0' then
                 ltc <= '0';
             else
                 ToggleNextBit : if start_of_bit or (middle_of_bit and prev_msb) then

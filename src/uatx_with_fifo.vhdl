@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-13
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -29,15 +29,15 @@ entity uatx_with_fifo is
         BAUD_RATE : natural);           -- what it is
     port (
         -- write side:
-        clksrc      : in  std_logic;                     -- clock for the FIFO input
-        rstsrc_l    : in  std_logic;                     -- reset in that domain
+        clk_src      : in  std_logic;                     -- clock for the FIFO input
+        rst_src_l    : in  std_logic;                     -- reset in that domain
         tx_data     : in  std_logic_vector(7 downto 0);  -- data to send
         tx_valid    : in  std_logic;                     -- write din to the FIFO
         full        : out std_logic;                     -- indicate FIFO is full
         almost_full : out std_logic;                     -- indicate FIFO has one more word left
         -- UATX side
-        clkmain     : in  std_logic;                     -- global clock which drives serializer
-        rstmain_l   : in  std_logic;                     -- reset in that domain
+        clk_main     : in  std_logic;                     -- global clock which drives serializer
+        rst_main_l   : in  std_logic;                     -- reset in that domain
         ser_tx      : out std_logic);                    -- serial data transmit line
 
 end entity uatx_with_fifo;
@@ -94,13 +94,13 @@ begin  -- architecture wrapper
     -- FIFO is FWFT so read data are valid when the valid flag is true. We never do continuous FIFO pops, so
     -- we don't hold the read enable true all the time.
     ---------------------------------------------------------------------------------------------------------
-    fiforst <= not rstsrc_l;
+    fiforst <= not rst_src_l;
     
     ufifo : uart_fifo
         port map (
             rst          => fiforst,
-            wr_clk       => clksrc,
-            rd_clk       => clkmain,
+            wr_clk       => clk_src,
+            rd_clk       => clk_main,
             din          => tx_data,    -- we want to write this to the UATX
             wr_en        => tx_valid,   -- the above is valid
             rd_en        => pop_and_write,  -- advance FIFO read pointer
@@ -116,10 +116,10 @@ begin  -- architecture wrapper
 
     -- Control writing to the transmitter.
     -- Write when the serializer is not busy and when the FIFO has something in it.
-    fifo_rd_tx_wr : process (clkmain) is
+    fifo_rd_tx_wr : process (clk_main) is
     begin  -- process transmitter
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
+        if rising_edge(clk_main) then
+            if rst_main_l = '0' then
                 pop_and_write <= '0';
             else
                 if busy = '0' and fifo_rddata_valid = '1' then
@@ -139,8 +139,8 @@ begin  -- architecture wrapper
             SYSCLKPER => SYSCLKPER,     -- system clock period
             BAUD_RATE => BAUD_RATE)     -- desired baud rate
         port map (
-            clk      => clkmain,            -- logic clock
-            rst_l    => rstmain_l,          -- reset in that domain
+            clk      => clk_main,            -- logic clock
+            rst_l    => rst_main_l,          -- reset in that domain
             tx_data  => data_f_to_uatx,        -- parallel data to transmit
             tx_wren  => pop_and_write,       -- transmit data write enable
             busy     => busy,

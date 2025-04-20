@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-16
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -53,23 +53,24 @@ use ieee.numeric_std.all;
 library work;
 use work.ltc_mtc_pkg.all;
 use work.mtc_pkg.all;
+use work.timecode_pkg.all;
 
 entity mtc_encoder is
 
     port (
         -- Clock and reset
-        clktimer   : in  std_logic;                     -- clock synchronous with our logic
-        rsttimer_l : in  std_logic;                     -- reset in that domain
+        clk_timer     : in  std_logic;                     -- clock synchronous with our logic
+        rst_timer_l   : in  std_logic;                     -- reset in that domain
         -- current info
-        frame_rate : in  frame_rate_t;                  -- frame rate
-        frame_tick : in  std_logic;                     -- tick at frame rate
-        frame_time : in  frame_time_t;                  -- the current time.
-        qframe_pkt : in  qframe_pkt_t;                  -- quarter-tick frame ID and strobe
+        frame_rate    : in  frame_rate_t;                  -- frame rate
+        frame_tick    : in  std_logic;                     -- tick at frame rate
+        frame_time    : in  frame_time_t;                  -- the current time.
+        qframe_pkt    : in  qframe_pkt_t;                  -- quarter-tick frame ID and strobe
         -- should we send Full Frame message next time?
         do_full_frame : in  std_logic;                     -- do a Full Frame message on next frame tick
         -- the next MIDI message word to send.
-        msg_data   : out std_logic_vector(7 downto 0);  -- MIDI message byte to serial port
-        msg_valid  : out std_logic);                    -- indicate the above is valid (FIFO write enable)
+        msg_data      : out std_logic_vector(7 downto 0);  -- MIDI message byte to serial port
+        msg_valid     : out std_logic);                    -- indicate the above is valid (FIFO write enable)
 
 end entity mtc_encoder;
 
@@ -107,10 +108,10 @@ architecture coder of mtc_encoder is
 
 begin  -- architecture coder
 
-    Encoder : process (clktimer) is
+    Encoder : process (clk_timer) is
     begin  -- process Encoder
-        if rising_edge(clktimer) then
-            if rsttimer_l = '0' then
+        if rising_edge(clk_timer) then
+            if rst_timer_l = '0' then
                 full_frame_latch <= '0';
                 ff_byte_cnt      <= 0;
                 msg_data         <= (others => '0');

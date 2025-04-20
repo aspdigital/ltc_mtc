@@ -6,13 +6,13 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-14
--- Last update: 2025-04-19
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
 -- Description: This entity implements a MIDI Time Code Receiver/Decoder.
 --
--- We capture incoming time code message bytes and keep track of them. When an entire time code is received,
+-- We capture incoming time code message bytes and keep track of them. When the entire time code is received,
 -- it is made available to the display.
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025 ASP Digital
@@ -32,8 +32,8 @@ entity mtc_decoder is
     port (
         -- MIDI receiver is on global clock.
         -- So is the frame rate.
-        clkmain     : in  std_logic;
-        rstmain_l   : in  std_logic;
+        clk_main     : in  std_logic;
+        rst_main_l   : in  std_logic;
         -- eventually frame rate will be determined from received MIDI time code, for now just accept it.
         frame_rate  : in  frame_rate_t;
         -- MMCM outputs the three clocks that work in the frame rate domains.
@@ -51,12 +51,20 @@ architecture decoder of mtc_decoder is
     signal rst_l : std_logic;
 
 begin  -- architecture decoder
+
+    ---------------------------------------------------------------------------------------------------------
+    -- serial receiver.
+    ---------------------------------------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------------------------------------
+    -- 
+    ---------------------------------------------------------------------------------------------------------
     
     select_timer_clk : entity work.clk_mux(mux)
         port map (
             -- lock status and frme rate are on main clock
-            clkmain      => clkmain,
-            rstmain_l    => rstmain_l,
+            clk_main      => clk_main,
+            rst_main_l    => rst_main_l,
             mmcm_locked  => mmcm_locked,
             frame_rate   => frame_rate,
             -- input clocks from MMCM

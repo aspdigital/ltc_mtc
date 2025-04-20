@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-16
--- Last update: 2025-04-19
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -32,15 +32,15 @@ entity clk_mux is
 
     port (
         -- lock status and frame rate are on main clock.
-        clkmain      : in  std_logic;   -- domain that manages the select
-        rstmain_l    : in  std_logic;   -- reset in that domain
-        mmcm_locked  : in  std_logic;   -- all clocks are valid
-        frame_rate   : in  frame_rate_t;   -- frame rate determines which clock is output.
+        clk_main    : in  std_logic;     -- domain that manages the select
+        rst_main_l  : in  std_logic;     -- reset in that domain
+        mmcm_locked : in  std_logic;     -- all clocks are valid
+        frame_rate  : in  frame_rate_t;  -- frame rate determines which clock is output.
         -- input clocks
-        clk_bundle   : in clk_bundle_t;
+        clk_bundle  : in  clk_bundle_t;
         -- output clock and reset in its domain.
-        clk_out      : out std_logic;   -- resulting clock
-        rst_out_l    : out std_logic);  -- reset in that domain.
+        clk_out     : out std_logic;     -- resulting clock
+        rst_out_l   : out std_logic);    -- reset in that domain.
 
 end entity clk_mux;
 
@@ -72,7 +72,7 @@ architecture mux of clk_mux is
         return clk_bundle_index_t is
         variable cbi : clk_bundle_index_t;
     begin
-        Selector: case FR is
+        Selector : case FR is
             when FR_24 => cbi := CLK_24FPS;
             when FR_25 => cbi := CLK_25FPS;
             when FR_30 => cbi := CLK_30FPS;
@@ -88,10 +88,10 @@ begin  -- architecture mux
     -- If the frame rate changes or if the MMCM is unlocked, assert the reset in the muxed clock domain.
     -- This also asserts the reset when the main domain reset is asserted.
     ---------------------------------------------------------------------------------------------------------
-    get_clk_selects : process (clkmain) is
+    get_clk_selects : process (clk_main) is
     begin  -- process MakeReset
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
+        if rising_edge(clk_main) then
+            if rst_main_l = '0' then
                 clk_sel      <= CLK_SEL_FR24;
                 frame_rate_d <= FR_24;
                 rst_int_l    <= '0';
