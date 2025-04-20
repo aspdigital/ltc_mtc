@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-08
--- Last update: 2025-04-13
+-- Last update: 2025-04-19
 -- Platform   : Xilinx Artix 7
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ package ltc_mtc_pkg is
     constant FC_ROLLOVER_LSD_24 : natural := 3;  -- rolls over at 23 for 24 fps
 
     ---------------------------------------------------------------------------------------------------------
-    -- These types manage the binary-codedd digits for time code display.
+    -- These types manage the binary-coded digits for time code display.
     -- Tens and ones digits are managed separately so we don't have to do a divide.
     -- lsd: least significant digit
     -- msd: most significant digit.

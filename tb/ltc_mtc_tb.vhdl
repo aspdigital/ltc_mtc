@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-13
+-- Last update: 2025-04-19
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,8 +39,9 @@ architecture testbench of ltc_mtc_tb is
     signal CLK100MHZ  : std_logic                    := '1';
     signal CPU_RESETN : std_logic                    := '0';
     signal SW         : std_logic_vector(1 downto 0) := "00";
-    signal BTND       : std_logic := '0';
-    signal LED : std_logic_vector(15 downto 0);
+    signal BTND       : std_logic                    := '0';
+    signal LED16_B    : std_logic;
+    signal LED        : std_logic_vector(15 downto 0);
     signal CA         : std_logic;
     signal CB         : std_logic;
     signal CC         : std_logic;
@@ -66,6 +67,7 @@ begin  -- architecture testbench
             BTND       => BTND,
             LED        => LED,
             SW         => SW,
+            LED16_B    => LED16_B,
             CA         => CA,
             CB         => CB,
             CC         => CC,

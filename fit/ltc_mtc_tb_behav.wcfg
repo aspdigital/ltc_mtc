@@ -5,6 +5,7 @@
    <db_ref_list>
       <db_ref path="ltc_mtc_tb_behav.wdb" id="1">
          <top_modules>
+            <top_module name="clk_mux_pkg" />
             <top_module name="glbl" />
             <top_module name="ltc_mtc_pkg" />
             <top_module name="ltc_mtc_tb" />
@@ -13,15 +14,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="46.918921212 ms"></ZoomEndTime>
-      <Cursor1Time time="46.918921211 ms"></Cursor1Time>
+      <ZoomStartTime time="165.833333 us"></ZoomStartTime>
+      <ZoomEndTime time="1,166.833334 us"></ZoomEndTime>
+      <Cursor1Time time="853.280000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="76"></ValueColumnWidth>
+      <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="33" />
+   <WVObjectSize size="36" />
    <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
       <obj_property name="ElementShortName">CLK100MHZ</obj_property>
       <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
@@ -31,8 +32,8 @@
       <obj_property name="ObjectShortName">CPU_RESETN</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/SW" type="array">
-      <obj_property name="ElementShortName">SW[1:0]</obj_property>
-      <obj_property name="ObjectShortName">SW[1:0]</obj_property>
+      <obj_property name="ElementShortName">SW[2:0]</obj_property>
+      <obj_property name="ObjectShortName">SW[2:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/frsw" type="array">
       <obj_property name="ElementShortName">frsw[1:0]</obj_property>
@@ -157,5 +158,17 @@
    <wvobject fp_name="/ltc_mtc_tb/JA[1]" type="logic">
       <obj_property name="ElementShortName">[1]</obj_property>
       <obj_property name="ObjectShortName">[1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/LED16_B" type="logic">
+      <obj_property name="ElementShortName">LED16_B</obj_property>
+      <obj_property name="ObjectShortName">LED16_B</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/decode_mtc/rgb_led_driver/timer" type="other">
+      <obj_property name="ElementShortName">timer</obj_property>
+      <obj_property name="ObjectShortName">timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/decode_mtc/rgb_led_driver/TIMER_MAX" type="other">
+      <obj_property name="ElementShortName">TIMER_MAX</obj_property>
+      <obj_property name="ObjectShortName">TIMER_MAX</obj_property>
    </wvobject>
 </wave_config>

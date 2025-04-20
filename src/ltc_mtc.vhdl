@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-13
+-- Last update: 2025-04-19
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -44,6 +44,7 @@ use ieee.numeric_std.all;
 library work;
 use work.ltc_mtc_pkg.all;
 use work.mtc_pkg.all;
+use work.clk_mux_pkg.all;
 
 entity ltc_mtc is
 
@@ -63,7 +64,7 @@ entity ltc_mtc is
         -- slide switches.
         SW         : in  std_logic_vector(1 downto 0);  -- 15 downto 0
         -- RGB LEDs. Controls are active low.
-        -- LED16_B    : out std_logic;                    -- blue
+        LED16_B    : out std_logic;                    -- blue
         -- LED16_G    : out std_logic;                    -- green
         -- LED16_R    : out std_logic;                    -- red
         -- LED17_B    : out std_logic;                    -- blue
@@ -106,6 +107,12 @@ architecture toplevel of ltc_mtc is
     -- accuracy.
     signal clktimer   : std_logic;
     signal rsttimer_l : std_logic;
+
+    -- bundle of the MMCM outputs.
+    signal clk_bundle : clk_bundle_t;
+
+    -- MMCM lock status, for generating resets.
+    signal mmcm_locked : std_logic;
 
     ---------------------------------------------------------------------------------------------------------
     -- The periods of the three clocks that divide nicely into the three frame rates.
@@ -177,11 +184,18 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     clks_rst_inst : entity work.clks_rst(clkgen)
         port map (
+            -- from theboard.
             clkref     => CLK100MHZ,
             arst_l     => CPU_RESETN,
+            -- switches determine frame timer rate.
             frame_rate => frame_rate,
+            -- to other things that need to select a clock.
+            clk_bundle => clk_bundle,
+            mmcm_locked => mmcm_locked,
+            -- to the LTC time code generator and frame rate generator.
             clktimer   => clktimer,
             rsttimer_l => rsttimer_l,
+            -- for non-frame-rate related logic, runs all the time.
             clkmain    => clkmain,
             rstmain_l  => rstmain_l);
 
@@ -214,7 +228,7 @@ begin  -- architecture toplevel
         port map (
             clk   => clkmain,
             rst_l => rstmain_l,
-            d     => SW,
+            d     => SW(1 downto 0),
             q     => frsw);
 
     GetFrameRate : process (clkmain) is
@@ -360,4 +374,15 @@ begin  -- architecture toplevel
         end if;
     end process drive_leds;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- MTC decoder (placeholder)
+    ---------------------------------------------------------------------------------------------------------
+    decode_mtc : entity work.mtc_decoder(decoder)
+        port map (
+            clkmain     => clkmain,
+            rstmain_l   => rstmain_l,
+            frame_rate  => frame_rate,
+            clk_bundle  => clk_bundle,
+            mmcm_locked => mmcm_locked,
+            led         => LED16_B);
 end architecture toplevel;

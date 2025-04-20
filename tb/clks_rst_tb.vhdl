@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-17
--- Last update: 2025-04-17
+-- Last update: 2025-04-19
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -24,6 +24,7 @@ use ieee.std_logic_1164.all;
 
 library work;
 use work.ltc_mtc_pkg.all;
+use work.clk_mux_pkg.all;
 
 -------------------------------------------------------------------------------------------------------------
 
@@ -41,6 +42,8 @@ architecture testbench of clks_rst_tb is
     signal clkref     : std_logic    := '1';
     signal arst_l     : std_logic    := '0';
     signal frame_rate : frame_rate_t := FR_30;
+    signal clk_bundle : clk_bundle_t;
+    signal mmcm_locked : std_logic;
     signal clktimer   : std_logic;
     signal rsttimer_l : std_logic;
     signal clkmain    : std_logic;
@@ -54,6 +57,8 @@ begin  -- architecture testbench
             clkref     => clkref,
             arst_l     => arst_l,
             frame_rate => frame_rate,
+            clk_bundle => clk_bundle,
+            mmcm_locked => mmcm_locked,
             clktimer   => clktimer,
             rsttimer_l => rsttimer_l,
             clkmain    => clkmain,

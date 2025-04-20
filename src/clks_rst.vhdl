@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-17
+-- Last update: 2025-04-19
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -20,6 +20,7 @@
 -- Revisions  :
 -- Date        Version  Author  Description
 -- 2025-04-07  -        andy    Created
+-- 2025-04-19           andy    bring out MMCM clocks and let entities that need to mux them do so. 
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
@@ -34,11 +35,18 @@ use work.clk_mux_pkg.all;
 entity clks_rst is
 
     port (
+        -- from the board.
         clkref     : in  std_logic;     -- reference or board input clock
         arst_l     : in  std_logic;     -- external asynchronous reset
+        -- from something 
         frame_rate : in  frame_rate_t;  -- desired frame rate, used as clock select
+        -- to other things that need to select a clock
+        clk_bundle : out clk_bundle_t;
+        mmcm_locked : out std_logic;
+        -- use for LTC time code generator.
         clktimer   : out std_logic;     -- selected timer clock
         rsttimer_l : out std_logic;     -- reset in that domain
+        -- for non-timer logic that always runs.
         clkmain    : out std_logic;     -- general use clock at reference frequency
         rstmain_l  : out std_logic);    -- clock in that domain
 
@@ -49,11 +57,6 @@ architecture clkgen of clks_rst is
     -- feedback clock.
     signal clkfb_in  : std_logic;       -- output of BUFG on feedback net
     signal clkfb_out : std_logic;       -- feedback out, to BUFG
-
-    -- MMCM output clocks.
-    signal clk_out_50   : std_logic;    -- for 25 fps
-    signal clk_out_37p5 : std_logic;    -- for 24 fps
-    signal clk_out_33   : std_logic;    -- for 30 fps
 
     -- MMCM locked status, which we sync to the main clock to create resets in the downstream domains.
     signal locked : std_logic;
@@ -120,11 +123,11 @@ begin  -- architecture clkgen
             CLKFBOUT  => clkfb_out,
             CLKFBOUTB => open,
             CLKIN1    => clkmain,
-            CLKOUT0   => clk_out_50,    -- 50 MHz for 25 fps
+            CLKOUT0   => clk_bundle(CLK_25FPS), --clk_out_50,    -- 50 MHz for 25 fps
             CLKOUT0B  => open,
-            CLKOUT1   => clk_out_37p5,  -- 37.5 MHz for 24 fps
+            CLKOUT1   => clk_bundle(CLK_24FPS), -- clk_out_37p5,  -- 37.5 MHz for 24 fps
             CLKOUT1B  => open,
-            CLKOUT2   => clk_out_33,    -- 33 MHz for 30 fps
+            CLKOUT2   => clk_bundle(CLK_30FPS),-- clk_out_33,    -- 33 MHz for 30 fps
             CLKOUT2B  => open,
             CLKOUT3   => open,
             CLKOUT3B  => open,
@@ -141,28 +144,6 @@ begin  -- architecture clkgen
             clk    => clkmain,
             arst_l => arst_l,
             srst_l => rstmain_l);
-
-    -- decode the frame_rate to give one-hot clock selects.
-    get_clock_selects : process (clkmain) is
-    begin  -- process get_clock_selects
-        if rising_edge(clkmain) then
-            if rstmain_l = '0' then
-                frame_rate_d <= FR_30;
-                clk_sel      <= CLK_SEL_FR30;
-            else
-                FrameRateDecoder : case frame_rate is
-                    when FR_30 => clk_sel <= CLK_SEL_FR30;  -- need 33 MHz clock
-                    when FR_25 => clk_sel <= CLK_SEL_FR25;  -- need 50 MHz clock
-                    when FR_24 => clk_sel <= CLK_SEL_FR24;  -- need 37.5 MHz clock
-                    when others =>
-                        report "30 FPS drop not supported yet (clks_rst)" severity ERROR;
-                end case FrameRateDecoder;
-
-                frame_rate_d <= frame_rate;
-                frame_rate_e <= '1' when frame_rate /= frame_rate_d else '0';
-            end if;
-        end if;
-    end process get_clock_selects;
 
     ---------------------------------------------------------------------------------------------------------
     -- generate a reset in the clktimer domain.
@@ -184,6 +165,9 @@ begin  -- architecture clkgen
             d     => locked,
             q     => locked_s);
 
+    -- to outside world.
+    mmcm_locked <= locked_s;
+
     -- Select one of the three options as the timer clock, based on the switches.
     -- Generate a reset synchronized to that clock.
     -- combine reset sources and register to the main clock before feeding it to the reset generator.
@@ -197,11 +181,9 @@ begin  -- architecture clkgen
             clkmain      => clkmain,
             rstmain_l    => rstmain_l,
             mmcm_locked  => locked_s,
-            rate_changed => frame_rate_e,
-            clk_24fps    => clk_out_37p5,
-            clk_25fps    => clk_out_50,
-            clk_30fps    => clk_out_33,
-            clk_sel      => clk_sel,
+            frame_rate   => frame_rate,
+            clk_bundle   => clk_bundle,
+            --
             clk_out      => clktimer,
             rst_out_l    => rsttimer_l);
         
