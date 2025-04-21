@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-17
--- Last update: 2025-04-19
+-- Last update: 2025-04-20
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,46 +39,46 @@ end entity clks_rst_tb;
 architecture testbench of clks_rst_tb is
 
     -- component ports
-    signal clkref     : std_logic    := '1';
-    signal arst_l     : std_logic    := '0';
-    signal frame_rate : frame_rate_t := FR_30;
-    signal clk_bundle : clk_bundle_t;
+    signal clk_ref     : std_logic    := '1';
+    signal arst_l      : std_logic    := '0';
+    signal frame_rate  : frame_rate_t := FR_30;
+    signal clk_bundle  : clk_bundle_t;
     signal mmcm_locked : std_logic;
-    signal clktimer   : std_logic;
-    signal rsttimer_l : std_logic;
-    signal clkmain    : std_logic;
-    signal rstmain_l  : std_logic;
+    signal clk_timer   : std_logic;
+    signal rst_timer_l : std_logic;
+    signal clk_main    : std_logic;
+    signal rst_main_l  : std_logic;
 
 begin  -- architecture testbench
 
     -- component instantiation
-    DUT : entity work.clks_rst
+    DUT : entity work.clks_rst(clkgen)
         port map (
-            clkref     => clkref,
-            arst_l     => arst_l,
-            frame_rate => frame_rate,
-            clk_bundle => clk_bundle,
+            clk_ref     => clk_ref,
+            arst_l      => arst_l,
+            frame_rate  => frame_rate,
+            clk_bundle  => clk_bundle,
             mmcm_locked => mmcm_locked,
-            clktimer   => clktimer,
-            rsttimer_l => rsttimer_l,
-            clkmain    => clkmain,
-            rstmain_l  => rstmain_l);
+            clk_timer   => clk_timer,
+            rst_timer_l => rst_timer_l,
+            clk_main    => clk_main,
+            rst_main_l  => rst_main_l);
 
     -- clock and reset
-    clkref <= not clkref after CLKPER / 2;
-    arst_l <= '1' after RESETTIME;
+    clk_ref <= not clk_ref after CLKPER / 2;
+    arst_l  <= '1'         after RESETTIME;
 
     -- waveform generation
     WaveGen_Proc : process
     begin
         wait for 500 US;
-        wait until rising_edge(clkmain);
+        wait until rising_edge(clk_main);
         frame_rate <= FR_24;
         wait for 500 US;
-        wait until rising_edge(clkmain);
+        wait until rising_edge(clk_main);
         frame_rate <= FR_25;
         wait for 500 US;
-        wait until rising_edge(clkmain);
+        wait until rising_edge(clk_main);
         frame_rate <= FR_30;
     end process WaveGen_Proc;
 

@@ -382,13 +382,13 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     -- MTC decoder (placeholder)
     ---------------------------------------------------------------------------------------------------------
-    decode_mtc : entity work.mtc_decoder(decoder)
-        port map (
-            clk_main    => clk_main,
-            rst_main_l  => rst_main_l,
-            frame_rate  => frame_rate,
-            clk_bundle  => clk_bundle,
-            mmcm_locked => mmcm_locked,
-            led         => LED16_B);
+    -- decode_mtc : entity work.mtc_decoder(decoder)
+    --     port map (
+    --         clk_main    => clk_main,
+    --         rst_main_l  => rst_main_l,
+    --         frame_rate  => frame_rate,
+    --         clk_bundle  => clk_bundle,
+    --         mmcm_locked => mmcm_locked,
+    --         led         => LED16_B);
 
 end architecture toplevel;
