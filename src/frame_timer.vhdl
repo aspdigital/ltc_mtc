@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-13
+-- Last update: 2025-04-23
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -43,10 +43,10 @@ use work.mtc_pkg.all;
 
 entity frame_timer is
     port (
-        clk        : in  std_logic;     -- our logic clock
-        rst_l      : in  std_logic;     -- reset in that domain
-        frame_rate : in  frame_rate_t;  -- the frame rate
-        frame_tick : out std_logic;    -- strobe true at frame rate
+        clk        : in  std_logic;      -- our logic clock
+        rst_l      : in  std_logic;      -- reset in that domain
+        frame_rate : in  frame_rate_t;   -- the frame rate
+        frame_tick : out std_logic;      -- strobe true at frame rate
         qframe_pkt : out qframe_pkt_t);  -- for MTC generation, the quarter frame
 
 end entity frame_timer;
@@ -56,26 +56,30 @@ architecture timer of frame_timer is
     -- these are magic numbers, based on timer clock frequencies.
     -- for 24 fps the timer clock is 37.5 MHz.
     constant TICKS_PER_FRAME_24 : natural := 1562500;
-    constant QFRAME_24 : natural := TICKS_PER_FRAME_24 / 4;
+    constant QFRAME_24          : natural := TICKS_PER_FRAME_24 / 4;
     -- for 25 fps the timer clock is 50 MHz.
     constant TICKS_PER_FRAME_25 : natural := 2000000;
-    constant QFRAME_25 : natural := TICKS_PER_FRAME_25 / 4;
+    constant QFRAME_25          : natural := TICKS_PER_FRAME_25 / 4;
     -- for 30 fps the timer clock is 33 MHz.
     constant TICKS_PER_FRAME_30 : natural := 1100000;
-    constant QFRAME_30 : natural := TICKS_PER_FRAME_30 / 4;
+    constant QFRAME_30          : natural := TICKS_PER_FRAME_30 / 4;
 
     -- counter for frame rate timer.
     subtype frame_tickcnt_t is natural range 0 to TICKS_PER_FRAME_25 - 1;
     signal frame_tickcnt : frame_tickcnt_t;
-    signal frame_tick_i : std_logic;    -- the tick itself
+    signal frame_tick_i  : std_logic;   -- the tick itself
 
     -- keep track of the quarter frames.
-    signal qframe_id : qframe_id_t;
+    signal qframe_id      : qframe_id_t;
     -- counter for quarter frame timer.
     subtype qframe_tickcnt_t is natural range 0 to QFRAME_25 - 1;
     signal qframe_tickcnt : qframe_tickcnt_t;
     -- the tick asserted ever quarter frame.
-    signal qframe_tick : std_logic;
+    signal qframe_tick    : std_logic;
+
+    -- synchronizer state machine.
+    type sm_state_t is (SM_WAIT_FRAME_TICK, SM_TIMING);
+    signal sm_state : sm_state_t;
     
 begin  -- architecture timer
 
@@ -87,7 +91,7 @@ begin  -- architecture timer
         if rising_edge(clk) then
             if rst_l = '0' then
                 frame_tickcnt <= 1;     -- for proper initial load
-                frame_tick_i    <= '0';
+                frame_tick_i  <= '0';
             else
                 StrobeFrameTick : if frame_tickcnt = 1 then
                     frame_tick_i <= '1';
@@ -123,32 +127,18 @@ begin  -- architecture timer
     -- Count quarter frames. This works like the full frame timer, except that it rolls over four times
     -- during one frame. This is synchronized with the full frame tick when that counter rolls over.
     ---------------------------------------------------------------------------------------------------------
-    QuarterFrameCounter: process (clk) is
+    QuarterFrameCounter : process (clk) is
     begin  -- process QuarterFrameCounter
         if rising_edge(clk) then
-            if rst_l = '0' then 
-                qframe_id <= 7;         -- for proper initial load
-                qframe_tickcnt <= 1;    -- same
-                qframe_tick <= '0';
+            if rst_l = '0' then
+                qframe_id      <= 0;    
+                qframe_tickcnt <= 0;    
+                qframe_tick    <= '0';
             else
 
-                -- the quarter-frame tick goes out on rollover. Update qframe ID here, too, so it coincides
-                -- with the tick.
-                StrobeQFrameTick: if qframe_tickcnt = 1 then
-                    qframe_tick <= '1';
-                    is_frame_tick_sync: if frame_tickcnt = 1 then
-                        qframe_id <= 0;
-                    else
-                        qframe_id <= qframe_id + 1;
-                    end if is_frame_tick_sync;
-                else
-                    qframe_tick <= '0';
-                end if StrobeQFrameTick;
-
-                -- qframe_tick true coincides with the tick count = 0, so the timer rolls over then.
-                -- frame rate determines the reload value.
-                QframeTimerCount: if qframe_tick then
-                    QframeReload: case frame_rate is
+                -- count ticks in the quarter frame.
+                QframeTimerCount : if qframe_tickcnt = 0 then
+                    QframeReload : case frame_rate is
                         when FR_30 =>
                             qframe_tickcnt <= QFRAME_30 - 1;
                         when FR_25 =>
@@ -161,13 +151,35 @@ begin  -- architecture timer
                 else
                     qframe_tickcnt <= qframe_tickcnt - 1;
                 end if QframeTimerCount;
-                
+
+                -- clear oneshot.
+                qframe_tick <= '0';
+
+                -- simple machine that waits for the first full frame tick and synchronizes the quarter frame
+                -- timer to it.
+                sync_machine : case sm_state is
+                    when SM_WAIT_FRAME_TICK =>
+                        -- first frame tick after reset synchronizes qframes.
+                        is_first_frame_tick : if frame_tickcnt = 1 then
+                            qframe_tickcnt <= 0;  -- this will reload qframe timer.
+                            qframe_id      <= 0;  -- this is the first quarter frame
+                            sm_state       <= SM_TIMING;
+                        end if is_first_frame_tick;
+
+                    when SM_TIMING =>
+                        -- update qframe id and output the actual tick when the timer will expire.
+                        update_qframe : if qframe_tickcnt = 1 then
+                            qframe_id   <= (qframe_id + 1) mod 8;
+                            qframe_tick <= '1';
+                        end if update_qframe;
+                end case sync_machine;
+
             end if;
         end if;
     end process QuarterFrameCounter;
 
     -- to outside world:
-    qframe_pkt.id <= qframe_id;
+    qframe_pkt.id   <= qframe_id;
     qframe_pkt.tick <= qframe_tick;
-    
+
 end architecture timer;

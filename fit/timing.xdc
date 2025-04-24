@@ -17,12 +17,12 @@ set_input_delay -clock [get_clocks sys_clk_pin] -min -add_delay 2.100 [get_ports
 set_input_delay -clock [get_clocks sys_clk_pin] -max -add_delay 8.100 [get_ports BTND]
 
 # vivado demands output delay specs for the LEDs.
-set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports {LED16_B}]
-set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports {LED16_B}]
-set_false_path -to [get_ports {LED16_B}]
+set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports LED16_B]
+set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports LED16_B]
+set_false_path -to [get_ports LED16_B]
 
-set_output_delay -clock [get_clocks clk_bundle[1]] -min -add_delay -1.900 [get_ports {LED[*]}]
-set_output_delay -clock [get_clocks clk_bundle[1]] -max -add_delay 6.100 [get_ports {LED[*]}]
+set_output_delay -clock [get_clocks {clk_bundle[1]}] -min -add_delay -1.900 [get_ports {LED[*]}]
+set_output_delay -clock [get_clocks {clk_bundle[1]}] -max -add_delay 6.100 [get_ports {LED[*]}]
 set_false_path -to [get_ports {LED[*]}]
 set_output_delay -clock [get_clocks sys_clk_pin] -min -add_delay -1.900 [get_ports {AN[*]}]
 set_output_delay -clock [get_clocks sys_clk_pin] -max -add_delay 6.100 [get_ports {AN[*]}]
@@ -72,5 +72,4 @@ set_false_path -from [get_clocks sys_clk_pin] -to [get_clocks -of_objects [get_p
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_inst/mmcm_adv_inst/CLKOUT0]] -to [get_clocks sys_clk_pin]
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_inst/mmcm_adv_inst/CLKOUT1]] -to [get_clocks sys_clk_pin]
 set_false_path -from [get_clocks -of_objects [get_pins clks_rst_inst/mmcm_adv_inst/CLKOUT2]] -to [get_clocks sys_clk_pin]
-
 

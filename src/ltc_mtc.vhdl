@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-20
+-- Last update: 2025-04-22
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ entity ltc_mtc is
         DP         : out std_logic;                     -- common decimal point
         AN         : out std_logic_vector(7 downto 0);  -- anodes for each segment
         -- PMOD
-        JA         : out std_logic_vector(2 downto 1);  -- use as MTC and LTC output
+        JA         : out std_logic_vector(3 downto 1);  -- use as MTC and LTC output
         -- Linear time code output on the audio PWM pin.
         AUD_PWM    : out std_logic;                     -- PWM signal path through to low-pass filter
         AUD_SD     : out std_logic                      -- active low shutdown, bring high to enable PWM
@@ -285,6 +285,8 @@ begin  -- architecture toplevel
             frame_rate  => frame_rate_s,
             frame_tick  => frame_tick,
             frame_time  => frame_time);
+
+    JA(3) <= frame_tick;
 
     ---------------------------------------------------------------------------------------------------------
     -- DISPLAY THE FRAME TIME.

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-19
+-- Last update: 2025-04-23
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ architecture testbench of ltc_mtc_tb is
     signal CG         : std_logic;
     signal DP         : std_logic;
     signal AN         : std_logic_vector(7 downto 0);
-    signal JA         : std_logic_vector(2 downto 1);
+    signal JA         : std_logic_vector(3 downto 1);
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
@@ -88,9 +88,9 @@ begin  -- architecture testbench
     -- change clock frequency.
     ChangeClockFreq : process is
     begin  -- process ChangeClockFreq
-        SW <= "00";
+        SW <= "11";
         wait for 5000 MS;
-        SW <= "01";
+        SW <= "00";
         wait for 5000 MS;
         SW <= "10";
         wait for 5000 MS;
