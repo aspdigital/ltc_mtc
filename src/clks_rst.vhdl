@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -45,10 +45,10 @@ entity clks_rst is
         mmcm_locked : out std_logic;
         -- use for LTC time code generator.
         clk_timer   : out std_logic;     -- selected timer clock
-        rst_timer_l : out std_logic;     -- reset in that domain
+        rst_timer   : out std_logic;     -- reset in that domain
         -- for non-timer logic that always runs.
         clk_main    : out std_logic;     -- general use clock at reference frequency
-        rst_main_l  : out std_logic);    -- clock in that domain
+        rst_main    : out std_logic);    -- clock in that domain
 
 end entity clks_rst;
 
@@ -140,10 +140,12 @@ begin  -- architecture clkgen
 
     -- reset in the "main" clock domain.
     main_reset_sync : entity work.reset_sync(synchronizer)
+        generic map (
+            ASYNC_ACTIVE => '0')
         port map (
-            clk    => clk_main,
-            arst_l => arst_l,
-            srst_l => rst_main_l);
+            clk  => clk_main,
+            arst => arst_l,
+            srst => rst_main);
 
     ---------------------------------------------------------------------------------------------------------
     -- generate a reset in the clk_timer domain.
@@ -161,7 +163,7 @@ begin  -- architecture clkgen
             SYNC_FLOPS  => 3)
         port map (
             clk   => clk_main,
-            rst_l => rst_main_l,
+            rst   => rst_main,
             d     => locked,
             q     => locked_s);
 
@@ -179,12 +181,12 @@ begin  -- architecture clkgen
     timer_clk_mux : entity work.clk_mux(mux)
         port map (
             clk_main    => clk_main,
-            rst_main_l  => rst_main_l,
+            rst_main    => rst_main,
             mmcm_locked => locked_s,
             frame_rate  => frame_rate,
             clk_bundle  => clk_bundle,
             --
             clk_out     => clk_timer,
-            rst_out_l   => rst_timer_l);
+            rst_out     => rst_timer);
 
 end architecture clkgen;

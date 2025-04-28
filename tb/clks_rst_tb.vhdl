@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-17
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -45,9 +45,9 @@ architecture testbench of clks_rst_tb is
     signal clk_bundle  : clk_bundle_t;
     signal mmcm_locked : std_logic;
     signal clk_timer   : std_logic;
-    signal rst_timer_l : std_logic;
+    signal rst_timer   : std_logic;
     signal clk_main    : std_logic;
-    signal rst_main_l  : std_logic;
+    signal rst_main    : std_logic;
 
 begin  -- architecture testbench
 
@@ -60,9 +60,9 @@ begin  -- architecture testbench
             clk_bundle  => clk_bundle,
             mmcm_locked => mmcm_locked,
             clk_timer   => clk_timer,
-            rst_timer_l => rst_timer_l,
+            rst_timer   => rst_timer,
             clk_main    => clk_main,
-            rst_main_l  => rst_main_l);
+            rst_main    => rst_main);
 
     -- clock and reset
     clk_ref <= not clk_ref after CLKPER / 2;

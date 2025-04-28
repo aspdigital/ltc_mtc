@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ entity mtc_encoder is
     port (
         -- Clock and reset
         clk_timer     : in  std_logic;                     -- clock synchronous with our logic
-        rst_timer_l   : in  std_logic;                     -- reset in that domain
+        rst_timer     : in  std_logic;                     -- reset in that domain
         -- current info
         frame_rate    : in  frame_rate_t;                  -- frame rate
         frame_tick    : in  std_logic;                     -- tick at frame rate
@@ -111,7 +111,7 @@ begin  -- architecture coder
     Encoder : process (clk_timer) is
     begin  -- process Encoder
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 full_frame_latch <= '0';
                 ff_byte_cnt      <= 0;
                 msg_data         <= (others => '0');

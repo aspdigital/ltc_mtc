@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-13
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -30,10 +30,10 @@ entity debounce is
         ACTIVE_STATE  : std_logic);
 
     port (
-        clk   : in  std_logic;          -- the logic clock to which the switch is synchronized
-        rst_l : in  std_logic;          -- reset in that domain
-        sw    : in  std_logic;          -- the switch input
-        swdb  : out std_logic);         -- debounced switch output
+        clk  : in  std_logic;           -- the logic clock to which the switch is synchronized
+        rst  : in  std_logic;           -- reset in that domain
+        sw   : in  std_logic;           -- the switch input
+        swdb : out std_logic);          -- debounced switch output
 
 end entity debounce;
 
@@ -66,23 +66,23 @@ begin  -- architecture swdeb
             RESET_STATE => not ACTIVE_STATE,
             SYNC_FLOPS  => 3)
         port map (
-            clk   => clk,
-            rst_l => rst_l,
-            d     => sw,
-            q     => sw_s);
+            clk => clk,
+            rst => rst,
+            d   => sw,
+            q   => sw_s);
 
     -- Debounce timer. Basically where there is an edge, latch it, then wait the debounce time. If it's still
     -- the same state, then update the output with that new state.
     Debouncer : process (clk) is
     begin  -- process Debouncer
         if rising_edge(clk) then
-            if rst_l = '0' then
+            if rst = '1' then
                 debounce_timer <= 0;                 -- count the debounce time
                 sw_d           <= not ACTIVE_STATE;  -- delay for edge detect
                 sw_prev        <= not ACTIVE_STATE;  -- state captured after a difference
                 swdb           <= not ACTIVE_STATE;
                 debounce_state <= DB_IDLE;
-                
+
             else
 
                 -- edge detector delay.

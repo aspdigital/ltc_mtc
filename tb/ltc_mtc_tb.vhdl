@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-23
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ architecture testbench of ltc_mtc_tb is
     -- component ports
     signal CLK100MHZ  : std_logic                    := '1';
     signal CPU_RESETN : std_logic                    := '0';
-    signal SW         : std_logic_vector(1 downto 0) := "00";
+    signal SW         : std_logic_vector(3 downto 0) := "0000";
     signal BTND       : std_logic                    := '0';
     signal LED16_B    : std_logic;
     signal LED        : std_logic_vector(15 downto 0);
@@ -51,14 +51,16 @@ architecture testbench of ltc_mtc_tb is
     signal CG         : std_logic;
     signal DP         : std_logic;
     signal AN         : std_logic_vector(7 downto 0);
-    signal JA         : std_logic_vector(3 downto 1);
+    signal JA1        : std_logic;
+    signal JA2        : std_logic;
+    signal JA3        : std_logic;
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
 begin  -- architecture testbench
 
     -- component instantiation
-    DUT : entity work.ltc_mtc
+    DUT : entity work.ltc_mtc(toplevel)
         generic map (
             CLKPER => CLKPER)
         port map (
@@ -77,24 +79,31 @@ begin  -- architecture testbench
             CG         => CG,
             DP         => DP,
             AN         => AN,
-            JA         => JA,
+            JA1        => JA1,
+            JA2        => JA2,
+            JA3        => JA3,
             AUD_PWM    => AUD_PWM,
             AUD_SD     => AUD_SD);
 
     -- clock generation
-    CLK100MHZ  <= not CLK100MHZ after 10 NS;
+    CLK100MHZ  <= not CLK100MHZ after CLKPER / 2;
     CPU_RESETN <= '1'           after 666 NS;
 
     -- change clock frequency.
     ChangeClockFreq : process is
     begin  -- process ChangeClockFreq
-        SW <= "11";
+        SW <= "0011";
         wait for 5000 MS;
-        SW <= "00";
+        SW <= "0000";
         wait for 5000 MS;
-        SW <= "10";
+        SW <= "0010";
         wait for 5000 MS;
     end process ChangeClockFreq;
+
+    tb_mtc_decoder_1: entity work.tb_mtc_decoder(model)
+        port map (
+            midi_in => JA2);
+
 
 end architecture testbench;
 

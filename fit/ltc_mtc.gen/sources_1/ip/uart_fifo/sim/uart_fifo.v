@@ -54,7 +54,6 @@
 
 (* DowngradeIPIdentifiedWarnings = "yes" *)
 module uart_fifo (
-  rst,
   wr_clk,
   rd_clk,
   din,
@@ -62,16 +61,10 @@ module uart_fifo (
   rd_en,
   dout,
   full,
-  almost_full,
-  wr_ack,
-  overflow,
   empty,
-  almost_empty,
-  valid,
-  underflow
+  valid
 );
 
-input wire rst;
 (* X_INTERFACE_INFO = "xilinx.com:signal:clock:1.0 write_clk CLK" *)
 (* X_INTERFACE_MODE = "slave" *)
 (* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME write_clk, FREQ_HZ 100000000, FREQ_TOLERANCE_HZ 0, PHASE 0.0, INSERT_VIP 0" *)
@@ -92,43 +85,36 @@ input wire rd_en;
 output wire [7 : 0] dout;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE FULL" *)
 output wire full;
-(* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE ALMOST_FULL" *)
-output wire almost_full;
-output wire wr_ack;
-output wire overflow;
 (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ EMPTY" *)
 output wire empty;
-(* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ ALMOST_EMPTY" *)
-output wire almost_empty;
 output wire valid;
-output wire underflow;
 
   fifo_generator_v13_2_11 #(
     .C_COMMON_CLOCK(0),
     .C_SELECT_XPM(0),
     .C_COUNT_TYPE(0),
-    .C_DATA_COUNT_WIDTH(4),
+    .C_DATA_COUNT_WIDTH(5),
     .C_DEFAULT_VALUE("BlankString"),
     .C_DIN_WIDTH(8),
     .C_DOUT_RST_VAL("0"),
     .C_DOUT_WIDTH(8),
     .C_ENABLE_RLOCS(0),
     .C_FAMILY("artix7"),
-    .C_FULL_FLAGS_RST_VAL(1),
-    .C_HAS_ALMOST_EMPTY(1),
-    .C_HAS_ALMOST_FULL(1),
+    .C_FULL_FLAGS_RST_VAL(0),
+    .C_HAS_ALMOST_EMPTY(0),
+    .C_HAS_ALMOST_FULL(0),
     .C_HAS_BACKUP(0),
     .C_HAS_DATA_COUNT(0),
     .C_HAS_INT_CLK(0),
     .C_HAS_MEMINIT_FILE(0),
-    .C_HAS_OVERFLOW(1),
+    .C_HAS_OVERFLOW(0),
     .C_HAS_RD_DATA_COUNT(0),
     .C_HAS_RD_RST(0),
-    .C_HAS_RST(1),
+    .C_HAS_RST(0),
     .C_HAS_SRST(0),
-    .C_HAS_UNDERFLOW(1),
+    .C_HAS_UNDERFLOW(0),
     .C_HAS_VALID(1),
-    .C_HAS_WR_ACK(1),
+    .C_HAS_WR_ACK(0),
     .C_HAS_WR_DATA_COUNT(0),
     .C_HAS_WR_RST(0),
     .C_IMPLEMENTATION_TYPE(2),
@@ -143,15 +129,15 @@ output wire underflow;
     .C_PROG_EMPTY_THRESH_ASSERT_VAL(4),
     .C_PROG_EMPTY_THRESH_NEGATE_VAL(5),
     .C_PROG_EMPTY_TYPE(0),
-    .C_PROG_FULL_THRESH_ASSERT_VAL(15),
-    .C_PROG_FULL_THRESH_NEGATE_VAL(14),
+    .C_PROG_FULL_THRESH_ASSERT_VAL(31),
+    .C_PROG_FULL_THRESH_NEGATE_VAL(30),
     .C_PROG_FULL_TYPE(0),
-    .C_RD_DATA_COUNT_WIDTH(4),
-    .C_RD_DEPTH(16),
+    .C_RD_DATA_COUNT_WIDTH(5),
+    .C_RD_DEPTH(32),
     .C_RD_FREQ(1),
-    .C_RD_PNTR_WIDTH(4),
+    .C_RD_PNTR_WIDTH(5),
     .C_UNDERFLOW_LOW(0),
-    .C_USE_DOUT_RST(1),
+    .C_USE_DOUT_RST(0),
     .C_USE_ECC(0),
     .C_USE_EMBEDDED_REG(0),
     .C_USE_PIPELINE_REG(0),
@@ -160,10 +146,10 @@ output wire underflow;
     .C_USE_FWFT_DATA_COUNT(0),
     .C_VALID_LOW(0),
     .C_WR_ACK_LOW(0),
-    .C_WR_DATA_COUNT_WIDTH(4),
-    .C_WR_DEPTH(16),
+    .C_WR_DATA_COUNT_WIDTH(5),
+    .C_WR_DEPTH(32),
     .C_WR_FREQ(1),
-    .C_WR_PNTR_WIDTH(4),
+    .C_WR_PNTR_WIDTH(5),
     .C_WR_RESPONSE_LATENCY(1),
     .C_MSGON_VAL(1),
     .C_ENABLE_RST_SYNC(1),
@@ -310,7 +296,7 @@ output wire underflow;
     .backup(1'D0),
     .backup_marker(1'D0),
     .clk(1'D0),
-    .rst(rst),
+    .rst(1'D0),
     .srst(1'D0),
     .wr_clk(wr_clk),
     .wr_rst(1'D0),
@@ -319,25 +305,25 @@ output wire underflow;
     .din(din),
     .wr_en(wr_en),
     .rd_en(rd_en),
-    .prog_empty_thresh(4'B0),
-    .prog_empty_thresh_assert(4'B0),
-    .prog_empty_thresh_negate(4'B0),
-    .prog_full_thresh(4'B0),
-    .prog_full_thresh_assert(4'B0),
-    .prog_full_thresh_negate(4'B0),
+    .prog_empty_thresh(5'B0),
+    .prog_empty_thresh_assert(5'B0),
+    .prog_empty_thresh_negate(5'B0),
+    .prog_full_thresh(5'B0),
+    .prog_full_thresh_assert(5'B0),
+    .prog_full_thresh_negate(5'B0),
     .int_clk(1'D0),
     .injectdbiterr(1'D0),
     .injectsbiterr(1'D0),
     .sleep(1'D0),
     .dout(dout),
     .full(full),
-    .almost_full(almost_full),
-    .wr_ack(wr_ack),
-    .overflow(overflow),
+    .almost_full(),
+    .wr_ack(),
+    .overflow(),
     .empty(empty),
-    .almost_empty(almost_empty),
+    .almost_empty(),
     .valid(valid),
-    .underflow(underflow),
+    .underflow(),
     .data_count(),
     .rd_data_count(),
     .wr_data_count(),

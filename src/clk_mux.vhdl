@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-16
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -33,14 +33,14 @@ entity clk_mux is
     port (
         -- lock status and frame rate are on main clock.
         clk_main    : in  std_logic;     -- domain that manages the select
-        rst_main_l  : in  std_logic;     -- reset in that domain
+        rst_main    : in  std_logic;     -- reset in that domain
         mmcm_locked : in  std_logic;     -- all clocks are valid
         frame_rate  : in  frame_rate_t;  -- frame rate determines which clock is output.
         -- input clocks
         clk_bundle  : in  clk_bundle_t;
         -- output clock and reset in its domain.
         clk_out     : out std_logic;     -- resulting clock
-        rst_out_l   : out std_logic);    -- reset in that domain.
+        rst_out     : out std_logic);    -- reset in that domain.
 
 end entity clk_mux;
 
@@ -50,8 +50,8 @@ architecture mux of clk_mux is
     signal frame_rate_d : frame_rate_t;
 
     -- Assert reset in the downstream domain when the MMCM is not locked or if the frame rate has changed.
-    -- This will be synced to the downstream clock to drive rst_out_l.
-    signal rst_int_l : std_logic;
+    -- This will be synced to the downstream clock to drive rst_out.
+    signal rst_int : std_logic;
 
     ---------------------------------------------------------------------------------------------------------
     -- Determine clock mux selects from input frame rate.
@@ -91,10 +91,10 @@ begin  -- architecture mux
     get_clk_selects : process (clk_main) is
     begin  -- process MakeReset
         if rising_edge(clk_main) then
-            if rst_main_l = '0' then
+            if rst_main = '1' then
                 clk_sel      <= CLK_SEL_FR24;
                 frame_rate_d <= FR_24;
-                rst_int_l    <= '0';
+                rst_int      <= '1';
             else
                 FrameRateDecoder : case frame_rate is
                     when FR_30 => clk_sel <= CLK_SEL_FR30;  -- need 33 MHz clock
@@ -106,7 +106,7 @@ begin  -- architecture mux
 
                 -- look for change in frame rate, or MMCM unlock, to assert reset in the mux domain.
                 frame_rate_d <= frame_rate;  -- delay for edge detect
-                rst_int_l    <= '0' when mmcm_locked = '0' or (frame_rate /= frame_rate_d) else '1';
+                rst_int      <= '1' when mmcm_locked = '0' or (frame_rate /= frame_rate_d) else '0';
             end if;
         end if;
     end process get_clk_selects;
@@ -134,10 +134,12 @@ begin  -- architecture mux
 
     -- reset in the output domain.
     reset_sync : entity work.reset_sync(synchronizer)
+        generic map (
+            ASYNC_ACTIVE => '1')
         port map (
-            clk    => clk_out,
-            arst_l => rst_int_l,
-            srst_l => rst_out_l);
+            clk  => clk_out,
+            arst => rst_int,
+            srst => rst_out);
 
 end architecture mux;
 

@@ -10,19 +10,26 @@
             <top_module name="ltc_mtc_pkg" />
             <top_module name="ltc_mtc_tb" />
             <top_module name="mtc_pkg" />
+            <top_module name="seven_segment_display_pkg" />
+            <top_module name="timecode_pkg" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="165.833333 us"></ZoomStartTime>
-      <ZoomEndTime time="1,166.833334 us"></ZoomEndTime>
-      <Cursor1Time time="853.280000 us"></Cursor1Time>
+      <ZoomStartTime time="999,949.275 ns"></ZoomStartTime>
+      <ZoomEndTime time="999,988.936 ns"></ZoomEndTime>
+      <Cursor1Time time="999,980.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="276"></NameColumnWidth>
-      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+      <NameColumnWidth column_width="270"></NameColumnWidth>
+      <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="36" />
+   <WVObjectSize size="42" />
+   <wave_markers>
+      <marker time="20669587216" label="" />
+      <marker time="37399801000" label="" />
+      <marker time="999960000" label="" />
+   </wave_markers>
    <wvobject fp_name="/ltc_mtc_tb/CLK100MHZ" type="logic">
       <obj_property name="ElementShortName">CLK100MHZ</obj_property>
       <obj_property name="ObjectShortName">CLK100MHZ</obj_property>
@@ -32,12 +39,8 @@
       <obj_property name="ObjectShortName">CPU_RESETN</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/SW" type="array">
-      <obj_property name="ElementShortName">SW[2:0]</obj_property>
-      <obj_property name="ObjectShortName">SW[2:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/frsw" type="array">
-      <obj_property name="ElementShortName">frsw[1:0]</obj_property>
-      <obj_property name="ObjectShortName">frsw[1:0]</obj_property>
+      <obj_property name="ElementShortName">SW[3:0]</obj_property>
+      <obj_property name="ObjectShortName">SW[3:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/CA" type="logic">
       <obj_property name="ElementShortName">CA</obj_property>
@@ -101,10 +104,6 @@
       <obj_property name="ObjectShortName">frame_time</obj_property>
       <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/JA[1]" type="logic">
-      <obj_property name="ElementShortName">[1]</obj_property>
-      <obj_property name="ObjectShortName">[1]</obj_property>
-   </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/ltc_enc/TICKS_PER_BIT_30FPS" type="other">
       <obj_property name="ElementShortName">TICKS_PER_BIT_30FPS</obj_property>
       <obj_property name="ObjectShortName">TICKS_PER_BIT_30FPS</obj_property>
@@ -151,24 +150,58 @@
       <obj_property name="ElementShortName">ff_byte_cnt</obj_property>
       <obj_property name="ObjectShortName">ff_byte_cnt</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/JA[2]" type="logic">
-      <obj_property name="ElementShortName">[2]</obj_property>
-      <obj_property name="ObjectShortName">[2]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/JA[1]" type="logic">
-      <obj_property name="ElementShortName">[1]</obj_property>
-      <obj_property name="ObjectShortName">[1]</obj_property>
-   </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/LED16_B" type="logic">
       <obj_property name="ElementShortName">LED16_B</obj_property>
       <obj_property name="ObjectShortName">LED16_B</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/decode_mtc/rgb_led_driver/timer" type="other">
-      <obj_property name="ElementShortName">timer</obj_property>
-      <obj_property name="ObjectShortName">timer</obj_property>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/clk_main" type="logic">
+      <obj_property name="ElementShortName">clk_main</obj_property>
+      <obj_property name="ObjectShortName">clk_main</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/decode_mtc/rgb_led_driver/TIMER_MAX" type="other">
-      <obj_property name="ElementShortName">TIMER_MAX</obj_property>
-      <obj_property name="ObjectShortName">TIMER_MAX</obj_property>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/br_timer" type="other">
+      <obj_property name="ElementShortName">br_timer</obj_property>
+      <obj_property name="ObjectShortName">br_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/JA2" type="logic">
+      <obj_property name="ElementShortName">JA2</obj_property>
+      <obj_property name="ObjectShortName">JA2</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/midi_in" type="logic">
+      <obj_property name="ElementShortName">midi_in</obj_property>
+      <obj_property name="ObjectShortName">midi_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word" type="array">
+      <obj_property name="ElementShortName">rx_word[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rx_word[7:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/got_f1" type="other">
+      <obj_property name="ElementShortName">got_f1</obj_property>
+      <obj_property name="ObjectShortName">got_f1</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/frames" type="other">
+      <obj_property name="ElementShortName">frames</obj_property>
+      <obj_property name="ObjectShortName">frames</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/seconds" type="other">
+      <obj_property name="ElementShortName">seconds</obj_property>
+      <obj_property name="ObjectShortName">seconds</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/minutes" type="other">
+      <obj_property name="ElementShortName">minutes</obj_property>
+      <obj_property name="ObjectShortName">minutes</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/hours" type="other">
+      <obj_property name="ElementShortName">hours</obj_property>
+      <obj_property name="ObjectShortName">hours</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/frame_rate" type="array">
+      <obj_property name="ElementShortName">frame_rate[1:0]</obj_property>
+      <obj_property name="ObjectShortName">frame_rate[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/frame_time" type="array">
+      <obj_property name="ElementShortName">frame_time</obj_property>
+      <obj_property name="ObjectShortName">frame_time</obj_property>
    </wvobject>
 </wave_config>

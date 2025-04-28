@@ -1,1 +1,1 @@
-vopt -l elaborate.log +acc=npr -suppress 10016  -L xil_defaultlib -L xpm -L unisims_ver -L unimacro_ver -L secureip -work xil_defaultlib xil_defaultlib.ltc_mtc_tb xil_defaultlib.glbl -o ltc_mtc_tb_opt
+vopt -l elaborate.log +acc=npr -suppress 10016  -L xil_defaultlib -L xpm -L fifo_generator_v13_2_11 -L unisims_ver -L unimacro_ver -L secureip -work xil_defaultlib xil_defaultlib.ltc_mtc_tb xil_defaultlib.glbl -o ltc_mtc_tb_opt

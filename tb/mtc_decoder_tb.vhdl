@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ architecture testbench of mtc_decoder_tb is
 
     signal midi_rx        : std_logic;
     signal clk_main       : std_logic := '1';
-    signal rst_main_l     : std_logic;
+    signal rst_main       : std_logic;
     signal frame_rate     : frame_rate_t;
     signal frame_time     : frame_time_t;
     signal new_frame_time : std_logic;
@@ -85,7 +85,7 @@ begin  -- architecture testbench
         port map (
             midi_rx        => midi_rx,
             clk_main       => clk_main,
-            rst_main_l     => rst_main_l,
+            rst_main       => rst_main,
             frame_rate     => frame_rate,
             frame_time     => frame_time,
             new_frame_time => new_frame_time);
@@ -93,11 +93,13 @@ begin  -- architecture testbench
     clk_main  <= not clk_main after CLK_PER / 2;
     tb_arst_l <= '1'          after RESET_TIME;
 
-    reset_sync_1 : entity work.reset_sync(synchronizer)
+    main_reset_sync : entity work.reset_sync(synchronizer)
+        generic map (
+            ASYNC_ACTIVE => '0')
         port map (
-            clk    => clk_main,
-            arst_l => tb_arst_l,
-            srst_l => rst_main_l);
+            clk  => clk_main,
+            arst => tb_arst_l,
+            srst => rst_main);
 
     ---------------------------------------------------------------------------------------------------------
     -- send a sequence of quarter frame messages.
@@ -105,9 +107,9 @@ begin  -- architecture testbench
     ---------------------------------------------------------------------------------------------------------
     send_test_data : process is
     begin  -- process send_test_data
-        is_in_reset : if rst_main_l /= '1' then
-            midi_rx <= '1';                 -- idle high
-            wait until rst_main_l = '1';
+        is_in_reset : if rst_main /= '0' then
+            midi_rx <= '1';             -- idle high
+            wait until rst_main = '0';
             wait for 100 US;
         end if is_in_reset;
 

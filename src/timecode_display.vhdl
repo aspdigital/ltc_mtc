@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-09
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -36,11 +36,11 @@ entity timecode_display is
         CLKPER_25FPS : time;
         CLKPER_24FPS : time);
     port (
-        clk_timer   : in  std_logic;     -- clock at a rate that divides nicely into the frame rate
-        rst_timer_l : in  std_logic;     -- reset in that domain
-        frame_time  : in  frame_time_t;  -- the current frame time, on clk_timer
-        frame_rate  : in  frame_rate_t;  -- the current frame rate
-        display     : out display_t);    -- all seven segments
+        clk_timer  : in  std_logic;     -- clock at a rate that divides nicely into the frame rate
+        rst_timer  : in  std_logic;     -- reset in that domain
+        frame_time : in  frame_time_t;  -- the current frame time, on clk_timer
+        frame_rate : in  frame_rate_t;  -- the current frame rate
+        display    : out display_t);    -- all seven segments
 
 end entity timecode_display;
 
@@ -106,7 +106,7 @@ begin  -- architecture digit_driver
     RefreshDisplay : process (clk_timer) is
     begin  -- process RefreshDisplay
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 reload        <= 0;
                 refresh_timer <= 0;
                 refresh_tick  <= '0';

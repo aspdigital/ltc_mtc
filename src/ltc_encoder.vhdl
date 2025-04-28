@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -52,12 +52,12 @@ use work.timecode_pkg.all;
 entity ltc_encoder is
 
     port (
-        clk_timer   : in  std_logic;     -- clock at the proper timer rate for evenly-divisible tick
-        rst_timer_l : in  std_logic;     -- reset in that domain
-        frame_rate  : in  frame_rate_t;  -- frames per second, 24, 25 or 30
-        frame_tick  : in  std_logic;     -- synchronizing strobe at the frame rate
-        frame_time  : in  frame_time_t;  -- current frame time, valid on the tick
-        ltc         : out std_logic);    -- current time encoded in the serial time code
+        clk_timer  : in  std_logic;     -- clock at the proper timer rate for evenly-divisible tick
+        rst_timer  : in  std_logic;     -- reset in that domain
+        frame_rate : in  frame_rate_t;  -- frames per second, 24, 25 or 30
+        frame_tick : in  std_logic;     -- synchronizing strobe at the frame rate
+        frame_time : in  frame_time_t;  -- current frame time, valid on the tick
+        ltc        : out std_logic);    -- current time encoded in the serial time code
 
 end entity ltc_encoder;
 
@@ -150,7 +150,7 @@ begin  -- architecture coder
     BitTimer : process (clk_timer) is
     begin  -- process BitTimer
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 bit_timer         <= 0;
                 start_of_bit      <= '0';
                 middle_of_bit     <= '0';
@@ -193,7 +193,7 @@ begin  -- architecture coder
     ShiftIt : process (clk_timer) is
     begin  -- process EncodeIt
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 prev_msb <= '0';
                 sr       <= (others => '0');
             else
@@ -237,7 +237,7 @@ begin  -- architecture coder
     EncodeIt : process (clk_timer) is
     begin  -- process EncodeIt
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 ltc <= '0';
             else
                 ToggleNextBit : if start_of_bit or (middle_of_bit and prev_msb) then

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-23
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ use work.mtc_pkg.all;
 entity frame_timer is
     port (
         clk        : in  std_logic;      -- our logic clock
-        rst_l      : in  std_logic;      -- reset in that domain
+        rst        : in  std_logic;      -- reset in that domain
         frame_rate : in  frame_rate_t;   -- the frame rate
         frame_tick : out std_logic;      -- strobe true at frame rate
         qframe_pkt : out qframe_pkt_t);  -- for MTC generation, the quarter frame
@@ -80,7 +80,7 @@ architecture timer of frame_timer is
     -- synchronizer state machine.
     type sm_state_t is (SM_WAIT_FRAME_TICK, SM_TIMING);
     signal sm_state : sm_state_t;
-    
+
 begin  -- architecture timer
 
     ---------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ begin  -- architecture timer
     FrameTimer : process (clk) is
     begin  -- process FrameTimer
         if rising_edge(clk) then
-            if rst_l = '0' then
+            if rst = '1' then
                 frame_tickcnt <= 1;     -- for proper initial load
                 frame_tick_i  <= '0';
             else
@@ -130,9 +130,9 @@ begin  -- architecture timer
     QuarterFrameCounter : process (clk) is
     begin  -- process QuarterFrameCounter
         if rising_edge(clk) then
-            if rst_l = '0' then
-                qframe_id      <= 0;    
-                qframe_tickcnt <= 0;    
+            if rst = '1' then
+                qframe_id      <= 0;
+                qframe_tickcnt <= 0;
                 qframe_tick    <= '0';
             else
 

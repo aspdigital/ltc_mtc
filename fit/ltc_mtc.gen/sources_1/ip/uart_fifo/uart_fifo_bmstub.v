@@ -6,7 +6,6 @@
 
 (* BLOCK_STUB = "true" *)
 module uart_fifo (
-  rst,
   wr_clk,
   rd_clk,
   din,
@@ -14,17 +13,10 @@ module uart_fifo (
   rd_en,
   dout,
   full,
-  almost_full,
-  wr_ack,
-  overflow,
   empty,
-  almost_empty,
-  valid,
-  underflow
+  valid
 );
 
-  (* X_INTERFACE_IGNORE = "true" *)
-  input rst;
   (* X_INTERFACE_INFO = "xilinx.com:signal:clock:1.0 write_clk CLK" *)
   (* X_INTERFACE_MODE = "slave write_clk" *)
   (* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME write_clk, FREQ_HZ 100000000, FREQ_TOLERANCE_HZ 0, PHASE 0.0, CLK_DOMAIN , ASSOCIATED_BUSIF , ASSOCIATED_PORT , ASSOCIATED_RESET , INSERT_VIP 0" *)
@@ -45,20 +37,10 @@ module uart_fifo (
   output [7:0]dout;
   (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE FULL" *)
   output full;
-  (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_write:1.0 FIFO_WRITE ALMOST_FULL" *)
-  output almost_full;
-  (* X_INTERFACE_IGNORE = "true" *)
-  output wr_ack;
-  (* X_INTERFACE_IGNORE = "true" *)
-  output overflow;
   (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ EMPTY" *)
   output empty;
-  (* X_INTERFACE_INFO = "xilinx.com:interface:fifo_read:1.0 FIFO_READ ALMOST_EMPTY" *)
-  output almost_empty;
   (* X_INTERFACE_IGNORE = "true" *)
   output valid;
-  (* X_INTERFACE_IGNORE = "true" *)
-  output underflow;
 
   // stub module has no contents
 

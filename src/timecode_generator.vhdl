@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-09
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -29,11 +29,11 @@ use work.timecode_pkg.all;
 entity timecode_generator is
 
     port (
-        clk_timer   : in  std_logic;      -- clock at the proper timer rate for evenly-divisible timer tick
-        rst_timer_l : in  std_logic;      -- reset in that domain
-        frame_rate  : in  frame_rate_t;   -- selected frame rate, should match clk_timer frequency.
-        frame_tick  : in  std_logic;      -- strobe at the selected frame rate
-        frame_time  : out frame_time_t);  -- the generated time code
+        clk_timer  : in  std_logic;      -- clock at the proper timer rate for evenly-divisible timer tick
+        rst_timer  : in  std_logic;      -- reset in that domain
+        frame_rate : in  frame_rate_t;   -- selected frame rate, should match clk_timer frequency.
+        frame_tick : in  std_logic;      -- strobe at the selected frame rate
+        frame_time : out frame_time_t);  -- the generated time code
 
 end entity timecode_generator;
 
@@ -78,7 +78,7 @@ begin  -- architecture timers
         variable v_hr  : time_0_to_23_t;
     begin  -- process TimeCodeGenerator
         if rising_edge(clk_timer) then
-            if rst_timer_l = '0' then
+            if rst_timer = '1' then
                 v_fc  := FRAME_CNT_RESET;
                 v_sec := MINSEC_RESET;
                 v_min := MINSEC_RESET;

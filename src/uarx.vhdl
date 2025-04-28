@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ entity uarx is
 
     port (
         clk      : in  std_logic;                     -- clock for our logic
-        rst_l    : in  std_logic;                     -- reset in that domain
+        rst      : in  std_logic;                     -- reset in that domain
         ser_rx   : in  std_logic;                     -- asynchronous serial input
         rx_data  : out std_logic_vector(7 downto 0);  -- received data word
         rx_valid : out std_logic);                    -- strobe true with new word
@@ -80,10 +80,10 @@ begin  -- architecture deserializer
             RESET_STATE => '1',         -- serial line idles high
             SYNC_FLOPS  => 3)
         port map (
-            clk   => clk,
-            rst_l => rst_l,
-            d     => ser_rx,
-            q     => ser_rx_s);
+            clk => clk,
+            rst => rst,
+            d   => ser_rx,
+            q   => ser_rx_s);
 
     ---------------------------------------------------------------------------------------------------------
     -- Deserializer.
@@ -91,7 +91,7 @@ begin  -- architecture deserializer
     deserialize_it : process (clk) is
     begin  -- process deserialize_it
         if rising_edge(clk) then
-            if rst_l = '0' then
+            if rst = '1' then
                 sr       <= (others => '1');  -- idles high.
                 bc       <= 0;
                 rx_data  <= (others => '0');
@@ -164,7 +164,5 @@ begin  -- architecture deserializer
             end if;
         end if;
     end process deserialize_it;
-
-
 
 end architecture deserializer;

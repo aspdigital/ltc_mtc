@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-14
--- Last update: 2025-04-20
+-- Last update: 2025-04-27
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -36,15 +36,15 @@ use work.timecode_pkg.all;
 
 entity mtc_decoder is
     generic (
-         CLK_PER  : time;               -- period of clk_main
+        CLK_PER   : time;               -- period of clk_main
         BAUD_RATE : natural := 31250);  -- MIDI baud rate
     port (
         -- MIDI in.
-        midi_rx        : in std_logic;
+        midi_rx        : in  std_logic;
         -- MIDI receiver is on global clock.
         -- So is the frame rate.
         clk_main       : in  std_logic;
-        rst_main_l     : in  std_logic;
+        rst_main       : in  std_logic;
         -- frame rate is sent as part of the hours count MSN.
         frame_rate     : out frame_rate_t;
         -- frame time updates
@@ -57,12 +57,12 @@ architecture decoder of mtc_decoder is
     -- uarx provides a receive byte and a valid strobe.
     signal rx_valid : std_logic;
     signal rx_data  : std_logic_vector(7 downto 0);
-    
+
     -- MS nybble of the receive data could be the quarter frame identifier. (If it is F then we should have
     -- the system common status byte).
-    alias qf_id     : std_logic_vector(3 downto 0) is rx_data(7 downto 4);
+    alias qf_id   : std_logic_vector(3 downto 0) is rx_data(7 downto 4);
     -- LS nybble is part of the time.
-    alias qf_data   : std_logic_vector(3 downto 0) is rx_data(3 downto 0);
+    alias qf_data : std_logic_vector(3 downto 0) is rx_data(3 downto 0);
 
     -- the Quarter Frame System Common Status Byte.
     constant QFSCS_BYTE : std_logic_vector(7 downto 0) := X"F1";
@@ -98,11 +98,11 @@ begin  -- architecture decoder
             BAUD_RATE => BAUD_RATE)
         port map (
             clk      => clk_main,
-            rst_l    => rst_main_l,
+            rst      => rst_main,
             ser_rx   => midi_rx,
             rx_data  => rx_data,
             rx_valid => rx_valid);
-    
+
     ---------------------------------------------------------------------------------------------------------
     -- As quarter-frame messages come in, decode them and store in the internal frame rate buffer.
     -- The messages come in this order: frames, seconds, minutes, hours.
@@ -118,7 +118,7 @@ begin  -- architecture decoder
     receive_timecode : process (clk_main) is
     begin  -- process receive_timecode
         if rising_edge(clk_main) then
-            if rst_main_l = '0' then
+            if rst_main = '1' then
                 got_qfscs      <= '0';
                 frame_rate     <= FR_30;
                 ft             <= FRAME_TIME_RESET;
