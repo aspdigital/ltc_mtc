@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-27
--- Last update: 2025-04-27
+-- Last update: 2025-04-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -25,6 +25,7 @@ use ieee.numeric_std.all;
 library std;
 use std.textio.all;
 
+use work.ltc_mtc_pkg.all;
 use work.mtc_pkg.all;
 use work.timecode_pkg.all;
 
@@ -59,6 +60,7 @@ architecture model of tb_mtc_decoder is
     procedure midi_receiver (
         signal midi_rx : in  std_logic;
         signal midi_data : out std_logic_vector(7 downto 0)) is
+        variable v_byte : std_logic_vector(7 downto 0);
     begin  -- procedure midi_receiver
         -- look for start bit
         wait until falling_edge(midi_in);
@@ -67,10 +69,11 @@ architecture model of tb_mtc_decoder is
         wait for MIDI_BIT_TIME / 2;
         get_bits : for bc in 0 to 7 loop
             wait for MIDI_BIT_TIME;
-            midi_data(bc) <= midi_in;
+            v_byte(bc) := midi_in;
         end loop get_bits;
         -- wait for stop bit
         wait for MIDI_BIT_TIME / 2;
+        midi_data <= v_byte;
     end procedure midi_receiver;
 
 begin  -- architecture model
@@ -108,7 +111,8 @@ begin  -- architecture model
                     when X"7" =>
                         hours      <= hours + (16 * to_integer(unsigned(nybble(0 downto 0))));
                         frame_rate <= nybble(2 downto 1);
-                    when others => null;
+                    when others =>
+                        report "Invalid qframe!" severity WARNING;
                 end case which_qframe;
             end if is_data;
         end if is_f1;
@@ -118,6 +122,24 @@ begin  -- architecture model
     report_timecode: process (all) is
     begin  -- process report_timecode
         got_it_all: if frame_rate'event then
+            frame_time <= (
+                frame_cnt => (
+                    lsd => frames mod (mtc_fr_to_frame_rate_t(frame_rate)),
+                    msd => frames /  (mtc_fr_to_frame_rate_t(frame_rate)),
+                    carry => '0'),
+                ft_sec => (
+                    lsd => seconds mod 60,
+                    msd => seconds / 60,
+                    carry => '0'),
+                ft_min => (
+                    lsd => minutes mod 60,
+                    msd => minutes / 60,
+                    carry => '0'),
+                ft_hr => (
+                    lsd => hours mod 24,
+                    msd => hours / 24,
+                    carry => '0'));
+                
             report "frame rate: " & to_string(frame_rate) & ", " & to_string(hours) & ":" & to_string(minutes) & ":" & to_string(hours)
                 severity NOTE;
         end if got_it_all;

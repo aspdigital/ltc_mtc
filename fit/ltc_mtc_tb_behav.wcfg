@@ -16,15 +16,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="999,949.275 ns"></ZoomStartTime>
-      <ZoomEndTime time="999,988.936 ns"></ZoomEndTime>
-      <Cursor1Time time="999,980.000 ns"></Cursor1Time>
+      <ZoomStartTime time="935,356.233334 us"></ZoomStartTime>
+      <ZoomEndTime time="937,343.233335 us"></ZoomEndTime>
+      <Cursor1Time time="935,919.233334 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="270"></NameColumnWidth>
+      <NameColumnWidth column_width="266"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="42" />
+   <WVObjectSize size="44" />
    <wave_markers>
       <marker time="20669587216" label="" />
       <marker time="37399801000" label="" />
@@ -174,7 +174,46 @@
       <obj_property name="ElementShortName">rx_word[7:0]</obj_property>
       <obj_property name="ObjectShortName">rx_word[7:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="vbus1099" type="vbus">
+      <obj_property name="label">nybble</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[3]" type="logic">
+         <obj_property name="ElementShortName">[3]</obj_property>
+         <obj_property name="ObjectShortName">[3]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[2]" type="logic">
+         <obj_property name="ElementShortName">[2]</obj_property>
+         <obj_property name="ObjectShortName">[2]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[1]" type="logic">
+         <obj_property name="ElementShortName">[1]</obj_property>
+         <obj_property name="ObjectShortName">[1]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[0]" type="logic">
+         <obj_property name="ElementShortName">[0]</obj_property>
+         <obj_property name="ObjectShortName">[0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="vbus1094" type="vbus">
+      <obj_property name="label">qframe</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[7]" type="logic">
+         <obj_property name="ElementShortName">[7]</obj_property>
+         <obj_property name="ObjectShortName">[7]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[6]" type="logic">
+         <obj_property name="ElementShortName">[6]</obj_property>
+         <obj_property name="ObjectShortName">[6]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[5]" type="logic">
+         <obj_property name="ElementShortName">[5]</obj_property>
+         <obj_property name="ObjectShortName">[5]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/rx_word[4]" type="logic">
+         <obj_property name="ElementShortName">[4]</obj_property>
+         <obj_property name="ObjectShortName">[4]</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/tb_mtc_decoder_1/got_f1" type="other">
       <obj_property name="ElementShortName">got_f1</obj_property>

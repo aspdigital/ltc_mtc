@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-12
--- Last update: 2025-04-12
+-- Last update: 2025-04-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -30,6 +30,5 @@ package mtc_pkg is
         id   : qframe_id_t;             -- which quarter frame is this?
         tick : std_logic;               -- strobe true every quarter frame
     end record qframe_pkt_t;
-
 
 end package mtc_pkg;
