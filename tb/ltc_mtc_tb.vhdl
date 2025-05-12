@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-04-27
+-- Last update: 2025-05-10
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -21,16 +21,25 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+library std;
+use std.textio.all;
+
+use work.ltc_mtc_pkg.all;
 
 -------------------------------------------------------------------------------------------------------------
 
 entity ltc_mtc_tb is
-
+    generic (
+        TX_FRAME_RATE : natural);
 end entity ltc_mtc_tb;
 
 -------------------------------------------------------------------------------------------------------------
 
 architecture testbench of ltc_mtc_tb is
+
+    constant FRAME_RATE_STR : string := frame_rate_t'image(frame_rate_t'val(TX_FRAME_RATE));
 
     -- component generics
     constant CLKPER : time := 10 NS;
@@ -38,7 +47,7 @@ architecture testbench of ltc_mtc_tb is
     -- component ports
     signal CLK100MHZ  : std_logic                    := '1';
     signal CPU_RESETN : std_logic                    := '0';
-    signal SW         : std_logic_vector(3 downto 0) := "0000";
+    signal SW         : std_logic_vector(3 downto 0) := "00" & std_logic_vector(to_unsigned(TX_FRAME_RATE, 2));
     signal BTND       : std_logic                    := '0';
     signal LED16_B    : std_logic;
     signal LED        : std_logic_vector(15 downto 0);
@@ -89,16 +98,18 @@ begin  -- architecture testbench
     CLK100MHZ  <= not CLK100MHZ after CLKPER / 2;
     CPU_RESETN <= '1'           after 666 NS;
 
+    assert FALSE report "frame rate =  " & FRAME_RATE_STR severity NOTE;
+
     -- change clock frequency.
-    ChangeClockFreq : process is
-    begin  -- process ChangeClockFreq
-        SW <= "0011";
-        wait for 5000 MS;
-        SW <= "0000";
-        wait for 5000 MS;
-        SW <= "0010";
-        wait for 5000 MS;
-    end process ChangeClockFreq;
+    -- ChangeClockFreq : process is
+    -- begin  -- process ChangeClockFreq
+    --     SW <= "0011";
+    --     wait for 5000 MS;
+    --     SW <= "0000";
+    --     wait for 5000 MS;
+    --     SW <= "0010";
+    --     wait for 5000 MS;
+    -- end process ChangeClockFreq;
 
     tb_mtc_decoder_1: entity work.tb_mtc_decoder(model)
         port map (

@@ -16,15 +16,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="935,356.233334 us"></ZoomStartTime>
-      <ZoomEndTime time="937,343.233335 us"></ZoomEndTime>
-      <Cursor1Time time="935,919.233334 us"></Cursor1Time>
+      <ZoomStartTime time="300.862 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,139.828 ns"></ZoomEndTime>
+      <Cursor1Time time="1,000.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="266"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="361"></NameColumnWidth>
+      <ValueColumnWidth column_width="194"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="44" />
+   <WVObjectSize size="63" />
    <wave_markers>
       <marker time="20669587216" label="" />
       <marker time="37399801000" label="" />
@@ -154,13 +154,90 @@
       <obj_property name="ElementShortName">LED16_B</obj_property>
       <obj_property name="ObjectShortName">LED16_B</obj_property>
    </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/clk_main" type="logic">
-      <obj_property name="ElementShortName">clk_main</obj_property>
-      <obj_property name="ObjectShortName">clk_main</obj_property>
+   <wvobject type="divider" fp_name="divider591">
+      <obj_property name="label">MIDI TRANSMIT</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/do_full_frame" type="logic">
+      <obj_property name="ElementShortName">do_full_frame</obj_property>
+      <obj_property name="ObjectShortName">do_full_frame</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/full_frame_latch" type="logic">
+      <obj_property name="ElementShortName">full_frame_latch</obj_property>
+      <obj_property name="ObjectShortName">full_frame_latch</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/ff_byte_cnt" type="other">
+      <obj_property name="ElementShortName">ff_byte_cnt</obj_property>
+      <obj_property name="ObjectShortName">ff_byte_cnt</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/clk_timer" type="logic">
+      <obj_property name="ElementShortName">clk_timer</obj_property>
+      <obj_property name="ObjectShortName">clk_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/qframe_pkt" type="array">
+      <obj_property name="ElementShortName">qframe_pkt</obj_property>
+      <obj_property name="ObjectShortName">qframe_pkt</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/sender_state" type="other">
+      <obj_property name="ElementShortName">sender_state</obj_property>
+      <obj_property name="ObjectShortName">sender_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/msg_data" type="array">
+      <obj_property name="ElementShortName">msg_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">msg_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/mtc_enc/msg_valid" type="logic">
+      <obj_property name="ElementShortName">msg_valid</obj_property>
+      <obj_property name="ObjectShortName">msg_valid</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/br_timer" type="other">
       <obj_property name="ElementShortName">br_timer</obj_property>
       <obj_property name="ObjectShortName">br_timer</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider598">
+      <obj_property name="label">UAT</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/bc" type="other">
+      <obj_property name="ElementShortName">bc</obj_property>
+      <obj_property name="ObjectShortName">bc</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/clk_main" type="logic">
+      <obj_property name="ElementShortName">clk_main</obj_property>
+      <obj_property name="ObjectShortName">clk_main</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/tx_state" type="other">
+      <obj_property name="ElementShortName">tx_state</obj_property>
+      <obj_property name="ObjectShortName">tx_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/tx_data" type="array">
+      <obj_property name="ElementShortName">tx_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">tx_data[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/fifo_empty" type="logic">
+      <obj_property name="ElementShortName">fifo_empty</obj_property>
+      <obj_property name="ObjectShortName">fifo_empty</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/fifo_valid" type="logic">
+      <obj_property name="ElementShortName">fifo_valid</obj_property>
+      <obj_property name="ObjectShortName">fifo_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/fifo_rd_tx_wren" type="logic">
+      <obj_property name="ElementShortName">fifo_rd_tx_wren</obj_property>
+      <obj_property name="ObjectShortName">fifo_rd_tx_wren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/tx_wren" type="logic">
+      <obj_property name="ElementShortName">tx_wren</obj_property>
+      <obj_property name="ObjectShortName">tx_wren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/busy" type="logic">
+      <obj_property name="ElementShortName">busy</obj_property>
+      <obj_property name="ObjectShortName">busy</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/serial_transmitter/tx_serializer/sr" type="array">
+      <obj_property name="ElementShortName">sr[9:0]</obj_property>
+      <obj_property name="ObjectShortName">sr[9:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/JA2" type="logic">
       <obj_property name="ElementShortName">JA2</obj_property>

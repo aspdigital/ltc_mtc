@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-04-27
+-- Last update: 2025-05-11
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -45,9 +45,10 @@ end entity uatx_with_fifo;
 architecture wrapper of uatx_with_fifo is
 
     -- between the FIFO and the UATX.
-    signal data_f_to_uatx    : std_logic_vector(tx_data'range);  -- data from FIFO.
-    signal fifo_rddata_valid : std_logic;  -- there is something in the FIFO.
-    signal pop_and_write     : std_logic;  -- pop the FIFO and push its read data to the serializer
+    signal data_f_to_uatx  : std_logic_vector(tx_data'range);  -- data from FIFO.
+    signal fifo_valid      : std_logic;      -- what we read is valid
+    signal fifo_empty      : std_logic;   -- there is nothing in the FIFO.
+    signal fifo_rd_tx_wren : std_logic;         -- write to the serializer
 
     -- UATX status.
     signal busy : std_logic;            -- serialization in process
@@ -78,8 +79,8 @@ begin  -- architecture wrapper
     -- The outside world writes to this directly.
     -- Logic here handles reading the FIFO and loading the shift register.
     --
-    -- FIFO is FWFT so read data are valid when the valid flag is true. We never do continuous FIFO pops, so
-    -- we don't hold the read enable true all the time.
+    -- FIFO is FWFT so read data are valid when the valid flag is true.
+    -- Remember there is a clock of latency between the UAT write and its assertion of busy.
     ---------------------------------------------------------------------------------------------------------
 
     ufifo : uart_fifo
@@ -88,28 +89,27 @@ begin  -- architecture wrapper
             rd_clk => clk_main,
             din    => tx_data,          -- we want to write this to the UATX
             wr_en  => tx_valid,         -- the above is valid
-            rd_en  => pop_and_write,    -- advance FIFO read pointer
+            rd_en  => fifo_rd_tx_wren,
             dout   => data_f_to_uatx,   -- give to transmitter
             full   => open,
-            empty  => open,
-            valid  => fifo_rddata_valid);
+            empty  => fifo_empty,
+            valid  => fifo_valid);
 
-    -- Control writing to the transmitter.
-    -- Write when the serializer is not busy and when the FIFO has something in it.
-    fifo_rd_tx_wr : process (clk_main) is
-    begin  -- process transmitter
+    pop_and_write: process (clk_main) is
+    begin  -- process pop_and_write
         if rising_edge(clk_main) then
             if rst_main = '1' then
-                pop_and_write <= '0';
+                fifo_rd_tx_wren <= '0';
             else
-                if busy = '0' and fifo_rddata_valid = '1' then
-                    pop_and_write <= '1';
+                popper: if fifo_valid and not busy and not fifo_rd_tx_wren then
+                    fifo_rd_tx_wren <= '1';
                 else
-                    pop_and_write <= '0';
-                end if;
+                    fifo_rd_tx_wren <= '0';
+                end if popper;
+                
             end if;
         end if;
-    end process fifo_rd_tx_wr;
+    end process pop_and_write;
 
     ---------------------------------------------------------------------------------------------------------
     -- The serializer/transmitter
@@ -122,7 +122,7 @@ begin  -- architecture wrapper
             clk     => clk_main,        -- logic clock
             rst     => rst_main,        -- reset in that domain
             tx_data => data_f_to_uatx,  -- parallel data to transmit
-            tx_wren => pop_and_write,   -- transmit data write enable
+            tx_wren => fifo_rd_tx_wren,
             busy    => busy,
             ser_tx  => ser_tx);         -- serial data line
 
