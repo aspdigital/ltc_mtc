@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-04-27
+-- Last update: 2025-05-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -191,6 +191,15 @@ architecture toplevel of ltc_mtc is
     signal midi_msg_data  : std_logic_vector(7 downto 0);
     signal midi_msg_valid : std_logic;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- MTC receiver. This runs on the main clock.
+    ---------------------------------------------------------------------------------------------------------
+    -- determines which clock to use for the display, if display is showing received MIDI time clock.
+    signal mtcd_frame_rate     : frame_rate_t;
+    -- received frame time, and data valid strobe.
+    signal mtcd_frame_time     : frame_time_t;
+    signal mtcd_new_frame_time : std_logic;
+
 begin  -- architecture toplevel
 
     ---------------------------------------------------------------------------------------------------------
@@ -257,7 +266,7 @@ begin  -- architecture toplevel
     -- After debounce, encode that select into the frame rate type. We do this on the main clock, and not the
     -- timer clock, because the frame rate here is used (in clks_rst) to select the timer clock.
     ---------------------------------------------------------------------------------------------------------
-    GetFrameRate : process (clk_main) is
+    GetOutputFrameRate : process (clk_main) is
     begin  -- process GetFrameRate
         if rising_edge(clk_main) then
             if rst_main = '1' then
@@ -266,7 +275,7 @@ begin  -- architecture toplevel
                 frame_rate <= frame_rate_t'val(to_integer(unsigned(frsw)));
             end if;
         end if;
-    end process GetFrameRate;
+    end process GetOutputxsFrameRate;
 
     ---------------------------------------------------------------------------------------------------------
     -- Sync frame rate to the timer clock, as it is needed in that domain.
@@ -312,17 +321,6 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     -- DISPLAY THE FRAME TIME.
     ---------------------------------------------------------------------------------------------------------
-    tcd : entity work.timecode_display(digit_driver)
-        generic map (
-            CLKPER_30FPS => CLKPER_30FPS,
-            CLKPER_25FPS => CLKPER_25FPS,
-            CLKPER_24FPS => CLKPER_24FPS)
-        port map (
-            clk_timer  => clk_timer,
-            rst_timer  => rst_timer,
-            frame_time => frame_time,
-            frame_rate => frame_rate_s,
-            display    => display);
 
     -- break out display type to pins.
     CA <= display.CA;
@@ -413,15 +411,19 @@ begin  -- architecture toplevel
     end process drive_leds;
 
     ---------------------------------------------------------------------------------------------------------
-    -- MTC decoder (placeholder)
+    -- MTC decoder. 
     ---------------------------------------------------------------------------------------------------------
-    -- decode_mtc : entity work.mtc_decoder(decoder)
-    --     port map (
-    --         clk_main    => clk_main,
-    --         rst_main  => rst_main,
-    --         frame_rate  => frame_rate,
-    --         clk_bundle  => clk_bundle,
-    --         mmcm_locked => mmcm_locked,
-    --         led         => LED16_B);
+
+    decoder_mtc : entity work.mtc_decoder(decoder)
+        generic map (
+            CLK_PER   => CLK_PER,
+            BAUD_RATE => BAUD_RATE)
+        port map (
+            midi_rx        => JA1,
+            clk_main       => clk_main,
+            rst_main       => rst_main,
+            frame_rate     => mtcd_frame_rate,
+            frame_time     => mtcd_frame_time,
+            new_frame_time => mtcd_new_frame_time);
 
 end architecture toplevel;
