@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-16
--- Last update: 2025-04-27
+-- Last update: 2025-05-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -56,6 +56,16 @@ architecture mux of clk_mux is
     ---------------------------------------------------------------------------------------------------------
     -- Determine clock mux selects from input frame rate.
     ---------------------------------------------------------------------------------------------------------
+    -- one-hot clock selects decoded from frame_rate input.
+    -- bit 0 selects between 50 MHz (0) and 37.5 MHz (1).
+    -- bit 1 selects between the above (0) or 33 MHz (1)
+    constant CLK_SEL_37_NOT_50 : natural := 0;
+    constant CLK_SEL_33_NOT_OTHERS : natural := 1;
+    subtype clk_sel_t is std_logic_vector(CLK_SEL_33_NOT_OTHERS downto CLK_SEL_37_NOT_50);
+    constant CLK_SEL_FR24 : clk_sel_t := "01";  -- 37.5 MHz
+    constant CLK_SEL_FR25 : clk_sel_t := "00";  -- 50 MHz
+    constant CLK_SEL_FR30 : clk_sel_t := "10";  -- 33 MHz
+
     signal clk_sel : clk_sel_t;
 
     ---------------------------------------------------------------------------------------------------------

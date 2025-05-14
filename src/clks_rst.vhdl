@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-27
+-- Last update: 2025-05-13
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -38,14 +38,9 @@ entity clks_rst is
         -- from the board.
         clk_ref     : in  std_logic;     -- reference or board input clock
         arst_l      : in  std_logic;     -- external asynchronous reset
-        -- from something 
-        frame_rate  : in  frame_rate_t;  -- desired frame rate, used as clock select
         -- to other things that need to select a clock
         clk_bundle  : out clk_bundle_t;
         mmcm_locked : out std_logic;
-        -- use for LTC time code generator.
-        clk_timer   : out std_logic;     -- selected timer clock
-        rst_timer   : out std_logic;     -- reset in that domain
         -- for non-timer logic that always runs.
         clk_main    : out std_logic;     -- general use clock at reference frequency
         rst_main    : out std_logic);    -- clock in that domain
@@ -60,17 +55,6 @@ architecture clkgen of clks_rst is
 
     -- MMCM locked status, which we sync to the main clock to create resets in the downstream domains.
     signal locked   : std_logic;
-    signal locked_s : std_logic;
-
-    -- for the reset in the timer clock domain.
-    signal timer_reset_l : std_logic;
-
-    -- delay frame rate for edge detect, used to assert the final output clock.
-    signal frame_rate_d : frame_rate_t;
-    signal frame_rate_e : std_logic;    -- true on change of frame rate
-
-    -- mux select.
-    signal clk_sel : clk_sel_t;
 
 begin  -- architecture clkgen
 
@@ -165,28 +149,6 @@ begin  -- architecture clkgen
             clk   => clk_main,
             rst   => rst_main,
             d     => locked,
-            q     => locked_s);
-
-    -- to outside world.
-    mmcm_locked <= locked_s;
-
-    -- Select one of the three options as the timer clock, based on the switches.
-    -- Generate a reset synchronized to that clock.
-    -- combine reset sources and register to the main clock before feeding it to the reset generator.
-    -- This ensures so we don't have a weird combinatorial path on the reset synchronizer's async reset input.
-    -- Those reset sources are:
-    -- 1. Main timer reset, asserted at the beginning of time,
-    -- 2. MMCM lock, which should assert soon after the beginning of time,
-    -- 3. Change in frame rate, which can happen at any time.
-    timer_clk_mux : entity work.clk_mux(mux)
-        port map (
-            clk_main    => clk_main,
-            rst_main    => rst_main,
-            mmcm_locked => locked_s,
-            frame_rate  => frame_rate,
-            clk_bundle  => clk_bundle,
-            --
-            clk_out     => clk_timer,
-            rst_out     => rst_timer);
+            q     => mmcm_locked);
 
 end architecture clkgen;
