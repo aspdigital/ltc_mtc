@@ -4,3 +4,4 @@ set_property CONFIG_MODE SPIx4 [current_design]
 
 
 
+
