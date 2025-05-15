@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-08
--- Last update: 2025-04-28
+-- Last update: 2025-05-14
 -- Platform   : Xilinx Artix 7
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -85,17 +85,20 @@ package body ltc_mtc_pkg is
         constant DIVIDEND : natural;
         constant DIVISOR  : frame_rate_t)
         return natural is
+        variable rv : natural;
     begin
+        rv := 0;
         divide_by: case DIVISOR is
             when FR_24 =>
-                return DIVIDEND mod 24;
+                rv := DIVIDEND mod 24;
             when FR_25 =>
-                return DIVIDEND mod 25;
+                rv :=  DIVIDEND mod 25;
             when FR_30 =>
-                return DIVIDEND mod 30;
+                rv := DIVIDEND mod 30;
             when others =>
                 report "Invalid divisor in overloaded mod" severity ERROR;
         end case divide_by;
+        return rv;
     end function "mod";
 
     ---------------------------------------------------------------------------------------------------------
@@ -105,17 +108,20 @@ package body ltc_mtc_pkg is
         constant DIVIDEND : natural;
         constant DIVISOR : frame_rate_t)
         return natural is
+        variable rv : natural;
     begin
+        rv := 0;
         divide_by: case DIVISOR is
             when FR_24 =>
-                return DIVIDEND / 24;
+                rv := DIVIDEND / 24;
             when FR_25 =>
-                return DIVIDEND / 25;
+                rv := DIVIDEND / 25;
             when FR_30 =>
-                return DIVIDEND / 30;
+                rv := DIVIDEND / 30;
             when others =>
                 report "Invalid divisor in overloaded div" severity ERROR;
         end case divide_by;
+        return rv;
     end function "/";
 
 end package body ltc_mtc_pkg;

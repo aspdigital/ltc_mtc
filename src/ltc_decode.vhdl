@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-20
+-- Last update: 2025-05-14
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -18,7 +18,17 @@
 -- Date        Version  Author  Description
 -- 2025-04-20  -        andy	Created
 -------------------------------------------------------------------------------
+entity ltc_decode is
+  
+end entity ltc_decode;
 
+architecture decoder of ltc_decode is
+
+begin  -- architecture decoder
+
+  
+
+end architecture decoder;
 
 
 
