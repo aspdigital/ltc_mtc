@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-05-12
--- Last update: 2025-05-13
+-- Last update: 2025-05-15
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ begin  -- architecture mux
     choose_frame_rate: process (clk_main) is
     begin  -- process choose_frame_rate
         if rising_edge(clk_main) then
-            if rst_main = '0' then
+            if rst_main = '1' then
                 frame_rate_mux <= FR_24;
                 frame_time_mux <= FRAME_TIME_RESET;
             else
