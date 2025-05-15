@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-05-13
+-- Last update: 2025-05-14
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ entity ltc_mtc is
         DP         : out std_logic;                     -- common decimal point
         AN         : out std_logic_vector(7 downto 0);  -- anodes for each segment
         -- PMOD
-        JA1        : in  std_logic;                     -- JA(2) is MTC in
+        JA1        : in  std_logic;                     -- JA(1) is MTC in
         JA2        : out std_logic;                     -- JA(2) is MTC out
         JA3        : out std_logic;                     -- frame timer tick test point
         -- Linear time code output on the audio PWM pin.

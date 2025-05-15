@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-05-10
+-- Last update: 2025-05-14
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -38,6 +38,8 @@ end entity ltc_mtc_tb;
 -------------------------------------------------------------------------------------------------------------
 
 architecture testbench of ltc_mtc_tb is
+
+    constant TB_MIDI_FRAME_RATE : frame_rate_t := FR_24;
 
     constant FRAME_RATE_STR : string := frame_rate_t'image(frame_rate_t'val(TX_FRAME_RATE));
 
@@ -115,6 +117,10 @@ begin  -- architecture testbench
         port map (
             midi_in => JA2);
 
+    tb_mtc_encoder_1: entity work.tb_mtc_encoder(model)
+        port map (
+            frame_rate => TB_MIDI_FRAME_RATE,
+            midi_out   => JA1);
 
 end architecture testbench;
 
