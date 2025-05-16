@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-05-14
+-- Last update: 2025-05-15
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -253,26 +253,28 @@ begin  -- architecture toplevel
             CLKPER_24FPS => CLKPER_24FPS)
         port map (
             -- main clock domain
-            clk_main        => clk_main,
-            rst_main        => rst_main,
+            clk_main            => clk_main,
+            rst_main            => rst_main,
             -- the three timer clock options, and the MMCM status.
-            mmcm_locked     => mmcm_locked,
-            clk_bundle      => clk_bundle,
+            mmcm_locked         => mmcm_locked,
+            clk_bundle          => clk_bundle,
             -- from the switches that choose what to display.
-            tc_display_src  => tc_display_src,  -- '0' = internal, '1' = external
-            tc_ext_src      => tc_ext_src,  -- '0' = MTC, '1' = LTC
+            tc_display_src      => tc_display_src,  -- '0' = internal, '1' = external
+            tc_ext_src          => tc_ext_src,      -- '0' = MTC, '1' = LTC
             -- possible frame times to display.
             -- the frame time generated internally (and driven out on MTC and LTC pins)
-            gen_frame_time  => gen_frame_time,
-            gen_frame_rate  => gen_frame_rate,
+            gen_frame_time      => gen_frame_time,
+            gen_frame_rate      => gen_frame_rate,
             -- decoded frame time from the MIDI in
-            mtcd_frame_time => mtcd_frame_time,
-            mtcd_frame_rate => mtcd_frame_rate,
+            mtcd_frame_time     => mtcd_frame_time,
+            mtcd_frame_rate     => mtcd_frame_rate,
+            mtcd_new_frame_time => mtcd_new_frame_time,
             -- decoded frame time from the LTC in.
-            ltcd_frame_time => ltcd_frame_time,
-            ltcd_frame_rate => ltcd_frame_rate,
+            ltcd_frame_time     => ltcd_frame_time,
+            ltcd_frame_rate     => ltcd_frame_rate,
+            ltcd_new_frame_time => ltcd_new_frame_time,
             -- drive the display.
-            display         => display);
+            display             => display);
     
     -- break out display type to pins.
     CA <= display.CA;

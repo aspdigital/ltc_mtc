@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-14
--- Last update: 2025-04-27
+-- Last update: 2025-05-15
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -114,6 +114,8 @@ begin  -- architecture decoder
     -- of those events.
     --
     -- TO DO: support that +2 frame offset.
+    --
+    -- Remember that the frame time record wants BCD.
     ---------------------------------------------------------------------------------------------------------
     receive_timecode : process (clk_main) is
     begin  -- process receive_timecode
@@ -135,6 +137,7 @@ begin  -- architecture decoder
                     got_qfscs <= '1' when rx_data = QFSCS_BYTE else '0';
 
                     -- parse the byte after the QFSCS.
+                    -- Remember that each qframe gives a nybble, but our display wants BCD.
                     is_qfmsg : if got_qfscs then
                         which_msg : case qf_id is
                             when X"0" =>

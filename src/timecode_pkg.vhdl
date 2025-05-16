@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-20
+-- Last update: 2025-05-15
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -239,6 +239,37 @@ package body timecode_pkg is
         rv := std_logic_vector(to_unsigned(ARG.msd * 10 + ARG.lsd, rv'length));
         return rv;
     end function BCDToSLV;
+
+    -- Convert SLV nybble to BCD with a lookup table.
+    function SLVToBCD (
+        constant ARG : std_logic_vector(3 downto 0))
+        return natural is
+        variable arg_int : natural;
+        variable rv : natural range 0 to 9;
+    begin  -- function SLVToBCD
+        arg_int := to_integer(unsigned(ARG));
+        lookup: case arg_int is
+            when 0 => rv := 0;
+            when 1 => rv := 1;
+            when 2 => rv := 2;
+            when 3 => rv := 3;
+            when 4 => rv := 4;
+            when 5 => rv := 5;
+            when 6 => rv := 6;
+            when 7 => rv := 7;
+            when 8 => rv := 8;
+            when 9 => rv := 9;
+            when 10 => rv := 0;
+            when 11 => rv := 1;
+            when 12 => rv := 2;
+            when 13 => rv := 3;
+            when 14 => rv := 4;
+            when 15 => rv := 5;
+        end case lookup;
+
+        return rv;
+        
+    end function SLVToBCD;
 
 end package body timecode_pkg;
 

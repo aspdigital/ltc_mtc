@@ -37,24 +37,24 @@ vcom -work xil_defaultlib  -2008  \
 "../../../../src/clks_rst.vhdl" \
 "../../../../src/debounce.vhdl" \
 "../../../../src/mtc_pkg.vhdl" \
-"../../../../src/frame_timer.vhdl" \
 "../../../../src/timecode_pkg.vhdl" \
-"../../../../src/ltc_encoder.vhdl" \
 "../../../../src/seven_segment_display_pkg.vhdl" \
-"../../../../src/timecode_generator.vhdl" \
 "../../../../src/timecode_display.vhdl" \
+"../../../../src/display_mux.vhdl" \
+"../../../../src/frame_timer.vhdl" \
+"../../../../src/ltc_encoder.vhdl" \
+"../../../../src/timecode_generator.vhdl" \
 "../../../../src/mtc_encoder.vhdl" \
 "../../../../src/uatx.vhdl" \
 "../../../../src/uatx_with_fifo.vhdl" \
+"../../../../src/mtc_tx.vhdl" \
+"../../../../src/tc_generator.vhdl" \
 "../../../../src/uarx.vhdl" \
 "../../../../src/mtc_decoder.vhdl" \
 "../../../../src/ltc_mtc.vhdl" \
-"../../../../src/rgb_led.vhdl" \
-"../../../../tb/mtc_decoder_tb.vhdl" \
-"../../../../tb/uarx_tb.vhdl" \
+"../../../../tb/tb_mtc_decoder.vhdl" \
+"../../../../tb/tb_mtc_encoder.vhdl" \
 "../../../../tb/ltc_mtc_tb.vhdl" \
-"../../../../tb/clks_rst_tb.vhdl" \
-"../../../../tb/uatx_with_fifo_tb.vhdl" \
 
 vlog -work xil_defaultlib \
 "glbl.v"
