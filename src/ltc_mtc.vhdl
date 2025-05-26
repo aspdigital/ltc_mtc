@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-05-15
+-- Last update: 2025-05-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -104,6 +104,8 @@ end entity ltc_mtc;
 
 architecture toplevel of ltc_mtc is
 
+    attribute MARK_DEBUG : string;
+
     ---------------------------------------------------------------------------------------------------------
     -- Clocking and resets.
     ---------------------------------------------------------------------------------------------------------
@@ -164,11 +166,11 @@ architecture toplevel of ltc_mtc is
     ---------------------------------------------------------------------------------------------------------
     -- MTC receiver. This runs on the main clock.
     ---------------------------------------------------------------------------------------------------------
-    -- determines which clock to use for the display, if display is showing received MIDI time clock.
-    signal mtcd_frame_rate     : frame_rate_t;
-    -- received frame time, and data valid strobe.
-    signal mtcd_frame_time     : frame_time_t;
+    signal mtcd_frame_time     : mtc_pkt_t;
     signal mtcd_new_frame_time : std_logic;
+    attribute MARK_DEBUG of mtcd_frame_time : signal is "TRUE";
+    attribute MARK_DEBUG of mtcd_new_frame_time : signal is "TRUE";
+    
 
     ---------------------------------------------------------------------------------------------------------
     -- lTC receiver, also on the main clock.
@@ -267,7 +269,6 @@ begin  -- architecture toplevel
             gen_frame_rate      => gen_frame_rate,
             -- decoded frame time from the MIDI in
             mtcd_frame_time     => mtcd_frame_time,
-            mtcd_frame_rate     => mtcd_frame_rate,
             mtcd_new_frame_time => mtcd_new_frame_time,
             -- decoded frame time from the LTC in.
             ltcd_frame_time     => ltcd_frame_time,
@@ -317,7 +318,6 @@ begin  -- architecture toplevel
             midi_rx        => JA1,
             clk_main       => clk_main,
             rst_main       => rst_main,
-            frame_rate     => mtcd_frame_rate,
             frame_time     => mtcd_frame_time,
             new_frame_time => mtcd_new_frame_time);
 

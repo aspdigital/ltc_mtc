@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-05-15
+-- Last update: 2025-05-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -21,6 +21,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+
+use work.mtc_pkg.all;
 
 package timecode_pkg is
 
@@ -94,6 +96,25 @@ package timecode_pkg is
         constant ARG : time_0_to_59_t)
         return std_logic_vector;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- Convert straight binary to two BCDs.
+    ---------------------------------------------------------------------------------------------------------
+    function FramesNatToBCD (
+        constant ARG : frames_t)
+        return frame_cnt_t;
+
+    function SecondsNatToBCD (
+        constant ARG : seconds_t)
+        return time_0_to_59_t;
+
+    function MinutesNatToBCD (
+        constant ARG : minutes_t)
+        return time_0_to_59_t;
+
+    function HoursNatToBCD (
+        constant ARG : hours_t)
+        return time_0_to_23_t;
+    
     ---------------------------------------------------------------------------------------------------------
     -- keep track of time with this record.
     -- we keep track of the individual digits, so we don't have to divide to work them out.
@@ -240,36 +261,48 @@ package body timecode_pkg is
         return rv;
     end function BCDToSLV;
 
-    -- Convert SLV nybble to BCD with a lookup table.
-    function SLVToBCD (
-        constant ARG : std_logic_vector(3 downto 0))
-        return natural is
-        variable arg_int : natural;
-        variable rv : natural range 0 to 9;
-    begin  -- function SLVToBCD
-        arg_int := to_integer(unsigned(ARG));
-        lookup: case arg_int is
-            when 0 => rv := 0;
-            when 1 => rv := 1;
-            when 2 => rv := 2;
-            when 3 => rv := 3;
-            when 4 => rv := 4;
-            when 5 => rv := 5;
-            when 6 => rv := 6;
-            when 7 => rv := 7;
-            when 8 => rv := 8;
-            when 9 => rv := 9;
-            when 10 => rv := 0;
-            when 11 => rv := 1;
-            when 12 => rv := 2;
-            when 13 => rv := 3;
-            when 14 => rv := 4;
-            when 15 => rv := 5;
-        end case lookup;
+    ---------------------------------------------------------------------------------------------------------
+    -- convert binary byte to two BCD digits.
+    ---------------------------------------------------------------------------------------------------------
+    function FramesNatToBCD (
+        constant ARG : frames_t)
+        return frame_cnt_t is
+        variable rv : frame_cnt_t;
+    begin
+        rv.lsd := ARG mod 10;
+        rv.msd := ARG / 10;
+        rv.carry := '0';
+    end function FramesNatToBCD;
 
-        return rv;
-        
-    end function SLVToBCD;
+    function SecondsNatToBCD (
+        constant ARG : seconds_t)
+        return time_0_to_59_t is
+        variable rv : time_0_to_59_t;
+    begin
+        rv.lsd := ARG mod 10;
+        rv.msd := ARG / 10;
+        rv.carry := '0';
+    end function SecondsNatToBCD;
+
+    function MinutesNatToBCD (
+        constant ARG : minutes_t)
+        return time_0_to_59_t is
+        variable rv : time_0_to_59_t;
+    begin
+        rv.lsd := ARG mod 10;
+        rv.msd := ARG / 10;
+        rv.carry := '0';
+    end function MinutesNatToBCD;
+
+    function HoursNatToBCD (
+        constant ARG : hours_t)
+        return time_0_to_23_t is
+        variable rv : time_0_to_59_t;
+    begin
+        rv.lsd := ARG mod 10;
+        rv.msd := ARG / 10;
+        rv.carry := '0';
+    end function HoursNatToBCD;
 
 end package body timecode_pkg;
 

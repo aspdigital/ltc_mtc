@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-27
+-- Last update: 2025-05-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -41,6 +41,8 @@ end entity uarx;
 
 architecture deserializer of uarx is
 
+    attribute MARK_DEBUG : string;
+    
     -- for baud rate timer.
     constant BIT_TIME      : time    := 1 SEC / BAUD_RATE;
     constant TICKS_PER_BIT : natural := integer (BIT_TIME / CLK_PER);
@@ -54,9 +56,11 @@ architecture deserializer of uarx is
 
     -- synchronize the incoming serial data bit to our clock.
     signal ser_rx_s : std_logic;
+    attribute MARK_DEBUG of ser_rx_s : signal is "TRUE";
 
     -- the shift register. We shift in LSb first.
     signal sr : std_logic_vector(7 downto 0);
+    attribute MARK_DEBUG of sr : signal is "TRUE";
 
     -- count bits as we shift them.
     signal bc : natural range 0 to 7;
@@ -68,6 +72,8 @@ architecture deserializer of uarx is
         RX_SHIFT,                       -- shift in all bits
         RX_STOP);                       -- test for stop bit and latch output if we see it
     signal rx_state : rx_state_t;
+    
+    attribute MARK_DEBUG of rx_state : signal is "TRUE";
 
 begin  -- architecture deserializer
 

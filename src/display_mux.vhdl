@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-05-12
--- Last update: 2025-05-15
+-- Last update: 2025-05-26
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -60,8 +60,7 @@ entity display_mux is
         gen_frame_time      : in  frame_time_t;  -- on generator timer clock, needs CDC.
         gen_frame_rate      : in  frame_rate_t;  -- on main clock
         -- decoded frame rate and time received from the MIDI port, all on the main clock
-        mtcd_frame_time     : in  frame_time_t;
-        mtcd_frame_rate     : in  frame_rate_t;
+        mtcd_frame_time     : in  mtc_pkt_t;
         mtcd_new_frame_time : in  std_logic;
         -- decode frame rate and time received from the LTC in port, also on the main clock
         ltcd_frame_time     : in  frame_time_t;
@@ -73,6 +72,11 @@ end entity display_mux;
 
 architecture mux of display_mux is
 
+    attribute MARK_DEBUG : string;
+
+    attribute MARK_DEBUG of tc_display_src : signal is "TRUE";
+    attribute MARK_DEBUG of tc_ext_src : signal is "TRUE";
+    
     -- generator frame time is on that timer's clock, we need it on the main clock.
     signal gen_frame_time_s : frame_time_t;
 
@@ -80,13 +84,33 @@ architecture mux of display_mux is
     signal frame_rate_mux : frame_rate_t;
     signal frame_time_mux : frame_time_t;
 
+    attribute MARK_DEBUG of frame_rate_mux : signal is "TRUE";
+    attribute MARK_DEBUG of frame_time_mux : signal is "TRUE";
+
     -- synchronize the received/decoded frame rate and time to the display clock.
     signal frame_rate_mux_s : frame_rate_t;
     signal frame_time_mux_s : frame_time_t;
+    attribute MARK_DEBUG of frame_rate_mux_s : signal is "TRUE";
+    attribute MARK_DEBUG of frame_time_mux_s : signal is "TRUE";
 
     -- display clock from the mux.
     signal clk_display : std_logic;
     signal rst_display : std_logic;
+
+    ---------------------------------------------------------------------------------------------------------
+    -- Convert straight-binary MTC to the BCD format required by LTC.
+    ---------------------------------------------------------------------------------------------------------
+    function MTCToLTC (
+        constant ARG : mtc_pkt_t)
+        return frame_time_t is
+        variable rv : frame_time_t;
+    begin  -- function MTCToLTC
+        rv.frame_cnt := FramesNatToBCD(ARG.frames);
+        rv.ft_sec    := SecondsNatToBCD(ARG.seconds);
+        rv.ft_min    := MinutesNatToBCD(ARG.minutes);
+        rv.ft_hr     := HoursNatToBCD(ARG.hours);
+        return rv;
+    end function MTCToLTC;
 
 begin  -- architecture mux
 
@@ -122,8 +146,9 @@ begin  -- architecture mux
                 else
                     ltc_mtc_sel : if tc_ext_src = '0' then
                         got_new_mtc : if mtcd_new_frame_time then
-                            frame_rate_mux <= mtcd_frame_rate;
-                            frame_time_mux <= mtcd_frame_time;
+                            -- convert from binary to BCD here.
+                            frame_rate_mux <= mtcd_frame_time.frame_rate;
+                            frame_time_mux <= MTCToLTC(mtcd_frame_time);
                         end if got_new_mtc;
                     else
                         got_new_ltc : if ltcd_new_frame_time then
