@@ -6,11 +6,16 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-05-14
+-- Last update: 2025-05-26
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
--- Description: 
+-- Description: Exercise and validate the linear time code generator and receivers.
+--
+-- DISPLAY_SOURCE generic sets what drives the 7-segment displays:
+--      "INTERNAL" means the internal generator drives
+--      "MTC_IN"   means the MTC decoder drives from external MTC input.
+--      "LTC_IN"   means the LTC decoder drives from external LTC input.
 -------------------------------------------------------------------------------
 -- Copyright (c) 2025 ASP Digital
 -------------------------------------------------------------------------------
@@ -32,7 +37,8 @@ use work.ltc_mtc_pkg.all;
 
 entity ltc_mtc_tb is
     generic (
-        TX_FRAME_RATE : natural);
+        DISPLAY_SOURCE : string;
+        TX_FRAME_RATE  : natural);
 end entity ltc_mtc_tb;
 
 -------------------------------------------------------------------------------------------------------------
@@ -47,10 +53,10 @@ architecture testbench of ltc_mtc_tb is
     constant CLKPER : time := 10 NS;
 
     -- component ports
-    signal CLK100MHZ  : std_logic                    := '1';
-    signal CPU_RESETN : std_logic                    := '0';
-    signal SW         : std_logic_vector(3 downto 0) := "00" & std_logic_vector(to_unsigned(TX_FRAME_RATE, 2));
-    signal BTND       : std_logic                    := '0';
+    signal CLK100MHZ  : std_logic := '1';
+    signal CPU_RESETN : std_logic := '0';
+    signal SW         : std_logic_vector(3 downto 0);
+    signal BTND       : std_logic := '0';
     signal LED16_B    : std_logic;
     signal LED        : std_logic_vector(15 downto 0);
     signal CA         : std_logic;
@@ -68,7 +74,24 @@ architecture testbench of ltc_mtc_tb is
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
+    -- "digits" to "display"
+    
+
 begin  -- architecture testbench
+
+    -- determine generator frame rate.
+    SW(1 downto 0) <= std_logic_vector(to_unsigned(TX_FRAME_RATE, 2));
+
+    -- determine display driver.
+    SetSourceSwitches : process (all) is
+    begin  -- process SetSourceSwitches
+        DecodeGeneric : case DISPLAY_SOURCE is
+            when "INT"  => SW(3 downto 2) <= "00";
+            when "MTC"  => SW(3 downto 2) <= "01";
+            when "LTC"  => SW(3 downto 2) <= "11";
+            when others => report "Invalid DISPLAY_SOURCE" severity FAILURE;
+        end case DecodeGeneric;
+    end process SetSourceSwitches;
 
     -- component instantiation
     DUT : entity work.ltc_mtc(toplevel)
@@ -102,25 +125,28 @@ begin  -- architecture testbench
 
     assert FALSE report "frame rate =  " & FRAME_RATE_STR severity NOTE;
 
-    -- change clock frequency.
-    -- ChangeClockFreq : process is
-    -- begin  -- process ChangeClockFreq
-    --     SW <= "0011";
-    --     wait for 5000 MS;
-    --     SW <= "0000";
-    --     wait for 5000 MS;
-    --     SW <= "0010";
-    --     wait for 5000 MS;
-    -- end process ChangeClockFreq;
-
-    tb_mtc_decoder_1: entity work.tb_mtc_decoder(model)
+    -- Decode the incoming MIDI time code.
+    tb_mtc_decoder_1 : entity work.tb_mtc_decoder(model)
         port map (
             midi_in => JA2);
 
-    tb_mtc_encoder_1: entity work.tb_mtc_encoder(model)
+    -- generate MIDI time code to feed to our decoder
+    tb_mtc_encoder_1 : entity work.tb_mtc_encoder(model)
         port map (
             frame_rate => TB_MIDI_FRAME_RATE,
             midi_out   => JA1);
 
+    -- What was displayed?
+    tb_timecode_display_1: entity work.tb_timecode_display
+        port map (
+            CA  => CA,
+            CB  => CB,
+            CC  => CC,
+            CD  => CD,
+            CE  => CE,
+            CF  => CF,
+            CG  => CG,
+            CDP => DP,
+            AN  => AN);
 end architecture testbench;
 

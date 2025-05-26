@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-05-25
+-- Last update: 2025-05-26
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ entity ltc_mtc is
         -- PMOD
         JA1        : in  std_logic;                     -- JA(1) is MTC in
         JA2        : out std_logic;                     -- JA(2) is MTC out
-        JA3        : out std_logic;                     -- frame timer tick test point
+        JA3        : out std_logic;                     -- JA(3) is MTC new frame time
         -- Linear time code output on the audio PWM pin.
         AUD_PWM    : out std_logic;                     -- PWM signal path through to low-pass filter
         AUD_SD     : out std_logic                      -- active low shutdown, bring high to enable PWM
@@ -188,7 +188,24 @@ begin  -- architecture toplevel
     ---------------------------------------------------------------------------------------------------------
     AUD_SD <= '1';
 
-    JA3 <= '0';                         -- keeper
+    ---------------------------------------------------------------------------------------------------------
+    -- Test point toggle.
+    ---------------------------------------------------------------------------------------------------------
+    ToggleNewFrame: process (clk_main) is
+        variable v_toggle : std_logic;
+    begin  -- process ToggleNewFrame
+        if rising_edge(clk_main) then
+            if rst_main = '1' then
+                v_toggle := '0';
+                JA3 <= '0';
+            else
+                if mtcd_new_frame_time then
+                    v_toggle := not v_toggle;
+                end if;
+                JA3 <= v_toggle;
+            end if;
+        end if;
+    end process ToggleNewFrame;
 
     ---------------------------------------------------------------------------------------------------------
     -- Clocking.

@@ -17,14 +17,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="550.001000001 ms"></ZoomEndTime>
-      <Cursor1Time time="141.211194247 ms"></Cursor1Time>
+      <ZoomEndTime time="57.694853940 ms"></ZoomEndTime>
+      <Cursor1Time time="9.713404306 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="361"></NameColumnWidth>
-      <ValueColumnWidth column_width="178"></ValueColumnWidth>
+      <ValueColumnWidth column_width="154"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="69" />
+   <WVObjectSize size="68" />
    <wave_markers>
       <marker time="20669587216" label="" />
       <marker time="37399801000" label="" />
@@ -198,6 +198,7 @@
    <wvobject fp_name="/ltc_mtc_tb/tb_mtc_encoder_1/ft" type="array">
       <obj_property name="ElementShortName">ft</obj_property>
       <obj_property name="ObjectShortName">ft</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/tb_mtc_encoder_1/midi_out" type="logic">
       <obj_property name="ElementShortName">midi_out</obj_property>
@@ -222,15 +223,6 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/decoder_mtc/got_qfscs" type="logic">
       <obj_property name="ElementShortName">got_qfscs</obj_property>
       <obj_property name="ObjectShortName">got_qfscs</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/decoder_mtc/frame_rate" type="other">
-      <obj_property name="ElementShortName">frame_rate</obj_property>
-      <obj_property name="ObjectShortName">frame_rate</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/decoder_mtc/ft" type="array">
-      <obj_property name="ElementShortName">ft</obj_property>
-      <obj_property name="ObjectShortName">ft</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/decoder_mtc/new_frame_time" type="logic">
       <obj_property name="ElementShortName">new_frame_time</obj_property>
@@ -257,6 +249,14 @@
       <obj_property name="ElementShortName">tc_ext_src</obj_property>
       <obj_property name="ObjectShortName">tc_ext_src</obj_property>
    </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/clk_display" type="logic">
+      <obj_property name="ElementShortName">clk_display</obj_property>
+      <obj_property name="ObjectShortName">clk_display</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/rst_display" type="logic">
+      <obj_property name="ElementShortName">rst_display</obj_property>
+      <obj_property name="ObjectShortName">rst_display</obj_property>
+   </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/gen_frame_time" type="array">
       <obj_property name="ElementShortName">gen_frame_time</obj_property>
       <obj_property name="ObjectShortName">gen_frame_time</obj_property>
@@ -268,10 +268,6 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/mtcd_frame_time" type="array">
       <obj_property name="ElementShortName">mtcd_frame_time</obj_property>
       <obj_property name="ObjectShortName">mtcd_frame_time</obj_property>
-   </wvobject>
-   <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/mtcd_frame_rate" type="other">
-      <obj_property name="ElementShortName">mtcd_frame_rate</obj_property>
-      <obj_property name="ObjectShortName">mtcd_frame_rate</obj_property>
    </wvobject>
    <wvobject fp_name="/ltc_mtc_tb/DUT/the_display_mux/ltcd_frame_time" type="array">
       <obj_property name="ElementShortName">ltcd_frame_time</obj_property>
@@ -340,5 +336,6 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/AN" type="array">
       <obj_property name="ElementShortName">AN[7:0]</obj_property>
       <obj_property name="ObjectShortName">AN[7:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
 </wave_config>

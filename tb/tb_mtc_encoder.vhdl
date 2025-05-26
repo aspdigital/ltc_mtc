@@ -108,6 +108,10 @@ begin
     -- quarter-frame rate clock tick.
     qframe_tick <= not qframe_tick after qframe_interval / 2;
 
+    ---------------------------------------------------------------------------------------------------------
+    -- Update time code on every eigth time code tick.
+    -- 8 quarter frames take two frames to send, so we update the frame count by two.
+    ---------------------------------------------------------------------------------------------------------
     tcg : process is
     begin  -- process tcg
 
@@ -115,8 +119,15 @@ begin
         -- resynchronize on qframe = 7.
         start_of_next_frame : if qframe_cnt = 7 then
 
-            is_eof : if ft.frame = last_frame then
-                ft.frame <= 0;
+            -- special case for frame count, since it updates by two.
+            
+            is_eof : if (ft.frame = last_frame) or (ft.frame = last_frame - 1) then
+
+                handle_odd: if ft.frame = last_frame then
+                    ft.frame <= 1;
+                else
+                    ft.frame <= 0;
+                end if handle_odd;
 
                 is_eos : if ft.seconds = 59 then
                     ft.seconds <= 0;
@@ -136,7 +147,7 @@ begin
                     ft.seconds <= ft.seconds + 1;
                 end if is_eos;
             else
-                ft.frame <= ft.frame + 1;
+                ft.frame <= ft.frame + 2;
             end if is_eof;
         end if start_of_next_frame;
 

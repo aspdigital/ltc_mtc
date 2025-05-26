@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-05-25
+-- Last update: 2025-05-26
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -272,6 +272,7 @@ package body timecode_pkg is
         rv.lsd := ARG mod 10;
         rv.msd := ARG / 10;
         rv.carry := '0';
+        return rv;
     end function FramesNatToBCD;
 
     function SecondsNatToBCD (
@@ -282,6 +283,7 @@ package body timecode_pkg is
         rv.lsd := ARG mod 10;
         rv.msd := ARG / 10;
         rv.carry := '0';
+        return rv;
     end function SecondsNatToBCD;
 
     function MinutesNatToBCD (
@@ -292,16 +294,18 @@ package body timecode_pkg is
         rv.lsd := ARG mod 10;
         rv.msd := ARG / 10;
         rv.carry := '0';
+        return rv;
     end function MinutesNatToBCD;
 
     function HoursNatToBCD (
         constant ARG : hours_t)
         return time_0_to_23_t is
-        variable rv : time_0_to_59_t;
+        variable rv : time_0_to_23_t;
     begin
         rv.lsd := ARG mod 10;
         rv.msd := ARG / 10;
         rv.carry := '0';
+        return rv;
     end function HoursNatToBCD;
 
 end package body timecode_pkg;
