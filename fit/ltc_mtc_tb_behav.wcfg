@@ -17,14 +17,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="57.694853940 ms"></ZoomEndTime>
-      <Cursor1Time time="9.713404306 ms"></Cursor1Time>
+      <ZoomEndTime time="79.001000000 ms"></ZoomEndTime>
+      <Cursor1Time time="26.343260921 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="361"></NameColumnWidth>
-      <ValueColumnWidth column_width="154"></ValueColumnWidth>
+      <ValueColumnWidth column_width="146"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="68" />
+   <WVObjectSize size="71" />
    <wave_markers>
       <marker time="20669587216" label="" />
       <marker time="37399801000" label="" />
@@ -336,6 +336,17 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/AN" type="array">
       <obj_property name="ElementShortName">AN[7:0]</obj_property>
       <obj_property name="ObjectShortName">AN[7:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider992">
+      <obj_property name="label">Display</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_timecode_display_1/digits" type="array">
+      <obj_property name="ElementShortName">digits[7:0]</obj_property>
+      <obj_property name="ObjectShortName">digits[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_timecode_display_1/dps" type="array">
+      <obj_property name="ElementShortName">dps[7:0]</obj_property>
+      <obj_property name="ObjectShortName">dps[7:0]</obj_property>
    </wvobject>
 </wave_config>
