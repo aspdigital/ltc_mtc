@@ -61,7 +61,10 @@ begin  -- architecture digit_decode
                 when "0000010" => digit <= 6;
                 when "1111000" => digit <= 7;
                 when "0000000" => digit <= 8;
-                when "0011000" => digit <= 8;
+                when "0011000" => digit <= 9;
+                when "1111111" =>
+                    -- display is blanked, so valid, don't report.
+                    digit <= -1;
                 when others =>
                     digit <= -1;
                     report "These cathodes don't make a digit: " & to_string(cathodes) severity WARNING;
