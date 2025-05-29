@@ -309,16 +309,15 @@ begin  -- architecture decoder
 
                 -- we have an entire frame, so kick it out, while preparing for the next frame (between full
                 -- MTC frames).
-                is_new_frame: if got_qf_0 then
+                is_qf : if got_qf_0 then
                     frame_time <= ft_rx_out;
                     new_frame_time <= '1';
-                end if is_new_frame;
 
-                -- a new frame in between the MTC frame.
-                is_new_frame_1: if got_qf_4 then
+                elsif got_qf_4 then
+                    -- a new frame in between the MTC frame.
                     frame_time <= IncrementFrameCount(ft_rx_out);
                     new_frame_time <= '1';
-                end if is_new_frame_1;
+                end if is_qf;
                 
             end if;
         end if;

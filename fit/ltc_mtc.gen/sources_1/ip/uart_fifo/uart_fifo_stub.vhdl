@@ -2,10 +2,10 @@
 -- Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
--- Date        : Tue May 27 21:49:03 2025
+-- Date        : Tue May 27 21:49:02 2025
 -- Host        : ANDYPETERS84AE running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub
---               z:/Projects/ltc_mtc/fit/ltc_mtc.gen/sources_1/ip/uart_fifo/uart_fifo_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub -rename_top uart_fifo -prefix
+--               uart_fifo_ uart_fifo_stub.vhdl
 -- Design      : uart_fifo
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a100tcsg324-1

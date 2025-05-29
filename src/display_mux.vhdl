@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-05-12
--- Last update: 2025-05-26
+-- Last update: 2025-05-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -90,8 +90,6 @@ architecture mux of display_mux is
     -- synchronize the received/decoded frame rate and time to the display clock.
     signal frame_rate_mux_s : frame_rate_t;
     signal frame_time_mux_s : frame_time_t;
-    attribute MARK_DEBUG of frame_rate_mux_s : signal is "TRUE";
-    attribute MARK_DEBUG of frame_time_mux_s : signal is "TRUE";
 
     -- display clock from the mux.
     signal clk_display : std_logic;

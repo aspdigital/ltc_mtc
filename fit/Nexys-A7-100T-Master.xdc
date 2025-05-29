@@ -42,7 +42,7 @@ set_property -dict {PACKAGE_PIN R15 IOSTANDARD LVCMOS33 IOB TRUE} [get_ports {SW
 set_property -dict {PACKAGE_PIN C17 IOSTANDARD LVCMOS33 IOB TRUE} [get_ports JA1]
 set_property -dict {PACKAGE_PIN D18 IOSTANDARD LVCMOS33 IOB TRUE SLEW FAST} [get_ports JA2]
 set_property -dict {PACKAGE_PIN E18 IOSTANDARD LVCMOS33 IOB TRUE SLEW FAST} [get_ports JA3]
-set_property -dict {PACKAGE_PIN P18 IOSTANDARD LVCMOS33 IOB TRUE } [get_ports BTND]
+set_property -dict {PACKAGE_PIN P18 IOSTANDARD LVCMOS33 IOB TRUE} [get_ports BTND]
 
 ##Switches
 #set_property -dict { PACKAGE_PIN R17   IOSTANDARD LVCMOS33 IOB TRUE } [get_ports { SW[4] }]; #IO_L12N_T1_MRCC_14 Sch=sw[4]
@@ -204,4 +204,5 @@ set_property -dict {PACKAGE_PIN P18 IOSTANDARD LVCMOS33 IOB TRUE } [get_ports BT
 #set_property -dict { PACKAGE_PIN L14   IOSTANDARD LVCMOS33 IOB TRUE } [get_ports { QSPI_DQ[2] }]; #IO_L2P_T0_D02_14 Sch=qspi_dq[2]
 #set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 IOB TRUE } [get_ports { QSPI_DQ[3] }]; #IO_L2N_T0_D03_14 Sch=qspi_dq[3]
 #set_property -dict { PACKAGE_PIN L13   IOSTANDARD LVCMOS33 IOB TRUE } [get_ports { QSPI_CSN }]; #IO_L6P_T0_FCS_B_14 Sch=qspi_csn
+
 
