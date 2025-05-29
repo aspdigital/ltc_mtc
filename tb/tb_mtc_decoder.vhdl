@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-27
--- Last update: 2025-04-28
+-- Last update: 2025-05-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -31,6 +31,8 @@ use work.timecode_pkg.all;
 
 entity tb_mtc_decoder is
 
+    generic (
+        QUIET : boolean := TRUE);
     port (
         midi_in : in std_logic);        -- serial MIDI in
 
@@ -64,7 +66,7 @@ architecture model of tb_mtc_decoder is
     begin  -- procedure midi_receiver
         -- look for start bit
         wait until falling_edge(midi_in);
-        report "got start bit" severity NOTE;
+        assert QUIET report "got start bit" severity NOTE;
         -- go to middle of bit time.
         wait for MIDI_BIT_TIME / 2;
         get_bits : for bc in 0 to 7 loop

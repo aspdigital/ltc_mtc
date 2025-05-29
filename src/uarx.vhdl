@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-05-25
+-- Last update: 2025-05-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -48,6 +48,7 @@ architecture deserializer of uarx is
     constant TICKS_PER_BIT : natural := integer (BIT_TIME / CLK_PER);
     subtype br_timer_t is natural range 0 to TICKS_PER_BIT - 1;
     signal br_timer        : br_timer_t;
+    signal br_timer_is_zero : std_logic;
 
     -- to detect start bit, we see the first falling edge of the data line then wait half a bit period to see
     -- if we still have the start bit.
@@ -98,6 +99,8 @@ begin  -- architecture deserializer
     begin  -- process deserialize_it
         if rising_edge(clk) then
             if rst = '1' then
+                br_timer_is_zero <= '0';
+                br_timer <= 0;
                 sr       <= (others => '1');  -- idles high.
                 bc       <= 0;
                 rx_data  <= (others => '0');
@@ -112,6 +115,9 @@ begin  -- architecture deserializer
                     br_timer <= br_timer - 1;
                 end if baud_rate_timer;
 
+                -- strobe true when counter will be zero, shift in on this.
+                br_timer_is_zero <= '1' when br_timer = 1 else '0';
+
                 Decoder : case rx_state is
 
                     when RX_IDLE =>
@@ -122,7 +128,7 @@ begin  -- architecture deserializer
                         end if is_first_falling_edge;
 
                     when RX_START_TEST =>
-                        is_middle_of_start : if br_timer = 0 then
+                        is_middle_of_start : if br_timer_is_zero then
                             -- if low it's the start bit, so start shifting.
                             is_start : if ser_rx_s = '0' then
                                 rx_state <= RX_SHIFT;
@@ -135,7 +141,7 @@ begin  -- architecture deserializer
                         end if is_middle_of_start;
 
                     when RX_SHIFT =>
-                        is_middle_of_bit : if br_timer = 0 then
+                        is_middle_of_bit : if br_timer_is_zero then
                             -- we shift in LSb first.
                             sr <= ser_rx_s & sr(sr'LEFT downto sr'RIGHT + 1);
 
@@ -156,7 +162,7 @@ begin  -- architecture deserializer
                         -- if we see a valid stop bit, latch the shifted in data into the output and strobe
                         -- the valid. Otherwise, this frame is bad, so drop it on the floor.
                         -- Do we want error signals?
-                        is_in_stop_bit : if br_timer = 0 then
+                        is_in_stop_bit : if br_timer_is_zero then
                             is_stop_bit : if ser_rx_s = '1' then
                                 rx_data  <= sr;
                                 rx_valid <= '1';

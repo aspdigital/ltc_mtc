@@ -3,6 +3,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+library std;
+use std.textio.all;
+
 use work.ltc_mtc_pkg.all;
 
 entity tb_mtc_encoder is
@@ -76,14 +79,16 @@ architecture model of tb_mtc_encoder is
                 byte := std_logic_vector(to_unsigned(ARG.minutes, 8));
                 sr   := '1' & 4X"5" & byte(7 downto 4) & '0';
             when 6 =>
-                byte := std_logic_vector(to_unsigned(ARG.frame, 8));
+                byte := std_logic_vector(to_unsigned(ARG.hours, 8));
                 sr   := '1' & 4X"6" & byte(3 downto 0) & '0';
             when 7 =>
-                byte := std_logic_vector(to_unsigned(ARG.frame, 8));
+                byte := std_logic_vector(to_unsigned(ARG.hours, 8));
                 sr   := '1' & 4X"7" & ARG.rate & byte(5 downto 4) & '0';
             when others =>
                 null;
         end case which_nybble;
+
+        report "(MIDI TX) QFRAME = " & to_string(QFRAME) & " || byte = " & to_hstring(byte) & " || sr = " & to_hstring(sr) severity note;
 
         byte_qframe : for bcc in 0 to 9 loop
             tx <= sr(bcc);

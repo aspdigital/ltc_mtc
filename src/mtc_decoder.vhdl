@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-14
--- Last update: 2025-05-25
+-- Last update: 2025-05-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -226,6 +226,7 @@ begin  -- architecture decoder
             if rst_main = '1' then
                 got_qfscs      <= '0';
                 ft_rx_in       <= MTC_PKT_RESET;
+                ft_rx_out      <= MTC_PKT_RESET;
                 got_qf_0       <= '0';
                 got_qf_4       <= '0';
             else
@@ -242,7 +243,7 @@ begin  -- architecture decoder
                     got_qfscs <= '1' when rx_data = QFSCS_BYTE else '0';
 
                     -- parse the byte after the QFSCS.
-                    -- Remember that each qframe gives a nybble, but our display wants BCD.
+                    -- Remember that each qframe gives a binary nybble, but our display wants BCD.
                     is_qfmsg : if got_qfscs then
                         which_msg : case qf_id is
                             when X"0" =>
