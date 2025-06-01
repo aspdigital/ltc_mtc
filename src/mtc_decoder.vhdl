@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-14
--- Last update: 2025-05-28
+-- Last update: 2025-06-01
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -81,12 +81,12 @@ end entity mtc_decoder;
 architecture decoder of mtc_decoder is
 
     attribute MARK_DEBUG : string;
-    
+
     -- uarx provides a receive byte and a valid strobe.
-    signal rx_valid : std_logic;
-    signal rx_data  : std_logic_vector(7 downto 0);
+    signal rx_valid                  : std_logic;
+    signal rx_data                   : std_logic_vector(7 downto 0);
     attribute MARK_DEBUG of rx_valid : signal is "TRUE";
-    attribute MARK_DEBUG of rx_data : signal is "TRUE";
+    attribute MARK_DEBUG of rx_data  : signal is "TRUE";
 
     -- MS nybble of the receive data could be the quarter frame identifier. (If it is F then we should have
     -- the system common status byte).
@@ -100,36 +100,49 @@ architecture decoder of mtc_decoder is
     -- indicate that we've received the Quarter Frame System Common Status byte. The byte received after that
     -- status byte is the time code data. That is, if we don't see the QFSCS byte, whatever comes in is
     -- ignored. This is a flag that should toggle every byte.
-    signal got_qfscs : std_logic;
+    signal got_qfscs                  : std_logic;
     attribute MARK_DEBUG of got_qfscs : signal is "TRUE";
 
     -- indicate that the 0th and 4th QF messages were received.
-    signal got_qf_0 : std_logic;
-    signal got_qf_4 : std_logic;
+    signal got_qf_0                  : std_logic;
+    signal got_qf_4                  : std_logic;
+    signal got_qf_4_d                : std_logic;
     attribute MARK_DEBUG of got_qf_0 : signal is "TRUE";
     attribute MARK_DEBUG of got_qf_4 : signal is "TRUE";
+    attribute MARK_DEBUG of got_qf_4_d : signal is "TRUE";
 
     -- As qf messages are received, collect them into this record.
-    signal ft_rx_in : mtc_pkt_t;
-    attribute MARK_DEBUG of ft_rx_in : signal is "TRUE";
+    signal ft_rx_in                   : mtc_pkt_t;
+    attribute MARK_DEBUG of ft_rx_in  : signal is "TRUE";
     -- This is completely copied to the output on quarter frame 0, and the frame count in this is incremented
     -- on quarter frame 4. If that increment rolls over, all of the other parts of the packet are incremented
     -- as necessary.
-    signal ft_rx_out : mtc_pkt_t;
+    signal ft_rx_out                  : mtc_pkt_t;
     attribute MARK_DEBUG of ft_rx_out : signal is "TRUE";
+
+    -- we can calculate the incremented frame count, which updates the final output on qf_4. Mind the
+    -- rollover of the frame count, which is based on the frame rate.
+    signal frame_rollover                 : frames_t;
+    attribute MARK_DEBUG of frame_rollover : signal is "TRUE";
+    signal ft_rx_out_inc                  : mtc_pkt_t;
+    attribute MARK_DEBUG of ft_rx_out_inc : signal is "TRUE";
+
+    ---------------------------------------------------------------------------------------------------------
+    -- Functions, for our convenience.
+    ---------------------------------------------------------------------------------------------------------
 
     -- We receive nybbles, so this combines the previously-received nybble with the newest.
     function CombineNybbles (
-        constant LSN : natural;        -- previously nybble (to LSN)
-        constant MSN : natural)        -- new nybble (to MSN)
+        constant LSN : natural;         -- previously nybble (to LSN)
+        constant MSN : natural)         -- new nybble (to MSN)
         return natural is
-        variable rv : natural;
+        variable rv    : natural;
         variable v_lsn : std_logic_vector(3 downto 0);
         variable v_msn : std_logic_vector(3 downto 0);
     begin  -- function CombineNybbles
         v_lsn := std_logic_vector(to_unsigned(LSN, v_lsn'length));
         v_msn := std_logic_vector(to_unsigned(MSN, v_msn'length));
-        rv := to_integer(unsigned(v_msn & v_lsn));
+        rv    := to_integer(unsigned(v_msn & v_lsn));
         return rv;
     end function CombineNybbles;
 
@@ -147,27 +160,27 @@ architecture decoder of mtc_decoder is
     function IncrementFrameCount (
         constant ARG : mtc_pkt_t)
         return mtc_pkt_t is
-        variable rv : mtc_pkt_t;
+        variable rv         : mtc_pkt_t;
         variable last_frame : frames_t;
     begin  -- function IncrementFrameCount
 
-        frame_rate_rollover: case ARG.frame_rate is
-            when FR_24 => last_frame := 23;
-            when FR_25 => last_frame := 24;
-            when FR_30 => last_frame := 29;
+        frame_rate_rollover : case ARG.frame_rate is
+            when FR_24  => last_frame := 23;
+            when FR_25  => last_frame := 24;
+            when FR_30  => last_frame := 29;
             when others => null;
         end case frame_rate_rollover;
-        
-        UpdateFrame: if ARG.frames = last_frame then
+
+        UpdateFrame : if ARG.frames = last_frame then
             rv.frames := 0;
 
-            UpdateSeconds: if ARG.seconds = 59 then
+            UpdateSeconds : if ARG.seconds = 59 then
                 rv.seconds := 0;
 
-                UpdateMinutes: if ARG.minutes = 59 then
+                UpdateMinutes : if ARG.minutes = 59 then
                     rv.minutes := 0;
 
-                    UpdateHours: if ARG.hours = 23 then
+                    UpdateHours : if ARG.hours = 23 then
                         rv.hours := 0;
 
                     else
@@ -177,7 +190,7 @@ architecture decoder of mtc_decoder is
                 else
                     rv.minutes := ARG.minutes + 1;
                 end if UpdateMinutes;
-                
+
             else
                 rv.seconds := ARG.seconds + 1;
             end if UpdateSeconds;
@@ -224,16 +237,19 @@ begin  -- architecture decoder
     begin  -- process receive_timecode
         if rising_edge(clk_main) then
             if rst_main = '1' then
-                got_qfscs      <= '0';
-                ft_rx_in       <= MTC_PKT_RESET;
-                ft_rx_out      <= MTC_PKT_RESET;
-                got_qf_0       <= '0';
-                got_qf_4       <= '0';
+                got_qfscs <= '0';
+                ft_rx_in  <= MTC_PKT_RESET;
+                ft_rx_out <= MTC_PKT_RESET;
+                got_qf_0  <= '0';
+                got_qf_4  <= '0';
+                got_qf_4_d <= '0';
             else
 
                 -- clear one-shots.
                 got_qf_0 <= '0';
                 got_qf_4 <= '0';
+
+                got_qf_4_d <= got_qf_4;
 
                 -- look only when a new byte has arrived.
                 got_new_byte : if rx_valid then
@@ -250,9 +266,9 @@ begin  -- architecture decoder
                                 -- frame lSN.
                                 ft_rx_in.frames <= to_integer(unsigned(qf_data));
                                 -- save previous frame for output.
-                                ft_rx_out <= ft_rx_in;
+                                ft_rx_out       <= ft_rx_in;
                                 -- this will force the new frame to go out.
-                                got_qf_0 <= '1';
+                                got_qf_0        <= '1';
                             when X"1" =>
                                 -- frame MSN.
                                 ft_rx_in.frames <= CombineNybbles(
@@ -268,8 +284,8 @@ begin  -- architecture decoder
                                     MSN => to_integer(unsigned(qf_data)));
                             when X"4" =>
                                 -- minutes lSN.
-                                ft_rx_in.minutes  <= to_integer(unsigned(qf_data));
-                                got_qf_4 <= '1';
+                                ft_rx_in.minutes <= to_integer(unsigned(qf_data));
+                                got_qf_4         <= '1';
                             when X"5" =>
                                 -- minutes MSN.
                                 ft_rx_in.minutes <= CombineNybbles(
@@ -295,30 +311,93 @@ begin  -- architecture decoder
     end process receive_timecode;
 
     ---------------------------------------------------------------------------------------------------------
+    -- Take the latched frame_time_out and increment it by one frame. The incremented value is output with
+    -- QF4. 
+    ---------------------------------------------------------------------------------------------------------
+    increment_ft_rx_out : process (clk_main) is
+    begin  -- process increment_ft_rx_out
+        if rising_edge(clk_main) then
+            if rst_main = '1' then
+                ft_rx_out_inc <= MTC_PKT_RESET;
+            else
+                frame_rate_rollover : case ft_rx_out.frame_rate is
+                    when FR_24  => frame_rollover <= 23;
+                    when FR_25  => frame_rollover <= 24;
+                    when FR_30  => frame_rollover <= 29;
+                    when others => frame_rollover <= 1; report "Illegal frame rate" severity ERROR;
+                end case frame_rate_rollover;
+
+                -- starting values, will be updated by the calculations.
+                -- this includes ensuring the frame_rate field is populated.
+                ft_rx_out_inc <= ft_rx_out;
+
+                -- now increment and update as needed.
+                UpdateIt : if got_qf_4 then
+
+                    -- increment the frame time from qf_0. Pipelining should help timing.
+                    UpdateFrame : if ft_rx_out.frames = frame_rollover then
+
+                        ft_rx_out_inc.frames <= 0;
+
+                        UpdateSeconds : if ft_rx_out.seconds = 59 then
+
+                            ft_rx_out_inc.seconds <= 0;
+
+                            UpdateMinutes : if ft_rx_out.minutes = 59 then
+
+                                ft_rx_out_inc.minutes <= 0;
+
+                                UpdateHours : if ft_rx_out.hours = 23 then
+
+                                    ft_rx_out_inc.hours <= 0;
+
+                                else
+                                    ft_rx_out_inc.hours <= ft_rx_out.hours + 1;
+                                end if UpdateHours;
+
+                            else
+                                ft_rx_out_inc.minutes <= ft_rx_out.minutes + 1;
+                            end if UpdateMinutes;
+
+                        else
+                            ft_rx_out_inc.seconds <= ft_rx_out.seconds + 1;
+                        end if UpdateSeconds;
+
+                    else
+                        ft_rx_out_inc.frames <= ft_rx_out.frames + 1;
+                    end if UpdateFrame;
+                end if UpdateIt;
+
+            end if;
+        end if;
+    end process increment_ft_rx_out;
+
+    ---------------------------------------------------------------------------------------------------------
     -- Update the output received frame time.
     ---------------------------------------------------------------------------------------------------------
-    assemble_timecode: process (clk_main) is
+    assemble_timecode : process (clk_main) is
     begin  -- process assemble_timecode
         if rising_edge(clk_main) then
             if rst_main = '1' then
                 new_frame_time <= '0';
-                frame_time <= MTC_PKT_RESET;
-                
+                frame_time     <= MTC_PKT_RESET;
+
             else
+                -- clear one-shot.
                 new_frame_time <= '0';
 
                 -- we have an entire frame, so kick it out, while preparing for the next frame (between full
                 -- MTC frames).
                 is_qf : if got_qf_0 then
-                    frame_time <= ft_rx_out;
+                    frame_time     <= ft_rx_out;
                     new_frame_time <= '1';
 
-                elsif got_qf_4 then
+                elsif got_qf_4_d then
                     -- a new frame in between the MTC frame.
-                    frame_time <= IncrementFrameCount(ft_rx_out);
+                    frame_time     <= ft_rx_out_inc;
                     new_frame_time <= '1';
                 end if is_qf;
-                
+
             end if;
         end if;
     end process assemble_timecode;
