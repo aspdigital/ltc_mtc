@@ -106,10 +106,8 @@ architecture decoder of mtc_decoder is
     -- indicate that the 0th and 4th QF messages were received.
     signal got_qf_0                  : std_logic;
     signal got_qf_4                  : std_logic;
-    signal got_qf_4_d                : std_logic;
     attribute MARK_DEBUG of got_qf_0 : signal is "TRUE";
     attribute MARK_DEBUG of got_qf_4 : signal is "TRUE";
-    attribute MARK_DEBUG of got_qf_4_d : signal is "TRUE";
 
     -- As qf messages are received, collect them into this record.
     signal ft_rx_in                   : mtc_pkt_t;
@@ -119,13 +117,6 @@ architecture decoder of mtc_decoder is
     -- as necessary.
     signal ft_rx_out                  : mtc_pkt_t;
     attribute MARK_DEBUG of ft_rx_out : signal is "TRUE";
-
-    -- we can calculate the incremented frame count, which updates the final output on qf_4. Mind the
-    -- rollover of the frame count, which is based on the frame rate.
-    signal frame_rollover                 : frames_t;
-    attribute MARK_DEBUG of frame_rollover : signal is "TRUE";
-    signal ft_rx_out_inc                  : mtc_pkt_t;
-    attribute MARK_DEBUG of ft_rx_out_inc : signal is "TRUE";
 
     ---------------------------------------------------------------------------------------------------------
     -- Functions, for our convenience.
@@ -164,6 +155,11 @@ architecture decoder of mtc_decoder is
         variable last_frame : frames_t;
     begin  -- function IncrementFrameCount
 
+        -- starting point for all fields. If a field's rollover test doesn't pass, we have to make sure the
+        -- higher-order fields still have a value.
+        rv := ARG;
+
+        -- obviously the last frame in a second depends on the frame rate.
         frame_rate_rollover : case ARG.frame_rate is
             when FR_24  => last_frame := 23;
             when FR_25  => last_frame := 24;
@@ -242,14 +238,11 @@ begin  -- architecture decoder
                 ft_rx_out <= MTC_PKT_RESET;
                 got_qf_0  <= '0';
                 got_qf_4  <= '0';
-                got_qf_4_d <= '0';
             else
 
                 -- clear one-shots.
                 got_qf_0 <= '0';
                 got_qf_4 <= '0';
-
-                got_qf_4_d <= got_qf_4;
 
                 -- look only when a new byte has arrived.
                 got_new_byte : if rx_valid then
@@ -311,68 +304,6 @@ begin  -- architecture decoder
     end process receive_timecode;
 
     ---------------------------------------------------------------------------------------------------------
-    -- Take the latched frame_time_out and increment it by one frame. The incremented value is output with
-    -- QF4. 
-    ---------------------------------------------------------------------------------------------------------
-    increment_ft_rx_out : process (clk_main) is
-    begin  -- process increment_ft_rx_out
-        if rising_edge(clk_main) then
-            if rst_main = '1' then
-                ft_rx_out_inc <= MTC_PKT_RESET;
-            else
-                frame_rate_rollover : case ft_rx_out.frame_rate is
-                    when FR_24  => frame_rollover <= 23;
-                    when FR_25  => frame_rollover <= 24;
-                    when FR_30  => frame_rollover <= 29;
-                    when others => frame_rollover <= 1; report "Illegal frame rate" severity ERROR;
-                end case frame_rate_rollover;
-
-                -- starting values, will be updated by the calculations.
-                -- this includes ensuring the frame_rate field is populated.
-                ft_rx_out_inc <= ft_rx_out;
-
-                -- now increment and update as needed.
-                UpdateIt : if got_qf_4 then
-
-                    -- increment the frame time from qf_0. Pipelining should help timing.
-                    UpdateFrame : if ft_rx_out.frames = frame_rollover then
-
-                        ft_rx_out_inc.frames <= 0;
-
-                        UpdateSeconds : if ft_rx_out.seconds = 59 then
-
-                            ft_rx_out_inc.seconds <= 0;
-
-                            UpdateMinutes : if ft_rx_out.minutes = 59 then
-
-                                ft_rx_out_inc.minutes <= 0;
-
-                                UpdateHours : if ft_rx_out.hours = 23 then
-
-                                    ft_rx_out_inc.hours <= 0;
-
-                                else
-                                    ft_rx_out_inc.hours <= ft_rx_out.hours + 1;
-                                end if UpdateHours;
-
-                            else
-                                ft_rx_out_inc.minutes <= ft_rx_out.minutes + 1;
-                            end if UpdateMinutes;
-
-                        else
-                            ft_rx_out_inc.seconds <= ft_rx_out.seconds + 1;
-                        end if UpdateSeconds;
-
-                    else
-                        ft_rx_out_inc.frames <= ft_rx_out.frames + 1;
-                    end if UpdateFrame;
-                end if UpdateIt;
-
-            end if;
-        end if;
-    end process increment_ft_rx_out;
-
-    ---------------------------------------------------------------------------------------------------------
     -- Update the output received frame time.
     ---------------------------------------------------------------------------------------------------------
     assemble_timecode : process (clk_main) is
@@ -392,9 +323,9 @@ begin  -- architecture decoder
                     frame_time     <= ft_rx_out;
                     new_frame_time <= '1';
 
-                elsif got_qf_4_d then
+                elsif got_qf_4 then
                     -- a new frame in between the MTC frame.
-                    frame_time     <= ft_rx_out_inc;
+                    frame_time     <= IncrementFrameCount(ft_rx_out);
                     new_frame_time <= '1';
                 end if is_qf;
 
