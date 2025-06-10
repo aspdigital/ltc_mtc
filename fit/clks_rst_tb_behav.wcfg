@@ -3,57 +3,71 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="uarx_tb_behav.wdb" id="1">
+      <db_ref path="clks_rst_tb_behav.wdb" id="1">
          <top_modules>
+            <top_module name="clk_mux_pkg" />
+            <top_module name="clks_rst_tb" />
             <top_module name="glbl" />
-            <top_module name="uarx_tb" />
+            <top_module name="ltc_mtc_pkg" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="1,001.000001 us"></ZoomEndTime>
-      <Cursor1Time time="24.487768 us"></Cursor1Time>
+      <ZoomStartTime time="13,099.477 ns"></ZoomStartTime>
+      <ZoomEndTime time="23,038.149 ns"></ZoomEndTime>
+      <Cursor1Time time="30,110.261 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="250"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="295"></NameColumnWidth>
+      <ValueColumnWidth column_width="187"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="9" />
-   <wvobject fp_name="/uarx_tb/tb_arst_l" type="logic">
-      <obj_property name="ElementShortName">tb_arst_l</obj_property>
-      <obj_property name="ObjectShortName">tb_arst_l</obj_property>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/clks_rst_tb/clk_ref" type="logic">
+      <obj_property name="ElementShortName">clk_ref</obj_property>
+      <obj_property name="ObjectShortName">clk_ref</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
+   <wvobject fp_name="/clks_rst_tb/arst_l" type="logic">
+      <obj_property name="ElementShortName">arst_l</obj_property>
+      <obj_property name="ObjectShortName">arst_l</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/rst_l" type="logic">
-      <obj_property name="ElementShortName">rst_l</obj_property>
-      <obj_property name="ObjectShortName">rst_l</obj_property>
+   <wvobject fp_name="/clks_rst_tb/clk_bundle" type="array">
+      <obj_property name="ElementShortName">clk_bundle[0:2]</obj_property>
+      <obj_property name="ObjectShortName">clk_bundle[0:2]</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/ser_rx" type="logic">
-      <obj_property name="ElementShortName">ser_rx</obj_property>
-      <obj_property name="ObjectShortName">ser_rx</obj_property>
+   <wvobject fp_name="/clks_rst_tb/mmcm_locked" type="logic">
+      <obj_property name="ElementShortName">mmcm_locked</obj_property>
+      <obj_property name="ObjectShortName">mmcm_locked</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/rx_data" type="array">
-      <obj_property name="ElementShortName">rx_data[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rx_data[7:0]</obj_property>
+   <wvobject fp_name="/clks_rst_tb/clk_main" type="logic">
+      <obj_property name="ElementShortName">clk_main</obj_property>
+      <obj_property name="ObjectShortName">clk_main</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/rx_valid" type="logic">
-      <obj_property name="ElementShortName">rx_valid</obj_property>
-      <obj_property name="ObjectShortName">rx_valid</obj_property>
+   <wvobject fp_name="/clks_rst_tb/rst_main" type="logic">
+      <obj_property name="ElementShortName">rst_main</obj_property>
+      <obj_property name="ObjectShortName">rst_main</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/tb_rx_data" type="array">
-      <obj_property name="ElementShortName">tb_rx_data[7:0]</obj_property>
-      <obj_property name="ObjectShortName">tb_rx_data[7:0]</obj_property>
+   <wvobject fp_name="/clks_rst_tb/rst_audio" type="logic">
+      <obj_property name="ElementShortName">rst_audio</obj_property>
+      <obj_property name="ObjectShortName">rst_audio</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/tx_word" type="array">
-      <obj_property name="ElementShortName">tx_word[9:0]</obj_property>
-      <obj_property name="ObjectShortName">tx_word[9:0]</obj_property>
+   <wvobject fp_name="/clks_rst_tb/clk_audio" type="logic">
+      <obj_property name="ElementShortName">clk_audio</obj_property>
+      <obj_property name="ObjectShortName">clk_audio</obj_property>
    </wvobject>
-   <wvobject fp_name="/uarx_tb/running" type="other">
-      <obj_property name="ElementShortName">running</obj_property>
-      <obj_property name="ObjectShortName">running</obj_property>
+   <wvobject fp_name="/clks_rst_tb/sclk_audio" type="logic">
+      <obj_property name="ElementShortName">sclk_audio</obj_property>
+      <obj_property name="ObjectShortName">sclk_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/lrclk_audio" type="logic">
+      <obj_property name="ElementShortName">lrclk_audio</obj_property>
+      <obj_property name="ObjectShortName">lrclk_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/CLKPER" type="other">
+      <obj_property name="ElementShortName">CLKPER</obj_property>
+      <obj_property name="ObjectShortName">CLKPER</obj_property>
+   </wvobject>
+   <wvobject fp_name="/clks_rst_tb/RESETTIME" type="other">
+      <obj_property name="ElementShortName">RESETTIME</obj_property>
+      <obj_property name="ObjectShortName">RESETTIME</obj_property>
    </wvobject>
 </wave_config>

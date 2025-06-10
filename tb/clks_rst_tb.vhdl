@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-17
--- Last update: 2025-04-27
+-- Last update: 2025-06-09
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -39,15 +39,16 @@ end entity clks_rst_tb;
 architecture testbench of clks_rst_tb is
 
     -- component ports
-    signal clk_ref     : std_logic    := '1';
-    signal arst_l      : std_logic    := '0';
-    signal frame_rate  : frame_rate_t := FR_30;
+    signal clk_ref     : std_logic := '1';
+    signal arst_l      : std_logic := '0';
     signal clk_bundle  : clk_bundle_t;
     signal mmcm_locked : std_logic;
-    signal clk_timer   : std_logic;
-    signal rst_timer   : std_logic;
     signal clk_main    : std_logic;
     signal rst_main    : std_logic;
+    signal rst_audio   : std_logic;
+    signal clk_audio   : std_logic;
+    signal sclk_audio  : std_logic;
+    signal lrclk_audio : std_logic;
 
 begin  -- architecture testbench
 
@@ -56,32 +57,68 @@ begin  -- architecture testbench
         port map (
             clk_ref     => clk_ref,
             arst_l      => arst_l,
-            frame_rate  => frame_rate,
             clk_bundle  => clk_bundle,
             mmcm_locked => mmcm_locked,
-            clk_timer   => clk_timer,
-            rst_timer   => rst_timer,
             clk_main    => clk_main,
-            rst_main    => rst_main);
+            rst_main    => rst_main,
+            rst_audio   => rst_audio,
+            clk_audio   => clk_audio,
+            sclk_audio  => sclk_audio,
+            lrclk_audio => lrclk_audio);
 
     -- clock and reset
     clk_ref <= not clk_ref after CLKPER / 2;
     arst_l  <= '1'         after RESETTIME;
 
-    -- waveform generation
-    WaveGen_Proc : process
-    begin
-        wait for 500 US;
-        wait until rising_edge(clk_main);
-        frame_rate <= FR_24;
-        wait for 500 US;
-        wait until rising_edge(clk_main);
-        frame_rate <= FR_25;
-        wait for 500 US;
-        wait until rising_edge(clk_main);
-        frame_rate <= FR_30;
-    end process WaveGen_Proc;
+    ---------------------------------------------------------------------------------------------------------
+    -- Report the clocks' frequencies.
+    ---------------------------------------------------------------------------------------------------------
+    freq_calc_ref : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "Reference clock")
+        port map (
+            mysig => clk_ref);
 
+    freq_calc_main : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "Main clock")
+        port map (
+            mysig => clk_main);
 
+    freq_calc_24fps : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "24 fps clock")
+        port map (
+            mysig => clk_bundle(CLK_24FPS));
+
+    freq_calc_25fps : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "25 fps clock")
+        port map (
+            mysig => clk_bundle(CLK_25FPS));
+
+    freq_calc_30fps : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "30 fps clock")
+        port map (
+            mysig => clk_bundle(CLK_30FPS));
+
+    freq_calc_mclk : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "I2S mclk")
+        port map (
+            mysig => clk_audio);
+
+    freq_calc_sclk : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "I2S sclk")
+        port map (
+            mysig => sclk_audio);
+
+    freq_calc_lrclk : entity work.freq_calc
+        generic map (
+            SIGNAL_NAME => "I2S lrclk")
+        port map (
+            mysig => lrclk_audio);
 
 end architecture testbench;

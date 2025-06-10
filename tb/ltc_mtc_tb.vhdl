@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-05-28
+-- Last update: 2025-06-09
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -71,11 +71,15 @@ architecture testbench of ltc_mtc_tb is
     signal JA1        : std_logic;
     signal JA2        : std_logic;
     signal JA3        : std_logic;
+    signal JC7        : std_logic;
+    signal JC8        : std_logic;
+    signal JC9        : std_logic;
+    signal JC10       : std_logic;
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
     -- "digits" to "display"
-    
+
 
 begin  -- architecture testbench
 
@@ -113,9 +117,13 @@ begin  -- architecture testbench
             CG         => CG,
             DP         => DP,
             AN         => AN,
-            JA1        => JA1,
-            JA2        => JA2,
-            JA3        => JA3,
+            JA1        => JA1,          -- MTC in
+            JA2        => JA2,          -- MTC out
+            JA3        => JA3,          -- MTC new frame time
+            JC7        => JC7,          -- MCLK
+            JC8        => JC8,          -- LRCLK
+            JC9        => JC9,          -- SCLK
+            JC10       => JC10,         -- DATA
             AUD_PWM    => AUD_PWM,
             AUD_SD     => AUD_SD);
 
@@ -137,7 +145,7 @@ begin  -- architecture testbench
             midi_out   => JA1);
 
     -- What was displayed?
-    tb_timecode_display_1: entity work.tb_timecode_display
+    tb_timecode_display_1 : entity work.tb_timecode_display
         port map (
             CA  => CA,
             CB  => CB,

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-04-27
+-- Last update: 2025-06-09
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -23,6 +23,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 use work.ltc_mtc_pkg.all;
+use work.mtc_pkg.all;
 use work.timecode_pkg.all;
 
 entity mtc_decoder_tb is
@@ -40,8 +41,7 @@ architecture testbench of mtc_decoder_tb is
     signal midi_rx        : std_logic;
     signal clk_main       : std_logic := '1';
     signal rst_main       : std_logic;
-    signal frame_rate     : frame_rate_t;
-    signal frame_time     : frame_time_t;
+    signal frame_time     : mtc_pkt_t;
     signal new_frame_time : std_logic;
 
     -- test bench transmitter.
@@ -86,7 +86,6 @@ begin  -- architecture testbench
             midi_rx        => midi_rx,
             clk_main       => clk_main,
             rst_main       => rst_main,
-            frame_rate     => frame_rate,
             frame_time     => frame_time,
             new_frame_time => new_frame_time);
 

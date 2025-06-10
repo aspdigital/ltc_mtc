@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-05-26
+-- Last update: 2025-06-02
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -55,6 +55,10 @@ use work.seven_segment_display_pkg.all;
 use work.timecode_pkg.all;
 use work.clk_mux_pkg.all;
 
+library unisim;
+use unisim.vcomponents.all;
+
+
 entity ltc_mtc is
 
     generic (
@@ -95,6 +99,10 @@ entity ltc_mtc is
         JA1        : in  std_logic;                     -- JA(1) is MTC in
         JA2        : out std_logic;                     -- JA(2) is MTC out
         JA3        : out std_logic;                     -- JA(3) is MTC new frame time
+        JC7        : out std_logic;     -- I2S ADC MCLK
+        JC8        : out std_logic;     -- I2S ADC LRCLK
+        JC9        : out std_logic;     -- I2S ADC SCLK
+        JC10       : in  std_logic;     -- I2S ADC data
         -- Linear time code output on the audio PWM pin.
         AUD_PWM    : out std_logic;                     -- PWM signal path through to low-pass filter
         AUD_SD     : out std_logic                      -- active low shutdown, bring high to enable PWM
@@ -126,6 +134,12 @@ architecture toplevel of ltc_mtc is
 
     -- MMCM lock status, for generating resets.
     signal mmcm_locked : std_logic;
+
+    -- audio clocks.
+    signal clk_audio : std_logic;       -- at modulator rate, 38.4 MHz for 100 kHz sampling
+    signal rst_audio : std_logic;       -- reset in that domain
+    signal sclk_audio : std_logic;      -- I2S shift register clock
+    signal lrclk_audio : std_logic;     -- I2S LRCLK at sample rate
 
     ---------------------------------------------------------------------------------------------------------
     -- The periods of the three clocks that divide nicely into the three frame rates.
@@ -223,7 +237,31 @@ begin  -- architecture toplevel
             mmcm_locked => mmcm_locked,
             -- for non-frame-rate related logic, runs all the time.
             clk_main    => clk_main,
-            rst_main    => rst_main);
+            rst_main    => rst_main,
+            -- I2S audio clocks
+            rst_audio   => rst_audio,
+            clk_audio   => clk_audio,
+            sclk_audio  => sclk_audio,
+            lrclk_audio => lrclk_audio);
+
+    -- forward the modulator clock out.
+    i2s_mclk_forward : ODDR
+        generic map(
+            DDR_CLK_EDGE => "OPPOSITE_EDGE",  -- "OPPOSITE_EDGE" or "SAME_EDGE"
+            INIT         => '0',              -- Initial value for Q port ('1' or '0')
+            SRTYPE       => "SYNC")           -- Reset Type ("ASYNC" or "SYNC")
+        port map (
+            Q  => JC7,                        -- 1-bit DDR output
+            C  => clk_audio,                  -- 1-bit clock input
+            CE => '1',                        -- 1-bit clock enable input
+            D1 => '1',                        -- 1-bit data input (positive edge)
+            D2 => '0',                        -- 1-bit data input (negative edge)
+            R  => rst_audio,                  -- 1-bit reset input
+            S  => '0');                       -- 1-bit set input
+
+    -- other clocks follow.
+    JC8 <= lrclk_audio;
+    JC9 <= sclk_audio;
 
     ---------------------------------------------------------------------------------------------------------
     -- Debounce the slide switches.
