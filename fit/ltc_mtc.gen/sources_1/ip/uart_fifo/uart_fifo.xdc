@@ -59,6 +59,6 @@
 
 
 
-
+create_waiver  -type CDC -id CDC-1 -user fifo_generator  -to [get_pins -hierarchical -filter {NAME =~ *gconvfifo.rf/grf.rf/gntv_or_sync_fifo.mem/gdm.dm_gen.dm/gpr1.dout_i_reg[0]/D}] -description {Waiving CDC-1 warning because it is treating the asynchronous LUTRAM read to the read register path as CDC path which is not a real CDC}
 ################################################################################
 
