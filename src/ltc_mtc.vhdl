@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-06-02
+-- Last update: 2025-06-18
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -194,6 +194,7 @@ architecture toplevel of ltc_mtc is
     -- received frame time, and data valid strobe.
     signal ltcd_frame_time     : frame_time_t := FRAME_TIME_RESET;
     signal ltcd_new_frame_time : std_logic := '0';
+    signal ltcd_locked : std_logic;
     
 begin  -- architecture toplevel
 
@@ -376,4 +377,19 @@ begin  -- architecture toplevel
             frame_time     => mtcd_frame_time,
             new_frame_time => mtcd_new_frame_time);
 
+    ---------------------------------------------------------------------------------------------------------
+    -- LTC Decoder
+    ---------------------------------------------------------------------------------------------------------
+    decoder_ltc: entity work.ltc_decoder
+        port map (
+            clk_audio           => clk_audio,
+            rst_audio           => rst_audio,
+            sclk_audio          => JC9,
+            lrclk_audio         => JC9,
+            data_audio          => JC10,
+            ltcd_frame_rate     => ltcd_frame_rate,
+            ltcd_frame_time     => ltcd_frame_time,
+            ltcd_new_frame_time => ltcd_new_frame_time,
+            ltcd_locked         => ltcd_locked);
+    
 end architecture toplevel;

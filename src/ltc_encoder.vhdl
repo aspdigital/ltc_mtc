@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-07
--- Last update: 2025-04-27
+-- Last update: 2025-06-18
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -138,9 +138,6 @@ architecture coder of ltc_encoder is
     alias flag3         : std_logic is sr(59);  -- even parity at 25 fps, BGF2 at others
     alias user_bits8    : std_logic_vector(3 downto 0) is sr(63 downto 60);
     alias sync_word     : std_logic_vector(15 downto 0) is sr(79 downto 64);
-
-    -- the fixed-pattern sync word sent at the end of every frame:
-    constant SYNC_WORD_PATTERN : std_logic_vector(15 downto 0) := X"BFFC";
 
 begin  -- architecture coder
 

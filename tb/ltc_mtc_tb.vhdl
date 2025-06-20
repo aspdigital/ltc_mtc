@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-06
--- Last update: 2025-06-09
+-- Last update: 2025-06-18
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -38,7 +38,8 @@ use work.ltc_mtc_pkg.all;
 entity ltc_mtc_tb is
     generic (
         DISPLAY_SOURCE : string;
-        TX_FRAME_RATE  : natural);
+        TX_FRAME_RATE  : natural;
+        AMPLITUDE      : real := 1.0);
 end entity ltc_mtc_tb;
 
 -------------------------------------------------------------------------------------------------------------
@@ -78,8 +79,7 @@ architecture testbench of ltc_mtc_tb is
     signal AUD_PWM    : std_logic;
     signal AUD_SD     : std_logic;
 
-    -- "digits" to "display"
-
+    signal ltc_analog : real;
 
 begin  -- architecture testbench
 
@@ -156,5 +156,13 @@ begin  -- architecture testbench
             CG  => CG,
             CDP => DP,
             AN  => AN);
+
+    -- test bench generates analog LTC:
+    tb_ltc_encoder_1: entity work.tb_ltc_encoder
+        generic map (
+            AMPLITUDE => AMPLITUDE)
+        port map (
+            frame_rate => TB_MIDI_FRAME_RATE,
+            ltc_analog => ltc_analog);
 end architecture testbench;
 

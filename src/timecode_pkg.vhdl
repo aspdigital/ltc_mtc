@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-05-26
+-- Last update: 2025-06-18
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -136,6 +136,10 @@ package timecode_pkg is
         ft_sec     => MINSEC_RESET,
         ft_min     => MINSEC_RESET,
         ft_hr      => HR_RESET);
+
+    ---------------------------------------------------------------------------------------------------------
+    -- The sync at the end of every SMPTE frame.
+    constant SYNC_WORD_PATTERN : std_logic_vector(15 downto 0) := X"BFFC";
 
 end package timecode_pkg;
 

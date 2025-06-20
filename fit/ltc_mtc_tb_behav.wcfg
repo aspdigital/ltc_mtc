@@ -16,15 +16,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="17,743.859 ns"></ZoomStartTime>
-      <ZoomEndTime time="17,969.760 ns"></ZoomEndTime>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="240.093 ns"></ZoomEndTime>
       <Cursor1Time time="17,783.959 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="361"></NameColumnWidth>
-      <ValueColumnWidth column_width="130"></ValueColumnWidth>
+      <ValueColumnWidth column_width="122"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="79" />
+   <WVObjectSize size="87" />
    <wave_markers>
       <marker time="20669587216" label="" />
       <marker time="37399801000" label="" />
@@ -380,5 +380,37 @@
    <wvobject fp_name="/ltc_mtc_tb/DUT/clks_rst_inst/lrclk_audio" type="logic">
       <obj_property name="ElementShortName">lrclk_audio</obj_property>
       <obj_property name="ObjectShortName">lrclk_audio</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider188">
+      <obj_property name="label">Analog LTC generation</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/bit_time" type="other">
+      <obj_property name="ElementShortName">bit_time</obj_property>
+      <obj_property name="ObjectShortName">bit_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/half_bit_time" type="other">
+      <obj_property name="ElementShortName">half_bit_time</obj_property>
+      <obj_property name="ObjectShortName">half_bit_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/bit_clk" type="logic">
+      <obj_property name="ElementShortName">bit_clk</obj_property>
+      <obj_property name="ObjectShortName">bit_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/frame_clk" type="logic">
+      <obj_property name="ElementShortName">frame_clk</obj_property>
+      <obj_property name="ObjectShortName">frame_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/frame_time" type="array">
+      <obj_property name="ElementShortName">frame_time</obj_property>
+      <obj_property name="ObjectShortName">frame_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/frame_rate" type="other">
+      <obj_property name="ElementShortName">frame_rate</obj_property>
+      <obj_property name="ObjectShortName">frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_mtc_tb/tb_ltc_encoder_1/ltc_analog" type="other">
+      <obj_property name="ElementShortName">ltc_analog</obj_property>
+      <obj_property name="ObjectShortName">ltc_analog</obj_property>
    </wvobject>
 </wave_config>

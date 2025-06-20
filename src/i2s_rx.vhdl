@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-06-02
--- Last update: 2025-06-09
+-- Last update: 2025-06-18
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -41,9 +41,12 @@ architecture i2s_receiver of i2s_rx is
     -- for edge detect.
     signal sclk_d  : std_logic;
     signal lrclk_d : std_logic;
+    signal lrclk_dd : std_logic;
 
     -- the shift register.
-    signal sr : std_logic_vector(63 downto 0);
+    signal sr : std_logic_vector(31 downto 0);
+    alias this_sample : std_logic_vector(23 downto 0) is sr(sr'LEFT downto sr'LEFT - 24 + 1);
+    signal this_left : signed(23 downto 0);
 
 begin  -- architecture i2s_receiver
 
@@ -53,26 +56,33 @@ begin  -- architecture i2s_receiver
             if rst_audio = '1' then      -- synchronous reset (active high)
                 sclk_d     <= '0';
                 lrclk_d    <= '0';
+                lrclk_dd   <= '0';
                 sr         <= (others => '0');
                 data_valid <= '0';
                 data_left  <= (others => '0');
                 data_right <= (others => '0');
             else
                 sclk_d  <= sclk_audio;
-                lrclk_d <= lrclk_audio;
 
                 -- always shift on rising edge of sclk.
                 shift_in : if sclk_audio = '1' and sclk_d = '0' then
                     sr <= sr(sr'LEFT - 1 downto 0) & data_audio;
+                    lrclk_d <= lrclk_audio;
+                    lrclk_dd <= lrclk_d;
+
+                    got_both_samples: if lrclk_d = '0' and lrclk_dd = '1' then
+                        data_valid <= not data_valid;
+                    end if got_both_samples;
                 end if shift_in;
 
-                -- update outputs on falling edge of LRCLK, which is when the whole frame has shifted in.
-                latch_data : if lrclk_audio = '0' and lrclk_d = '1' then
-                    data_valid <= '1';
-                    data_left  <= signed(sr(62 downto 38));
-                    data_right <= signed(sr(30 downto 6));
-                else
-                    data_valid <= '0';
+                latch_data : if lrclk_d xor lrclk_dd then
+                    if lrclk_d = '1' then
+                        -- we've just toggled to right, so capture left.
+                        this_left <= signed(this_sample);
+                    else
+                        data_left <= this_left;
+                        data_right <= signed(this_sample);
+                    end if;
                 end if latch_data;
 
             end if;
