@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-06-19
+-- Last update: 2025-06-22
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -72,6 +72,9 @@ use ieee.numeric_std.all;
 use work.ltc_mtc_pkg.all;
 use work.timecode_pkg.all;
 
+library asp_utils;
+use asp_utils.vector_array_types_pkg.all;
+
 entity ltc_decoder is
     port (
         clk_audio           : in  std_logic;  -- modulator clock
@@ -91,18 +94,20 @@ architecture decoder of ltc_decoder is
     -- incoming samples. We'll use left only for our decoder source.
     ---------------------------------------------------------------------------------------------------------
     signal data_valid  : std_logic;
-    signal data_valid_d : std_logic;
-    signal data_left   : signed(23 downto 0);
-    signal data_left_d : signed(23 downto 0);  -- delay for transition detect, do we need the whole sample?
+    signal data_left   : slv_array_t(0 to 0)(23 downto 0);
+    signal data_right   : slv_array_t(0 to 0)(23 downto 0);
+    signal data_left_d : std_logic_vector(23 downto 0);  -- delay for transition detect, do we need the whole sample?
 
-    alias this_sign : std_logic is data_left(23);
+    alias this_sign : std_logic is data_left(0)(23);
     alias prev_sign : std_logic is data_left_d(23);
 
     -- flag set when we know the width (in clocks) of each bit.
     signal got_bitwidth : std_logic;
 
-    -- flag set when there is a transition between the current and previous sample.
-    signal got_transition : std_logic;
+    -- flag set when there is a transition between the current and previous sample. Since got_transition is
+    -- true for an entire sample time, we need only its leading edge to advance the determine-bitwidth machine.
+    signal got_transition   : std_logic;
+    signal got_transition_d : std_logic;
 
     ---------------------------------------------------------------------------------------------------------
     -- Our bit-width timer counts samples (at 100 kHz sample rate), for convenience and for a smaller
@@ -128,18 +133,22 @@ architecture decoder of ltc_decoder is
         return v_rv;
     end function CalcTicksPerBit;
 
-    constant SAMPLES_PER_30FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 30);
-    constant SAMPLES_PER_25FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 25);
-    constant SAMPLES_PER_24FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 24);
+    -- how many samples are in a full bit width for a given frame rate. The clock frequency here is the sample
+    -- rate.
+    constant BITWIDTH_30FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 30) - 1;
+    constant HALFBIT_30FPS  : natural := BITWIDTH_30FPS / 2;
+    constant BITWIDTH_25FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 25) - 1;
+    constant HALFBIT_25FPS  : natural := BITWIDTH_25FPS / 2;
+    constant BITWIDTH_24FPS : natural := CalcTicksPerBit(CLK_FREQ => 100.0e3, FRAME_RATE => 24) - 1;
+    constant HALFBIT_24FPS  : natural := BITWIDTH_24FPS / 2;
 
     constant WIGGLE       : natural := 10;
-    constant BITWIDTH_MAX : natural := SAMPLES_PER_24FPS + WIGGLE;
+    constant BITWIDTH_MAX : natural := BITWIDTH_24FPS + WIGGLE;
     subtype bitwidth_timer_t is natural range 0 to BITWIDTH_MAX;
     signal bitwidth_timer : bitwidth_timer_t;
 
     -- capture bit width times in these registers.
     signal bitwidth_base : bitwidth_timer_t;  -- initial measurement, between the first two transitions
-    signal bitwidth_next : bitwidth_timer_t;  -- next measurement, between transition 2 and 3
     signal bitwidth      : bitwidth_timer_t;  -- the measured bit width (for a 0)
     signal bitwidthdiv2  : bitwidth_timer_t;  -- half a bit period
     signal bitwidth3p4   : bitwidth_timer_t;  -- 3/4 a bit time (longer is 0, shorter is 1)
@@ -147,7 +156,7 @@ architecture decoder of ltc_decoder is
     ---------------------------------------------------------------------------------------------------------
     -- State machines.
     ---------------------------------------------------------------------------------------------------------
-    type bw_state_t is (BW_START, BW_FIRST_TRANSITION, BW_SECOND_TRANSITION, BW_WIDTH_KNOWN);
+    type bw_state_t is (BW_START, BW_FIRST_TRANSITION, BW_COMPARE, BW_SUCCESS);
     signal bw_state : bw_state_t;
 
     type ds_state_t is (DS_BEGIN, DS_START, DS_FIND_SECOND_TRANSITION, DS_DECODE_START, DS_WAIT_END_OF_ONE);
@@ -190,40 +199,47 @@ begin  -- architecture decoder
     -- widest range possible.
     ---------------------------------------------------------------------------------------------------------
     data_receiver : entity work.i2s_rx
+        generic map (
+            NUM_PAIRS => 1,
+            SWIDTH    => 24)
         port map (
-            clk_audio   => clk_audio,
-            rst_audio   => rst_audio,
-            sclk_audio  => sclk_audio,
-            lrclk_audio => lrclk_audio,
-            data_audio  => data_audio,
-            data_valid  => data_valid,
-            data_left   => data_left,
-            data_right  => open);
+            mclk     => clk_audio,
+            bclk     => sclk_audio,
+            lrclk    => lrclk_audio,
+            sdin(0)  => data_audio,
+            sd_left  => data_left,
+            sd_right => data_right,
+            sd_valid => data_valid);
 
     ---------------------------------------------------------------------------------------------------------
     -- Look for a transition between the current sample and the previous sample. A transition is when the
     -- polarity of the current and previous samples differs.
+    -- The transition lasts for an entire sample time, and we need only its edge.
     ---------------------------------------------------------------------------------------------------------
     look_for_transition : process (clk_audio) is
     begin  -- process look_for_transition
         if rising_edge(clk_audio) then
             if rst_audio = '1' then
-                data_valid_d   <= '0';
-                data_left_d    <= (others => '0');
-                got_transition <= '0';
+                data_left_d      <= (others => '0');
+                got_transition   <= '0';
+                got_transition_d <= '0';
             else
-                data_valid_d <= data_valid;
-                
-                got_new_sample : if data_valid and not data_valid_d then
-                    data_left_d    <= data_left;
-                    got_transition <= this_sign xor prev_sign;
+                got_new_sample : if data_valid then
+                    data_left_d      <= data_left(0);
+                    got_transition   <= this_sign xor prev_sign;
                 end if got_new_sample;
+
+                -- edge is one-clock strobe.
+                got_transition_d <= got_transition;
             end if;
         end if;
     end process look_for_transition;
 
     ---------------------------------------------------------------------------------------------------------
     -- Determine the width of a bit.
+    -- 1. Wait for a transition and clear a bit timer.
+    -- 2. Wait for a second transition. Now we have a duration that's either the long or the short. Since we
+    --    know the durations of bits for our three frame rates, we can determine which by comparing.
     ---------------------------------------------------------------------------------------------------------
     find_bit_width : process (clk_audio) is
     begin  -- process find_bit_width
@@ -235,11 +251,12 @@ begin  -- architecture decoder
                 bitwidthdiv2   <= 0;
                 bitwidth3p4    <= 0;
                 got_bitwidth   <= '0';
+                ltcd_frame_rate <= FR_30;
                 bw_state       <= BW_START;
             else
 
                 -- the timer, reset by machine.
-                the_timer : if bitwidth_timer < BITWIDTH_MAX then
+                the_timer : if (bitwidth_timer < BITWIDTH_MAX) and (data_valid = '1') then
                     bitwidth_timer <= bitwidth_timer + 1;
                 end if the_timer;
 
@@ -249,41 +266,56 @@ begin  -- architecture decoder
                 -- machine to determine the width of a bit.
                 Decoder : case bw_state is
                     when BW_START =>
+                        -- start timer.
+                        bitwidth_timer <= 0;
                         -- synchronize by waiting for a transition.
-                        start_of_bit : if got_transition then
-                            bitwidth_timer <= 0;
-                            bw_state       <= BW_FIRST_TRANSITION;
+                        start_of_bit : if got_transition = '1' and got_transition_d = '0' then
+                            bw_state <= BW_FIRST_TRANSITION;
                         end if start_of_bit;
 
                     when BW_FIRST_TRANSITION =>
-                        initial_width_capture : if got_transition then
+                        -- capture the timer value on a transition so we can start the width compares.
+                        initial_width_capture : if got_transition = '1' and got_transition_d = '0' then
                             bitwidth_base  <= bitwidth_timer;
-                            bitwidth_timer <= 0;
-                            bw_state       <= BW_SECOND_TRANSITION;
+                            bw_state       <= BW_COMPARE;
                         end if initial_width_capture;
 
-                    when BW_SECOND_TRANSITION =>
-                        next_edge : if got_transition then
-                            bw_state       <= BW_WIDTH_KNOWN;
-                            bitwidth_timer <= 0;  -- for next time
-                            compare_times : if bitwidth_timer > bitwidth_base then
-                                -- current time is longer, so this must be the true bit width.
-                                bitwidth     <= bitwidth_timer;
-                                bitwidthdiv2 <= bitwidth_base;
-                            elsif bitwidth_timer < bitwidth_base then
-                                -- current time is shorter, so it's the half-bit time.
-                                bitwidthdiv2 <= bitwidth_timer;
-                                bitwidth     <= bitwidth_base;
-                            else
-                                bw_state <= BW_SECOND_TRANSITION;
-                            end if compare_times;
-                        end if next_edge;
+                    when BW_COMPARE =>
+                        -- assume success
+                        bw_state <= BW_SUCCESS;
+                        tree : if bitwidth_base >= HALFBIT_24FPS then
+                            bitwidth        <= BITWIDTH_24FPS;
+                            bitwidthdiv2    <= HALFBIT_24FPS;
+                            ltcd_frame_rate <= FR_24;
+                        elsif bitwidth_base >= HALFBIT_25FPS then
+                            bitwidth        <= BITWIDTH_25FPS;
+                            bitwidthdiv2    <= HALFBIT_25FPS;
+                            ltcd_frame_rate <= FR_25;
+                        elsif bitwidth_base >= HALFBIT_30FPS then
+                            bitwidth        <= BITWIDTH_30FPS;
+                            bitwidthdiv2    <= HALFBIT_30FPS;
+                            ltcd_frame_rate <= FR_30;
+                        elsif bitwidth_base >= BITWIDTH_24FPS then
+                            bitwidth        <= BITWIDTH_24FPS;
+                            bitwidthdiv2    <= HALFBIT_24FPS;
+                            ltcd_frame_rate <= FR_24;
+                        elsif bitwidth_base >= BITWIDTH_25FPS then
+                            bitwidth        <= BITWIDTH_25FPS;
+                            bitwidthdiv2    <= HALFBIT_25FPS;
+                            ltcd_frame_rate <= FR_25;
+                        elsif bitwidth_base >= BITWIDTH_30FPS then
+                            bitwidth        <= BITWIDTH_30FPS;
+                            bitwidthdiv2    <= HALFBIT_30FPS;
+                            ltcd_frame_rate <= FR_30;
+                        else
+                            -- no transitions fast enough
+                            bw_state <= BW_START;
+                        end if tree;
 
-                    when BW_WIDTH_KNOWN =>
-                        -- now that we know the bit width, the shifting can commence. We need to keep
-                        -- monitoring transitions to see if the bit width, hence the frame time, has changed.
+                  when BW_SUCCESS =>
                         got_bitwidth <= '1';
-                end case Decoder;
+                        
+              end case Decoder;
 
             end if;
         end if;
@@ -319,7 +351,7 @@ begin  -- architecture decoder
             else
 
                 -- the bit timer.
-                bit_timer : if bittime > 0 then
+                bit_timer : if (bittime > 0) and (data_valid = '1') then
                     bittime <= bittime - 1;
                 end if bit_timer;
 
@@ -332,7 +364,7 @@ begin  -- architecture decoder
                         
                     when DS_START =>
                         -- look for the first transition, which will be the possible start of a bit
-                        find_first_edge : if got_transition then
+                        find_first_edge : if got_transition and not got_transition_d then
                             bittime  <= bitwidth3p4;
                             ds_state <= DS_FIND_SECOND_TRANSITION;
                         end if find_first_edge;
@@ -340,7 +372,7 @@ begin  -- architecture decoder
                     when DS_FIND_SECOND_TRANSITION =>
                         -- look for the second transition. If the bit timer went to zero, we've found the
                         -- long 0 width. If it didn't, we know the middle of the bit, so resync and start again.
-                        find_second_edge : if got_transition then
+                        find_second_edge : if got_transition and not got_transition_d then
                             -- restart timer.
                             bittime <= bitwidth3p4;
                             -- test
@@ -352,23 +384,29 @@ begin  -- architecture decoder
                     when DS_DECODE_START =>
                         -- we are at the start of a bit. Again we look for a transition, note whether it was
                         -- at half or a full bit time.
-                        got_another_transition : if got_transition then
+                        got_another_transition : if got_transition and not got_transition_d then
 
-                            sr(sr'LEFT downto 1) <= sr(sr'LEFT - 1 downto 0);
+                            -- most of the shift, we'll do the incoming below.
+                            sr(sr'LEFT - 1 downto sr'right) <= sr(sr'LEFT downto sr'RIGHT + 1);
 
                             is_also_full_width : if bittime = 0 then
-                                bittime      <= bitwidth3p4;
-                                sr(sr'RIGHT) <= '0';
+                                -- this transition was at the start of the bit. preload the timer to look for
+                                -- the next '0'.
+                                bittime     <= bitwidth3p4;
+                                sr(sr'left) <= '0';
                             else
-                                -- we're in the middle of the bit time. Capture the '1' and then wait for the
-                                -- next transition.
-                                sr(sr'RIGHT) <= '1';
-                                ds_state     <= DS_WAIT_END_OF_ONE;
+                                -- we're in the middle of the bit time. Wait for the next transition (which
+                                -- is at the start of the next bit) and then shift in the 1.
+                                ds_state <= DS_WAIT_END_OF_ONE;
                             end if is_also_full_width;
                         end if got_another_transition;
 
                     when DS_WAIT_END_OF_ONE =>
-                        got_end_of_one : if got_transition then
+                        got_end_of_one : if got_transition and not got_transition_d then
+                            -- we're at the start of a new bit. Save our '1' and then set up the bit timer to
+                            -- tell us whether the _next_ transition was at the half-way or full bit.
+                            sr(sr'LEFT) <= '1';
+                            bittime <= bitwidth3p4;
                             ds_state <= DS_DECODE_START;
                         end if got_end_of_one;
 
@@ -391,7 +429,7 @@ begin  -- architecture decoder
 
                 ltcd_new_frame_time <= '0';
 
-                compare : if sr(15 downto 0) = SYNC_WORD_PATTERN then
+                compare : if sync_word = SYNC_WORD_PATTERN then
                     ltcd_new_frame_time <= '1';
 
                     ltcd_frame_time <= (

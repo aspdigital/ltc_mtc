@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-09
--- Last update: 2025-04-27
+-- Last update: 2025-06-21
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -27,7 +27,8 @@ use work.ltc_mtc_pkg.all;
 use work.timecode_pkg.all;
 
 entity timecode_generator is
-
+    generic (
+        TC_START : frame_time_t := FRAME_TIME_RESET);
     port (
         clk_timer  : in  std_logic;      -- clock at the proper timer rate for evenly-divisible timer tick
         rst_timer  : in  std_logic;      -- reset in that domain

@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-06-18
--- Last update: 2025-06-18
+-- Last update: 2025-06-21
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -43,7 +43,6 @@ architecture testbench of ltc_decoder_tb is
 
     signal ltc_analog : real;
     signal ltc_gen_frame_rate : frame_rate_t := FR_24;
-
 
     -- component ports
     signal clk_audio           : std_logic;

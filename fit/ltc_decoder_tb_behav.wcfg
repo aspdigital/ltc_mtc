@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="ltc_decoder_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="clk_mux_pkg" />
+            <top_module name="glbl" />
+            <top_module name="ltc_decoder_tb" />
+            <top_module name="ltc_mtc_pkg" />
+            <top_module name="mtc_pkg" />
+            <top_module name="timecode_pkg" />
+            <top_module name="vector_array_types_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="22,040.416542 us"></ZoomStartTime>
+      <ZoomEndTime time="41,340.416543 us"></ZoomEndTime>
+      <Cursor1Time time="35,890.416542 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="356"></NameColumnWidth>
+      <ValueColumnWidth column_width="479"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="46" />
+   <wave_markers>
+      <marker time="2063018334" label="" />
+      <marker time="1023018334" label="" />
+      <marker time="36182992293" label="" />
+   </wave_markers>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/BITS_IN_FRAME" type="other">
+      <obj_property name="ElementShortName">BITS_IN_FRAME</obj_property>
+      <obj_property name="ObjectShortName">BITS_IN_FRAME</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/BITWIDTH_24FPS" type="other">
+      <obj_property name="ElementShortName">BITWIDTH_24FPS</obj_property>
+      <obj_property name="ObjectShortName">BITWIDTH_24FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/BITWIDTH_25FPS" type="other">
+      <obj_property name="ElementShortName">BITWIDTH_25FPS</obj_property>
+      <obj_property name="ObjectShortName">BITWIDTH_25FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/BITWIDTH_30FPS" type="other">
+      <obj_property name="ElementShortName">BITWIDTH_30FPS</obj_property>
+      <obj_property name="ObjectShortName">BITWIDTH_30FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/BITWIDTH_MAX" type="other">
+      <obj_property name="ElementShortName">BITWIDTH_MAX</obj_property>
+      <obj_property name="ObjectShortName">BITWIDTH_MAX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/HALFBIT_24FPS" type="other">
+      <obj_property name="ElementShortName">HALFBIT_24FPS</obj_property>
+      <obj_property name="ObjectShortName">HALFBIT_24FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/HALFBIT_25FPS" type="other">
+      <obj_property name="ElementShortName">HALFBIT_25FPS</obj_property>
+      <obj_property name="ObjectShortName">HALFBIT_25FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/HALFBIT_30FPS" type="other">
+      <obj_property name="ElementShortName">HALFBIT_30FPS</obj_property>
+      <obj_property name="ObjectShortName">HALFBIT_30FPS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/bit_time" type="other">
+      <obj_property name="ElementShortName">bit_time</obj_property>
+      <obj_property name="ObjectShortName">bit_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/clk_ref" type="logic">
+      <obj_property name="ElementShortName">clk_ref</obj_property>
+      <obj_property name="ObjectShortName">clk_ref</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/arst_l" type="logic">
+      <obj_property name="ElementShortName">arst_l</obj_property>
+      <obj_property name="ObjectShortName">arst_l</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltc_gen_frame_rate" type="other">
+      <obj_property name="ElementShortName">ltc_gen_frame_rate</obj_property>
+      <obj_property name="ObjectShortName">ltc_gen_frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/frame_clk" type="logic">
+      <obj_property name="ElementShortName">frame_clk</obj_property>
+      <obj_property name="ObjectShortName">frame_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/prev_msb" type="logic">
+      <obj_property name="ElementShortName">prev_msb</obj_property>
+      <obj_property name="ObjectShortName">prev_msb</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/sr" type="array">
+      <obj_property name="ElementShortName">sr[79:0]</obj_property>
+      <obj_property name="ObjectShortName">sr[79:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/bit_clk" type="logic">
+      <obj_property name="ElementShortName">bit_clk</obj_property>
+      <obj_property name="ObjectShortName">bit_clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/tb_ltc_encoder_1/ltc_digital" type="logic">
+      <obj_property name="ElementShortName">ltc_digital</obj_property>
+      <obj_property name="ObjectShortName">ltc_digital</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltc_analog" type="other">
+      <obj_property name="ElementShortName">ltc_analog</obj_property>
+      <obj_property name="ObjectShortName">ltc_analog</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider6385">
+      <obj_property name="label">I2S</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/clk_audio" type="logic">
+      <obj_property name="ElementShortName">clk_audio</obj_property>
+      <obj_property name="ObjectShortName">clk_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/rst_audio" type="logic">
+      <obj_property name="ElementShortName">rst_audio</obj_property>
+      <obj_property name="ObjectShortName">rst_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/sclk_audio" type="logic">
+      <obj_property name="ElementShortName">sclk_audio</obj_property>
+      <obj_property name="ObjectShortName">sclk_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/lrclk_audio" type="logic">
+      <obj_property name="ElementShortName">lrclk_audio</obj_property>
+      <obj_property name="ObjectShortName">lrclk_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/data_audio" type="logic">
+      <obj_property name="ElementShortName">data_audio</obj_property>
+      <obj_property name="ObjectShortName">data_audio</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/data_valid" type="logic">
+      <obj_property name="ElementShortName">data_valid</obj_property>
+      <obj_property name="ObjectShortName">data_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/AMPLITUDE" type="other">
+      <obj_property name="ElementShortName">AMPLITUDE</obj_property>
+      <obj_property name="ObjectShortName">AMPLITUDE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DEBUG" type="other">
+      <obj_property name="ElementShortName">DEBUG</obj_property>
+      <obj_property name="ObjectShortName">DEBUG</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/CLKREFPER" type="other">
+      <obj_property name="ElementShortName">CLKREFPER</obj_property>
+      <obj_property name="ObjectShortName">CLKREFPER</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/data_left_d" type="array">
+      <obj_property name="ElementShortName">data_left_d[23:0]</obj_property>
+      <obj_property name="ObjectShortName">data_left_d[23:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bw_state" type="other">
+      <obj_property name="ElementShortName">bw_state</obj_property>
+      <obj_property name="ObjectShortName">bw_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/got_transition" type="logic">
+      <obj_property name="ElementShortName">got_transition</obj_property>
+      <obj_property name="ObjectShortName">got_transition</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/got_transition_d" type="logic">
+      <obj_property name="ElementShortName">got_transition_d</obj_property>
+      <obj_property name="ObjectShortName">got_transition_d</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bitwidth_timer" type="other">
+      <obj_property name="ElementShortName">bitwidth_timer</obj_property>
+      <obj_property name="ObjectShortName">bitwidth_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bitwidth_base" type="other">
+      <obj_property name="ElementShortName">bitwidth_base</obj_property>
+      <obj_property name="ObjectShortName">bitwidth_base</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bitwidth" type="other">
+      <obj_property name="ElementShortName">bitwidth</obj_property>
+      <obj_property name="ObjectShortName">bitwidth</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bitwidthdiv2" type="other">
+      <obj_property name="ElementShortName">bitwidthdiv2</obj_property>
+      <obj_property name="ObjectShortName">bitwidthdiv2</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bitwidth3p4" type="other">
+      <obj_property name="ElementShortName">bitwidth3p4</obj_property>
+      <obj_property name="ObjectShortName">bitwidth3p4</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltcd_frame_rate" type="other">
+      <obj_property name="ElementShortName">ltcd_frame_rate</obj_property>
+      <obj_property name="ObjectShortName">ltcd_frame_rate</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/got_bitwidth" type="logic">
+      <obj_property name="ElementShortName">got_bitwidth</obj_property>
+      <obj_property name="ObjectShortName">got_bitwidth</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/ds_state" type="other">
+      <obj_property name="ElementShortName">ds_state</obj_property>
+      <obj_property name="ObjectShortName">ds_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/bittime" type="other">
+      <obj_property name="ElementShortName">bittime</obj_property>
+      <obj_property name="ObjectShortName">bittime</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/DUT/sr" type="array">
+      <obj_property name="ElementShortName">sr[79:0]</obj_property>
+      <obj_property name="ObjectShortName">sr[79:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="vbus6124" type="vbus">
+      <obj_property name="label">SYNC</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[79]" type="logic">
+         <obj_property name="ElementShortName">[79]</obj_property>
+         <obj_property name="ObjectShortName">[79]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[78]" type="logic">
+         <obj_property name="ElementShortName">[78]</obj_property>
+         <obj_property name="ObjectShortName">[78]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[77]" type="logic">
+         <obj_property name="ElementShortName">[77]</obj_property>
+         <obj_property name="ObjectShortName">[77]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[76]" type="logic">
+         <obj_property name="ElementShortName">[76]</obj_property>
+         <obj_property name="ObjectShortName">[76]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[75]" type="logic">
+         <obj_property name="ElementShortName">[75]</obj_property>
+         <obj_property name="ObjectShortName">[75]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[74]" type="logic">
+         <obj_property name="ElementShortName">[74]</obj_property>
+         <obj_property name="ObjectShortName">[74]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[73]" type="logic">
+         <obj_property name="ElementShortName">[73]</obj_property>
+         <obj_property name="ObjectShortName">[73]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[72]" type="logic">
+         <obj_property name="ElementShortName">[72]</obj_property>
+         <obj_property name="ObjectShortName">[72]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[71]" type="logic">
+         <obj_property name="ElementShortName">[71]</obj_property>
+         <obj_property name="ObjectShortName">[71]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[70]" type="logic">
+         <obj_property name="ElementShortName">[70]</obj_property>
+         <obj_property name="ObjectShortName">[70]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[69]" type="logic">
+         <obj_property name="ElementShortName">[69]</obj_property>
+         <obj_property name="ObjectShortName">[69]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[68]" type="logic">
+         <obj_property name="ElementShortName">[68]</obj_property>
+         <obj_property name="ObjectShortName">[68]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[67]" type="logic">
+         <obj_property name="ElementShortName">[67]</obj_property>
+         <obj_property name="ObjectShortName">[67]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[66]" type="logic">
+         <obj_property name="ElementShortName">[66]</obj_property>
+         <obj_property name="ObjectShortName">[66]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[65]" type="logic">
+         <obj_property name="ElementShortName">[65]</obj_property>
+         <obj_property name="ObjectShortName">[65]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/ltc_decoder_tb/DUT/sr[64]" type="logic">
+         <obj_property name="ElementShortName">[64]</obj_property>
+         <obj_property name="ObjectShortName">[64]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltcd_frame_time" type="array">
+      <obj_property name="ElementShortName">ltcd_frame_time</obj_property>
+      <obj_property name="ObjectShortName">ltcd_frame_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltcd_new_frame_time" type="logic">
+      <obj_property name="ElementShortName">ltcd_new_frame_time</obj_property>
+      <obj_property name="ObjectShortName">ltcd_new_frame_time</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ltc_decoder_tb/ltcd_locked" type="logic">
+      <obj_property name="ElementShortName">ltcd_locked</obj_property>
+      <obj_property name="ObjectShortName">ltcd_locked</obj_property>
+   </wvobject>
+</wave_config>

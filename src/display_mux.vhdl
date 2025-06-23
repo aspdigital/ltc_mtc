@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-05-12
--- Last update: 2025-05-28
+-- Last update: 2025-06-22
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -80,6 +80,11 @@ architecture mux of display_mux is
     -- generator frame time is on that timer's clock, we need it on the main clock.
     signal gen_frame_time_s : frame_time_t;
 
+    -- time code received/decoded from the analog LTC input is on the ADC clock, we need it on the main clock.
+    signal ltcd_frame_time_s    : frame_time_t;
+    signal ltcd_frame_rate_s     : frame_rate_t;
+    signal ltcd_new_frame_time_s : std_logic;
+
     -- frame rate based on the selects, then select the correct time.
     signal frame_rate_mux : frame_rate_t;
     signal frame_time_mux : frame_time_t;
@@ -116,7 +121,6 @@ begin  -- architecture mux
     -- the time code from the generator is on the generator's timer clock. We need it on the main clock for
     -- muxing with the others.
     ---------------------------------------------------------------------------------------------------------
-    -- synchronize the selected frame rate to the selected display clock.
     gen_frame_time_cdc_sync : entity work.cdc_sync(synchronizer)
         generic map (
             t           => frame_time_t,
@@ -129,7 +133,45 @@ begin  -- architecture mux
             q   => gen_frame_time_s);
 
     ---------------------------------------------------------------------------------------------------------
+    -- Time code from the LTC receiver is on the A/D modulator clock. We need it on the main clock for muxing
+    -- with the others.
+    ---------------------------------------------------------------------------------------------------------
+    ltc_frame_time_cdc_sync : entity work.cdc_sync(synchronizer)
+        generic map (
+            t           => frame_time_t,
+            RESET_STATE => FRAME_TIME_RESET,
+            SYNC_FLOPS  => 3)
+        port map (
+            clk => clk_main,
+            rst => rst_main,
+            d   => ltcd_frame_time,
+            q   => ltcd_frame_time_s);
+ 
+    ltc_frame_rate_cdc_sync : entity work.cdc_sync(synchronizer)
+        generic map (
+            t           => frame_rate_t,
+            RESET_STATE => FR_24,
+            SYNC_FLOPS  => 3)
+        port map (
+            clk => clk_main,
+            rst => rst_main,
+            d   => ltcd_frame_rate,
+            q   => ltcd_frame_rate_s);
+    
+    ltc_new_frame_time_cdc_sync : entity work.cdc_sync(synchronizer)
+        generic map (
+            t           => std_logic,
+            RESET_STATE => '0',
+            SYNC_FLOPS  => 3)
+        port map (
+            clk => clk_main,
+            rst => rst_main,
+            d   => ltcd_new_frame_time,
+            q   => ltcd_new_frame_time_s);
+    
+    ---------------------------------------------------------------------------------------------------------
     -- Determine frame rate for the display.
+    -- For the two incoming frame times, update the muxes only when we have a new time.
     ---------------------------------------------------------------------------------------------------------
     choose_frame_rate : process (clk_main) is
     begin  -- process choose_frame_rate
@@ -139,19 +181,22 @@ begin  -- architecture mux
                 frame_time_mux <= FRAME_TIME_RESET;
             else
                 ext_int_sel : if tc_display_src = '0' then
+                    -- display source is internal generator
                     frame_rate_mux <= gen_frame_rate;
                     frame_time_mux <= gen_frame_time_s;
                 else
+                    -- display source is either LTC or MTC.
                     ltc_mtc_sel : if tc_ext_src = '0' then
+                        -- choose MTC. We need to convert from binary MTC to BCD LTC.
                         got_new_mtc : if mtcd_new_frame_time then
-                            -- convert from binary to BCD here.
                             frame_rate_mux <= mtcd_frame_time.frame_rate;
                             frame_time_mux <= MTCToLTC(mtcd_frame_time);
                         end if got_new_mtc;
                     else
-                        got_new_ltc : if ltcd_new_frame_time then
-                            frame_rate_mux <= ltcd_frame_rate;
-                            frame_time_mux <= ltcd_frame_time;
+                        --
+                        got_new_ltc : if ltcd_new_frame_time_s then
+                            frame_rate_mux <= ltcd_frame_rate_s;
+                            frame_time_mux <= ltcd_frame_time_s;
                         end if got_new_ltc;
                     end if ltc_mtc_sel;
                 end if ext_int_sel;
@@ -159,7 +204,9 @@ begin  -- architecture mux
         end if;
     end process choose_frame_rate;
 
+    ---------------------------------------------------------------------------------------------------------
     -- timer clock frequency is determined by the selected frame rate.
+    ---------------------------------------------------------------------------------------------------------
     display_clk_mux : entity work.clk_mux(mux)
         port map (
             clk_main    => clk_main,
@@ -170,6 +217,9 @@ begin  -- architecture mux
             clk_out     => clk_display,
             rst_out     => rst_display);
 
+    ---------------------------------------------------------------------------------------------------------
+    -- Synchronize the selected frame time and rate (from mux above, on main clock) to the display clock.
+    ---------------------------------------------------------------------------------------------------------
     -- synchronize the selected frame time to the selected display clock.
     chosen_frame_time_cdc_sync : entity work.cdc_sync(synchronizer)
         generic map (
@@ -194,7 +244,9 @@ begin  -- architecture mux
             d   => frame_rate_mux,
             q   => frame_rate_mux_s);
 
+    ---------------------------------------------------------------------------------------------------------
     -- drive the display.
+    ---------------------------------------------------------------------------------------------------------
     received_tcd : entity work.timecode_display(digit_driver)
         generic map (
             CLKPER_30FPS => CLKPER_30FPS,
