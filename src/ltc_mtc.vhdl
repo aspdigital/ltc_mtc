@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-06-18
+-- Last update: 2025-06-22
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -184,6 +184,9 @@ architecture toplevel of ltc_mtc is
     signal mtcd_new_frame_time : std_logic;
     attribute MARK_DEBUG of mtcd_frame_time : signal is "TRUE";
     attribute MARK_DEBUG of mtcd_new_frame_time : signal is "TRUE";
+
+    -- test point.
+    signal toggle : std_logic;
     
 
     ---------------------------------------------------------------------------------------------------------
@@ -207,17 +210,16 @@ begin  -- architecture toplevel
     -- Test point toggle.
     ---------------------------------------------------------------------------------------------------------
     ToggleNewFrame: process (clk_main) is
-        variable v_toggle : std_logic;
     begin  -- process ToggleNewFrame
         if rising_edge(clk_main) then
             if rst_main = '1' then
-                v_toggle := '0';
+                toggle <= '0';
                 JA3 <= '0';
             else
                 if mtcd_new_frame_time then
-                    v_toggle := not v_toggle;
+                    toggle <= not toggle;
+                    JA3    <= toggle;
                 end if;
-                JA3 <= v_toggle;
             end if;
         end if;
     end process ToggleNewFrame;
