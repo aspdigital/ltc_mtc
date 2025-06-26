@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-13
--- Last update: 2025-05-11
+-- Last update: 2025-06-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -30,11 +30,8 @@ entity uatx_with_fifo is
     port (
         -- write side:
         clk_src     : in  std_logic;                     -- clock for the FIFO input
-        rst_src     : in  std_logic;                     -- reset in that domain
         tx_data     : in  std_logic_vector(7 downto 0);  -- data to send
         tx_valid    : in  std_logic;                     -- write din to the FIFO
-        full        : out std_logic;                     -- indicate FIFO is full
-        almost_full : out std_logic;                     -- indicate FIFO has one more word left
         -- UATX side
         clk_main    : in  std_logic;                     -- global clock which drives serializer
         rst_main    : in  std_logic;                     -- reset in that domain
@@ -92,7 +89,7 @@ begin  -- architecture wrapper
             rd_en  => fifo_rd_tx_wren,
             dout   => data_f_to_uatx,   -- give to transmitter
             full   => open,
-            empty  => fifo_empty,
+            empty  => open,
             valid  => fifo_valid);
 
     pop_and_write: process (clk_main) is

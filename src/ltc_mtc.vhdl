@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-06-22
+-- Last update: 2025-06-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -185,10 +185,6 @@ architecture toplevel of ltc_mtc is
     attribute MARK_DEBUG of mtcd_frame_time : signal is "TRUE";
     attribute MARK_DEBUG of mtcd_new_frame_time : signal is "TRUE";
 
-    -- test point.
-    signal toggle : std_logic;
-    
-
     ---------------------------------------------------------------------------------------------------------
     -- lTC receiver, also on the main clock.
     ---------------------------------------------------------------------------------------------------------
@@ -205,24 +201,6 @@ begin  -- architecture toplevel
     -- Enable the PWM filters.
     ---------------------------------------------------------------------------------------------------------
     AUD_SD <= '1';
-
-    ---------------------------------------------------------------------------------------------------------
-    -- Test point toggle.
-    ---------------------------------------------------------------------------------------------------------
-    ToggleNewFrame: process (clk_main) is
-    begin  -- process ToggleNewFrame
-        if rising_edge(clk_main) then
-            if rst_main = '1' then
-                toggle <= '0';
-                JA3 <= '0';
-            else
-                if mtcd_new_frame_time then
-                    toggle <= not toggle;
-                    JA3    <= toggle;
-                end if;
-            end if;
-        end if;
-    end process ToggleNewFrame;
 
     ---------------------------------------------------------------------------------------------------------
     -- Clocking.
@@ -347,7 +325,7 @@ begin  -- architecture toplevel
     AN <= display.AN;
 
 
-    drive_leds : process (clk_main) is
+    drive_leds : process (clk_timer) is
         variable v_timer : natural range 0 to 100000;
     begin  -- process drive_leds
         if rising_edge(clk_timer) then
@@ -386,12 +364,13 @@ begin  -- architecture toplevel
         port map (
             clk_audio           => clk_audio,
             rst_audio           => rst_audio,
-            sclk_audio          => JC9,
-            lrclk_audio         => JC9,
+            sclk_audio          => sclk_audio,
+            lrclk_audio         => lrclk_audio,
             data_audio          => JC10,
             ltcd_frame_rate     => ltcd_frame_rate,
             ltcd_frame_time     => ltcd_frame_time,
             ltcd_new_frame_time => ltcd_new_frame_time,
-            ltcd_locked         => ltcd_locked);
+            ltcd_locked         => ltcd_locked,
+            tp_signbit          => JA3);
     
 end architecture toplevel;

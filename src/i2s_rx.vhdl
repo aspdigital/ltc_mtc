@@ -70,15 +70,19 @@ end entity i2s_rx;
 
 architecture i2s_shift_in of i2s_rx is
 
+    attribute MARK_DEBUG : string;
+
     -- there are 32 bit times for each sample.
     constant BITS : positive := 32;
 
     -- delay the BCLK for edge detect. The rising edge is when we shift in the bits.
     signal bclk_d : std_logic;
+    attribute MARK_DEBUG of bclk_d : signal is "TRUE";
 
     -- delay the LRCLK for edge detect. This is used to reset the bit counter.
     signal lrclk_d  : std_logic;
     signal lrclk_dd : std_logic;
+    attribute MARK_DEBUG of lrclk_d : signal is "TRUE";
 
 begin  -- architecture i2s_shift_in
 
@@ -111,12 +115,14 @@ begin  -- architecture i2s_shift_in
     Channels : for chan in 0 to NUM_PAIRS - 1 generate
         -- one shift register per both channel pair.
         signal sr : std_logic_vector(BITS - 1 downto 0);
+        attribute MARK_DEBUG of sr : signal is "TRUE";
 
         alias this_sample : std_logic_vector(SWIDTH - 1 downto 0) is sr(sr'LEFT downto sr'LEFT - SWIDTH + 1);
 
         -- because we capture the left channel before the right, save it so after we get the right channel
         -- data we latch both for any downstream thing.
         signal this_left : std_logic_vector(SWIDTH - 1 downto 0);
+        attribute MARK_DEBUG of this_left : signal is "TRUE";
         
     begin
 

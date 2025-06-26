@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-04-20
--- Last update: 2025-06-22
+-- Last update: 2025-06-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -85,29 +85,44 @@ entity ltc_decoder is
         ltcd_frame_rate     : out frame_rate_t;
         ltcd_frame_time     : out frame_time_t;
         ltcd_new_frame_time : out std_logic;
-        ltcd_locked         : out std_logic);
+        ltcd_locked         : out std_logic;
+        tp_signbit          : out std_logic);
 end entity ltc_decoder;
 
 architecture decoder of ltc_decoder is
+
+    attribute MARK_DEBUG : string;
 
     ---------------------------------------------------------------------------------------------------------
     -- incoming samples. We'll use left only for our decoder source.
     ---------------------------------------------------------------------------------------------------------
     signal data_valid  : std_logic;
+    attribute MARK_DEBUG of data_valid : signal is "TRUE";
     signal data_left   : slv_array_t(0 to 0)(23 downto 0);
     signal data_right   : slv_array_t(0 to 0)(23 downto 0);
     signal data_left_d : std_logic_vector(23 downto 0);  -- delay for transition detect, do we need the whole sample?
 
-    alias this_sign : std_logic is data_left(0)(23);
-    alias prev_sign : std_logic is data_left_d(23);
+    signal data_valid_d : std_logic;    -- for pipeline
+    attribute MARK_DEBUG of data_valid_d : signal is "TRUE";
+ 
+    --alias this_sign : std_logic is data_left(0)(23);
+    --alias prev_sign : std_logic is data_left_d(23);
+    signal this_sign : std_logic;
+    signal prev_sign : std_logic;
+    attribute MARK_DEBUG of this_sign : signal is "TRUE";
+    attribute MARK_DEBUG of prev_sign : signal is "TRUE";
 
     -- flag set when we know the width (in clocks) of each bit.
     signal got_bitwidth : std_logic;
+    attribute MARK_DEBUG of got_bitwidth : signal is "TRUE";
 
     -- flag set when there is a transition between the current and previous sample. Since got_transition is
     -- true for an entire sample time, we need only its leading edge to advance the determine-bitwidth machine.
     signal got_transition   : std_logic;
     signal got_transition_d : std_logic;
+
+    attribute MARK_DEBUG of got_transition   : signal is "TRUE";
+    attribute MARK_DEBUG of got_transition_d : signal is "TRUE";
 
     ---------------------------------------------------------------------------------------------------------
     -- Our bit-width timer counts samples (at 100 kHz sample rate), for convenience and for a smaller
@@ -158,9 +173,11 @@ architecture decoder of ltc_decoder is
     ---------------------------------------------------------------------------------------------------------
     type bw_state_t is (BW_START, BW_FIRST_TRANSITION, BW_COMPARE, BW_SUCCESS);
     signal bw_state : bw_state_t;
+    attribute MARK_DEBUG of bw_state : signal is "TRUE";
 
     type ds_state_t is (DS_BEGIN, DS_START, DS_FIND_SECOND_TRANSITION, DS_DECODE_START, DS_WAIT_END_OF_ONE);
     signal ds_state : ds_state_t;
+    attribute MARK_DEBUG of ds_state : signal is "TRUE";
 
     signal bittime      : bitwidth_timer_t;
     ---------------------------------------------------------------------------------------------------------
@@ -223,14 +240,26 @@ begin  -- architecture decoder
                 data_left_d      <= (others => '0');
                 got_transition   <= '0';
                 got_transition_d <= '0';
+                this_sign        <= '0';
             else
                 got_new_sample : if data_valid then
+                    this_sign  <= data_left(0)(23);
+                    prev_sign  <= data_left_d(23);
                     data_left_d      <= data_left(0);
-                    got_transition   <= this_sign xor prev_sign;
                 end if got_new_sample;
+
+                data_valid_d <= data_valid;
+                
+                if data_valid_d then
+                    got_transition   <= this_sign xor prev_sign;                   
+                end if;
 
                 -- edge is one-clock strobe.
                 got_transition_d <= got_transition;
+
+                -- test point.
+                tp_signbit <= this_sign;
+
             end if;
         end if;
     end process look_for_transition;

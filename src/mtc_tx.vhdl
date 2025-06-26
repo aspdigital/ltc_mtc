@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-05-13
--- Last update: 2025-05-13
+-- Last update: 2025-06-25
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -81,15 +81,10 @@ begin  -- architecture mtc_driver
             BAUD_RATE => MIDI_BAUD_RATE)    -- what it is
         port map (
             clk_src     => clk_timer,       -- clock for the FIFO input
-            rst_src     => rst_timer,       -- reset in that domain
             tx_data     => midi_msg_data,   -- data to send
             tx_valid    => midi_msg_valid,  -- write din to the FIFO
-            full        => open,
-            almost_full => open,
             clk_main    => clk_main,        -- global clock which drives serializer
             rst_main    => rst_main,        -- reset in that domain
             ser_tx      => midi_ser_tx);    -- serial data transmit line
-
-
 
 end architecture mtc_driver;
