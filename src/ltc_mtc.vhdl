@@ -6,7 +6,7 @@
 -- Author     : Andy Peters  <devel@latke.net>
 -- Company    : ASP Digital
 -- Created    : 2025-03-30
--- Last update: 2025-06-25
+-- Last update: 2025-06-28
 -- Platform   : 
 -- Standard   : VHDL'08, Math Packages
 -------------------------------------------------------------------------------
@@ -78,11 +78,11 @@ entity ltc_mtc is
         SW         : in  std_logic_vector(3 downto 0);  -- 15 downto 0
         -- RGB LEDs. Controls are active low.
         LED16_B    : out std_logic;                     -- blue
-        -- LED16_G    : out std_logic;                    -- green
-        -- LED16_R    : out std_logic;                    -- red
-        -- LED17_B    : out std_logic;                    -- blue
-        -- LED17_G    : out std_logic;                    -- red
-        -- LED17_R    : out std_logic;                    -- green
+        LED16_G    : out std_logic;                    -- green
+        LED16_R    : out std_logic;                    -- red
+        LED17_B    : out std_logic;                    -- blue
+        LED17_G    : out std_logic;                    -- red
+        LED17_R    : out std_logic;                    -- green
         -- discrete LEDs. These are active high.
         LED        : out std_logic_vector(15 downto 0);
         -- 7-segment display. The controls are active low.
@@ -193,7 +193,8 @@ architecture toplevel of ltc_mtc is
     -- received frame time, and data valid strobe.
     signal ltcd_frame_time     : frame_time_t := FRAME_TIME_RESET;
     signal ltcd_new_frame_time : std_logic := '0';
-    signal ltcd_locked : std_logic;
+    signal ltcd_locked         : std_logic;
+    signal ltcd_los            : std_logic;
     
 begin  -- architecture toplevel
 
@@ -324,25 +325,6 @@ begin  -- architecture toplevel
     DP <= display.DP;
     AN <= display.AN;
 
-
-    drive_leds : process (clk_timer) is
-        variable v_timer : natural range 0 to 100000;
-    begin  -- process drive_leds
-        if rising_edge(clk_timer) then
-            if rst_timer = '1' then
-                v_timer := 0;
-                LED <= (0 => '1', others => '0');
-            else
-                led_timer: if v_timer = 0 then
-                    v_timer := 100000;
-                    LED <= LED(LED'LEFT - 1 downto 0) & LED(LED'left);
-                else
-                    v_timer := v_timer - 1;
-                end if led_timer;
-            end if;
-        end if;
-    end process drive_leds;
-
     ---------------------------------------------------------------------------------------------------------
     -- MTC decoder. 
     ---------------------------------------------------------------------------------------------------------
@@ -370,7 +352,40 @@ begin  -- architecture toplevel
             ltcd_frame_rate     => ltcd_frame_rate,
             ltcd_frame_time     => ltcd_frame_time,
             ltcd_new_frame_time => ltcd_new_frame_time,
-            ltcd_locked         => ltcd_locked,
-            tp_signbit          => JA3);
+            ltcd_locked         => JA3,
+            ltcd_los            => ltcd_los);
+
+    ltcd_los_LEDs: process (clk_audio) is
+    begin  -- process ltcd_los_LEDs
+        if rising_edge(clk_audio) then
+            if rst_audio = '1' then
+                LED16_R <= '0';
+                LED16_G <= '0';
+                LED(0)  <= '0';
+                LED17_R <= '0';
+                LED17_G <= '0';
+                LED17_B <= '0';
+            else
+                LED16_R <= ltcd_los;
+                LED16_G <= not ltcd_los;
+                LED(0)  <= ltcd_locked;
+                LED17_R <= '0';
+                LED17_G <= '0';
+                LED17_B <= '0';
+                display_ltc_frame_rate: case ltcd_frame_rate is
+                    when FR_24 =>
+                        LED17_R <= '1';
+                    when FR_25 =>
+                        LED17_G <= '1';
+                    when FR_30 =>
+                        LED17_B <= '1';
+                    when others =>
+                        null;
+                end case display_ltc_frame_rate;
+            end if;
+        end if;
+    end process ltcd_los_LEDs;
+
+    LED(15 downto 1) <= (others => '0');
     
 end architecture toplevel;
